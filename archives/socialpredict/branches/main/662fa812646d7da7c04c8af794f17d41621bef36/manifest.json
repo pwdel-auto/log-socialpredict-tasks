@@ -1,0 +1,108 @@
+{
+  "source_repo": "socialpredict",
+  "source_remote": "git@github.com:openpredictionmarkets/socialpredict.git",
+  "source_ref": {
+    "kind": "branch",
+    "name": "main",
+    "local_commit": "662fa812646d7da7c04c8af794f17d41621bef36",
+    "remote_commit": "1e3e8f082aaf29e36a9a7157d701ab2b5e555d84"
+  },
+  "migrated_at_utc": "2026-04-10T01:14:46Z",
+  "migration_repo": "log-socialpredict-tasks",
+  "mirrored_log_roots": [
+    "README/CHECKPOINTS"
+  ],
+  "missing_expected_log_roots": [
+    "codex-reports"
+  ],
+  "notes": [
+    "The archived files matched both the local socialpredict main commit and origin/main for README/CHECKPOINTS at migration time."
+  ],
+  "files": [
+    {
+      "path": "files/README/CHECKPOINTS/CHECKPOINT20250724-01.md",
+      "original_path": "README/CHECKPOINTS/CHECKPOINT20250724-01.md",
+      "sha256": "22bdbeb6274cdce180d0de46cbade7f85355982729cfc8054881bf8e48d5ec1a"
+    },
+    {
+      "path": "files/README/CHECKPOINTS/CHECKPOINT20250730-01.md",
+      "original_path": "README/CHECKPOINTS/CHECKPOINT20250730-01.md",
+      "sha256": "1382ffa6bbc9e04896250e97b771023d42563516e86eb538d26a21f3eda6d30f"
+    },
+    {
+      "path": "files/README/CHECKPOINTS/CHECKPOINT20250731-01.md",
+      "original_path": "README/CHECKPOINTS/CHECKPOINT20250731-01.md",
+      "sha256": "f454f33b324eeaafbba2d1e1d93c1eb1c3ed151c89e8fff13c02f663dbc29217"
+    },
+    {
+      "path": "files/README/CHECKPOINTS/CHECKPOINT20250731-02.md",
+      "original_path": "README/CHECKPOINTS/CHECKPOINT20250731-02.md",
+      "sha256": "207205ae5ca242284506f9420706fda7ec385a6f6f1ec5798070b514b9b5888b"
+    },
+    {
+      "path": "files/README/CHECKPOINTS/CHECKPOINT20250803-02-COMPLETED.md",
+      "original_path": "README/CHECKPOINTS/CHECKPOINT20250803-02-COMPLETED.md",
+      "sha256": "02a2b53e285fb495ac300b509c952e5129d08336f86eddeca21c2c4348e04b9c"
+    },
+    {
+      "path": "files/README/CHECKPOINTS/CHECKPOINT20250803-02.md",
+      "original_path": "README/CHECKPOINTS/CHECKPOINT20250803-02.md",
+      "sha256": "c59f8cf9c4a9fbcd97e5aeabd6225e97051d8f6f5ac870f9ca8089ecf824a8e9"
+    },
+    {
+      "path": "files/README/CHECKPOINTS/CHECKPOINT20250803-03-COMPLETED.md",
+      "original_path": "README/CHECKPOINTS/CHECKPOINT20250803-03-COMPLETED.md",
+      "sha256": "e55e182a4b9811238f81e08db50b4d8d4b21df3262481efda063852d28867b73"
+    },
+    {
+      "path": "files/README/CHECKPOINTS/CHECKPOINT20250803-03.md",
+      "original_path": "README/CHECKPOINTS/CHECKPOINT20250803-03.md",
+      "sha256": "f90576bd0e2399746fc0b43615359a8256be345b90d4aaa6f200e5888d807706"
+    },
+    {
+      "path": "files/README/CHECKPOINTS/CHECKPOINT20250803-04-COMPLETED.md",
+      "original_path": "README/CHECKPOINTS/CHECKPOINT20250803-04-COMPLETED.md",
+      "sha256": "0a21ff45393b1d5a6ce4baf04565c26b8d5e511ab2b66ed207d44cb4e803084a"
+    },
+    {
+      "path": "files/README/CHECKPOINTS/CHECKPOINT20250803-04.md",
+      "original_path": "README/CHECKPOINTS/CHECKPOINT20250803-04.md",
+      "sha256": "ac59e265431dda5bbe979c7887b99c89947c087cb9d42b068e45e2ac8c87aac8"
+    },
+    {
+      "path": "files/README/CHECKPOINTS/CHECKPOINT20250807-50.md",
+      "original_path": "README/CHECKPOINTS/CHECKPOINT20250807-50.md",
+      "sha256": "304004508949b307ddeef4252acdf9c285ed3cebfec28cc2a422df5a5494481a"
+    },
+    {
+      "path": "files/README/CHECKPOINTS/CHECKPOINT20250807-51.md",
+      "original_path": "README/CHECKPOINTS/CHECKPOINT20250807-51.md",
+      "sha256": "672d116145daedc094c41eefeb66ca2a2d8c4a379222f89f4cfe2e3ebc259a5c"
+    },
+    {
+      "path": "files/README/CHECKPOINTS/CHECKPOINT20250916-01.md",
+      "original_path": "README/CHECKPOINTS/CHECKPOINT20250916-01.md",
+      "sha256": "6b9129cef8023513f518804db0cb5b011b597eafc5ed19ae7842dce0b946bd88"
+    },
+    {
+      "path": "files/README/CHECKPOINTS/CHECKPOINT20250916-02.md",
+      "original_path": "README/CHECKPOINTS/CHECKPOINT20250916-02.md",
+      "sha256": "754a66b2ebbd510f8a816bb571f1c72b047bf835db9948b4c3fe75e276b86851"
+    },
+    {
+      "path": "files/README/CHECKPOINTS/CHECKPOINT20251008-01.md",
+      "original_path": "README/CHECKPOINTS/CHECKPOINT20251008-01.md",
+      "sha256": "2371712b4fc7c96c20dafbbef7767996016691ef3e083b436c69fc92ec830a11"
+    },
+    {
+      "path": "files/README/CHECKPOINTS/CHECKPOINT20251008-51.md",
+      "original_path": "README/CHECKPOINTS/CHECKPOINT20251008-51.md",
+      "sha256": "5b10c86f5a32da983316b74955e8c6085b9691149c952299d651394f7f22f663"
+    },
+    {
+      "path": "files/README/CHECKPOINTS/CHECKPOINT20251105-01.md",
+      "original_path": "README/CHECKPOINTS/CHECKPOINT20251105-01.md",
+      "sha256": "b4ba49635f4c00976fa9a3de4056e965d0d217a376b48d24b0723ddc49d96ab0"
+    }
+  ]
+}
