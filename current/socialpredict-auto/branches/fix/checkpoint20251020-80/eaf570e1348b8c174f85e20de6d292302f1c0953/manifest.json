@@ -1,0 +1,27 @@
+{
+  "snapshot_class": "current",
+  "source_repo": "socialpredict-auto",
+  "source_remote": "https://github.com/pwdel-auto/socialpredict",
+  "source_ref": {
+    "kind": "branch",
+    "name": "fix/checkpoint20251020-80",
+    "local_commit": "eaf570e1348b8c174f85e20de6d292302f1c0953",
+    "remote_commit": "9e1d99f0055e0b227f469f3b1980e32eb1d7267f",
+    "merge_base_with_local_main": "f90b7c393c8b49725a64b087af6c014cb3adeca6"
+  },
+  "migrated_at_utc": "2026-04-10T01:50:28Z",
+  "migration_repo": "log-socialpredict-tasks",
+  "primary_log_roots": [
+    ".codex-reports"
+  ],
+  "checksums_file": "SHA256SUMS",
+  "summary": {
+    "tracked_file_count": 112,
+    "task_directory_count": 27,
+    "approximate_size": "660K"
+  },
+  "notes": [
+    "The imported .codex-reports tree was tracked in the source repo.",
+    "The socialpredict-auto working tree also had an unrelated untracked .bin/ directory that was intentionally excluded."
+  ]
+}
