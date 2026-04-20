@@ -1,0 +1,13 @@
+task_uid `019d9996-f8a9-75b8-a4a3-7349b2560d4f`  
+task_id `W02-002`  
+status `completed`
+
+The runtime config-service migration is present in the backend and verified. Startup now initializes the config service once and passes it through seeding and server startup, `/v0/setup` and `/v0/setup/frontend` remain service-backed with stable semantics, and the resumed segment updated the canonical report with current verification evidence rather than redoing implementation.
+
+files_changed `/workspace/socialpredict/backend/main.go`, `/workspace/socialpredict/backend/server/server.go`, `/workspace/socialpredict/backend/server/server_test.go`, `/workspace/socialpredict/backend/seed/seed.go`, `/workspace/socialpredict/backend/seed/seed_users_test.go`, `/workspace/socialpredict/backend/internal/app/runtime/config.go`, `/workspace/socialpredict/backend/internal/app/runtime/config_test.go`, `/workspace/socialpredict/backend/handlers/setup/setuphandler_test.go`
+
+checks_run `/workspace/spec-socialpredict-tasks/.codex/skills/socialpredict-go-architecture-governance/scripts/run_boundary_checks.sh /workspace/socialpredict`, `GOCACHE=/workspace/socialpredict/.cache/go-build GOMODCACHE=/workspace/socialpredict/.cache/gomod go test -p 1 -vet=off -count=1 ./handlers/setup ./handlers/stats ./seed ./server ./internal/app`, `GOCACHE=/workspace/socialpredict/.cache/go-build GOMODCACHE=/workspace/socialpredict/.cache/gomod go vet -p 1 ./handlers/setup ./handlers/stats ./seed ./server ./internal/app`, `GOCACHE=/workspace/socialpredict/.cache/go-build GOMODCACHE=/workspace/socialpredict/.cache/gomod go test ./... -run TestOpenAPISpecValidates -count=1`
+
+follow_ups `None.`
+
+Assumption noted in the report: setup route payloads were intended to remain unchanged, so no OpenAPI contract edits were needed. The only resumed-session adjustment was using lower-parallelism Go validation because default `go test`/`go vet` runs hit environment memory pressure in transitive `modernc` compilation.

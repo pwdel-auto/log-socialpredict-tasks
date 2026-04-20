@@ -1,0 +1,74 @@
+You are resuming queued automation task W03-003 (019d9996-f8a9-736b-93d9-de5a3e5e447f) after codex-runner checkpointed the session because the active context window was getting full.
+
+Continue from the existing session state and current repository contents.
+- Reuse the canonical report directory `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-736b-93d9-de5a3e5e447f`.
+- Continue appending to `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-736b-93d9-de5a3e5e447f/conversation.ndjson` and `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-736b-93d9-de5a3e5e447f/decisions.ndjson` rather than creating new report files.
+- Keep `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-736b-93d9-de5a3e5e447f/summary.json` current as the dispatcher-owned rollup.
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for incremental reads and summary updates when practical.
+- Check `summary.json.context` first. If `handoff_requested` is true, consolidate state before branching into more work.
+- Do not restart the task from scratch.
+- Avoid repeating work that is already complete.
+- Re-read files or rerun checks only when needed to safely continue.
+- Finish with the same concise summary contract as before, including task_uid and task_id.
+
+Latest checkpoint:
+{}
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "Remaining `socialpredict/models` usage in analytics, auth login, and adjacent touched boundary consumers is removed or tightly contained.",
+    "Any unavoidable legacy-model usage is pushed to repositories or explicit edge adapters and documented.",
+    "Touched application wiring reflects the new containment boundaries."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "019d9996-f8a9-736b-93d9-de583bb6112a",
+    "019d9996-f8a9-736b-93d9-de592fcac393"
+  ],
+  "id": "W03-003",
+  "last_resumed_at": "2026-04-19T19:49:49.873582+00:00",
+  "max_attempts": 3,
+  "notes": [
+    "This is the gate into WAVE04. Leave no hidden persistence-model dependency surprises in internal code if they can be removed cleanly."
+  ],
+  "out_of_scope": [
+    "WAVE04 API contract migration",
+    "rewriting untouched legacy-model consumers outside the scoped seams"
+  ],
+  "profile": "",
+  "prompt": "Finish the legacy-model decoupling wave by removing or tightly containing remaining `socialpredict/models` usage in analytics, auth login, and adjacent boundary consumers touched by the new seams. Any unavoidable legacy-model usage should be pushed to repositories or explicit edge adapters and documented. Update tests and application wiring as needed.",
+  "runner_pid": 190493,
+  "runner_state": {
+    "context_file": "/workspace/log-socialpredict-tasks/.codex-runs/20260418-120411/context/019d9996-f8a9-736b-93d9-de5a3e5e447f_20260419T121432Z_part01.ndjson",
+    "event_file": "/workspace/log-socialpredict-tasks/.codex-runs/20260418-120411/events/019d9996-f8a9-736b-93d9-de5a3e5e447f_20260419T121432Z_part01.ndjson",
+    "message_file": "/workspace/log-socialpredict-tasks/.codex-runs/20260418-120411/messages/019d9996-f8a9-736b-93d9-de5a3e5e447f_20260419T121432Z_part01.txt",
+    "prompt_file": "/workspace/log-socialpredict-tasks/.codex-runs/20260418-120411/prompts/019d9996-f8a9-736b-93d9-de5a3e5e447f_20260419T121432Z_part01.txt",
+    "resume_pending": true,
+    "segment": 1,
+    "session_id": "019da5a9-f6d1-70a3-81f1-f8c20509380c",
+    "stderr_file": "/workspace/log-socialpredict-tasks/.codex-runs/20260418-120411/stderr/019d9996-f8a9-736b-93d9-de5a3e5e447f_20260419T121432Z_part01.stderr.log"
+  },
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-19T12:14:32.419651+00:00",
+  "status": "running",
+  "title": "WAVE03: Decouple analytics and remaining internal boundary consumers from legacy models",
+  "touched_paths": [
+    "../socialpredict/backend/internal/domain/analytics",
+    "../socialpredict/backend/internal/service/auth",
+    "../socialpredict/backend/internal/repository",
+    "../socialpredict/backend/internal/app",
+    "../socialpredict/backend/models"
+  ],
+  "uid": "019d9996-f8a9-736b-93d9-de5a3e5e447f",
+  "verification": {
+    "focus": [
+      "deterministic regression coverage for analytics and auth-adjacent flows touched by the decoupling",
+      "evidence that remaining legacy-model usage is constrained to explicit edges"
+    ],
+    "owner": "software-action-test-reliability-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

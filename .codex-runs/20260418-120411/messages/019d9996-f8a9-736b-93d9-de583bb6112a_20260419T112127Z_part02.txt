@@ -1,0 +1,30 @@
+task_uid: `019d9996-f8a9-736b-93d9-de583bb6112a`  
+task_id: `W03-001`  
+status: `completed`
+
+files_changed:
+- `backend/internal/domain/boundary/types.go`
+- `backend/internal/domain/math/market/{dust.go,dust_test.go,marketvolume.go,marketvolume_test.go}`
+- `backend/internal/domain/math/outcomes/dbpm/marketshares.go`
+- `backend/internal/domain/math/positions/{positionsmath.go,positionsmath_defaults.go,positionsmath_test.go,profitability.go,profitability_test.go}`
+- `backend/internal/domain/math/probabilities/wpam/{wpam_marketprobabilities.go,wpam_marketprobabilities_test.go}`
+- `backend/internal/domain/markets/{service.go,service_policies.go,models.go,market_bets.go,market_leaderboard.go,market_overview.go,market_projection.go,market_volume.go}`
+- `backend/internal/domain/bets/{service.go,models.go,bet_support.go}`
+- `backend/internal/domain/analytics/{models.go,service.go,positions_strategy.go,leaderboard.go,leaderboard_test.go,repository.go,system_metrics.go,repository_boundary_test.go}`
+- `backend/internal/repository/bets/{repository.go,repository_test.go}`
+- `backend/internal/repository/markets/{repository.go,repository_boundary_test.go}`
+- `backend/internal/repository/users/repository.go`
+- `backend/internal/service/auth/{loggin.go,loggin_boundary_test.go}`
+- `.codex-reports/tasks/019d9996-f8a9-736b-93d9-de583bb6112a/{summary.json,conversation.ndjson,decisions.ndjson}`
+
+checks_run:
+- `gofmt -w` on the touched backend files
+- `GOMODCACHE=/workspace/.gomodcache GOCACHE=/workspace/.gocache go test ./internal/domain/math/positions ./internal/domain/math/probabilities/wpam ./internal/domain/math/market`
+- Dispatcher report confirms additional focused verification already recorded in `summary.json`:
+  `go build` on touched domain/repository/auth packages, focused repository tests, boundary check script, and `gofmt -l`
+
+follow_ups:
+- Migrate the remaining broader legacy math and market test fixtures from direct `models.Bet` usage so a full touched-package `go test`/`go vet` pass can run without narrowing the verification slice.
+- The dispatcher-owned rollup is current at [summary.json](/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-736b-93d9-de583bb6112a/summary.json).
+
+The implemented seam is the intended first wave: touched domain and math code now depend on explicit boundary records, while repositories and the auth edge own the legacy-model translation paths. API contract behavior was left unchanged.

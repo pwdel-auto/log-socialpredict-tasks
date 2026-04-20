@@ -1,0 +1,71 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/019d99d7-3d71-70aa-9f0b-d0f4da7524f0`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/019d99d7-3d71-70aa-9f0b-d0f4da7524f0/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/019d99d7-3d71-70aa-9f0b-d0f4da7524f0/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/019d99d7-3d71-70aa-9f0b-d0f4da7524f0/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/019d99d7-3d71-70aa-9f0b-d0f4da7524f0/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "`backend/util` no longer remains the primary mixed ownership home for DB/bootstrap, env, and domain-specific helpers.",
+    "Moved responsibilities land in clearly-owned packages that match the current backend architecture.",
+    "Behavior is preserved for touched callers and moved logic has focused test coverage where practical."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [],
+  "id": "W01-001",
+  "max_attempts": 3,
+  "notes": [
+    "Treat DB bootstrap/runtime code as infrastructure, not a domain service.",
+    "Push API key and user-specific uniqueness helpers toward users/account-owned code rather than leaving them generic."
+  ],
+  "out_of_scope": [
+    "full configuration-service extraction",
+    "public API contract redesign",
+    "introducing a replacement junk-drawer package"
+  ],
+  "profile": "",
+  "prompt": "Break up `backend/util` so it stops acting as a mixed catch-all package. Separate DB/bootstrap concerns, env loading, and domain-specific helper logic into better-owned packages that fit the existing architecture. Keep the scope pragmatic: establish clear homes for the current `util` responsibilities, preserve behavior, and avoid introducing a new junk-drawer package under a different name. Add focused tests where behavior moves.",
+  "runner_pid": 126821,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-18T12:04:11.927485+00:00",
+  "status": "running",
+  "title": "WAVE01: Split backend/util into infrastructure/bootstrap and domain-owned helpers",
+  "touched_paths": [
+    "../socialpredict/backend/util",
+    "../socialpredict/backend/internal",
+    "../socialpredict/backend/server",
+    "../socialpredict/backend/handlers",
+    "../socialpredict/backend/main.go"
+  ],
+  "uid": "019d99d7-3d71-70aa-9f0b-d0f4da7524f0",
+  "verification": {
+    "focus": [
+      "deterministic test evidence for moved helper behavior",
+      "regression coverage for touched startup or caller paths",
+      "confirmation that the util breakup did not introduce hidden runtime failures"
+    ],
+    "owner": "software-action-test-reliability-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

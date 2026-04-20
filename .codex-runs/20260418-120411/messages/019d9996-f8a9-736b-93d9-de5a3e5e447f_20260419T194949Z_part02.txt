@@ -1,0 +1,31 @@
+task_uid: `019d9996-f8a9-736b-93d9-de5a3e5e447f`  
+task_id: `W03-003`  
+status: `completed`
+
+What changed: auth login now depends on a minimal repository-facing lookup contract instead of touching legacy model types directly, with the persistence mapping contained in `internal/repository/users`. The scoped analytics/auth-adjacent seams and affected test doubles were updated to use boundary-facing contracts, and application wiring now passes the users repository edge into login handling. Remaining `socialpredict/models` usage in this wave is constrained to explicit repository edges and tests.
+
+files_changed:
+- `backend/internal/service/auth/loggin.go`
+- `backend/internal/repository/users/repository.go`
+- `backend/internal/app/container.go`
+- `backend/server/server.go`
+- `backend/server/server_test.go`
+- `backend/internal/service/auth/middleware_test.go`
+- `backend/internal/domain/analytics/repository.go`
+- `backend/internal/domain/analytics/leaderboard_test.go`
+- `backend/internal/domain/analytics/systemmetrics_integration_test.go`
+- `backend/handlers/metrics/getgloballeaderboard_test.go`
+- `backend/handlers/metrics/getsystemmetrics_test.go`
+- `backend/handlers/positions/positionshandler_test.go`
+
+checks_run:
+- `run_boundary_checks.sh /workspace/socialpredict`
+- `gofmt -w` on touched files
+- `GOCACHE=/workspace/.gocache GOMODCACHE=/workspace/.gomodcache go test ./handlers/metrics ./handlers/positions ./internal/domain/analytics ./internal/service/auth ./internal/repository/... ./internal/app/... ./server`
+- `RUNS=2 run_reliability_suite.sh /workspace/socialpredict ./internal/...`
+- `RUNS=2 run_reliability_suite.sh /workspace/socialpredict ./server`
+- `RUNS=2 run_reliability_suite.sh /workspace/socialpredict ./handlers/metrics`
+- `RUNS=2 run_reliability_suite.sh /workspace/socialpredict ./handlers/positions`
+
+follow_ups:
+- Repo-wide `run_reliability_suite.sh /workspace/socialpredict ./...` still reports unrelated deterministic failures in `./handlers/users`; those were not required to complete this scoped decoupling task.

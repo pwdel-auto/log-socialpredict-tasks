@@ -1,0 +1,74 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/019d99d7-3d71-70aa-9f0b-d0f553db0d37`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/019d99d7-3d71-70aa-9f0b-d0f553db0d37/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/019d99d7-3d71-70aa-9f0b-d0f553db0d37/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/019d99d7-3d71-70aa-9f0b-d0f553db0d37/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/019d99d7-3d71-70aa-9f0b-d0f553db0d37/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "Touched startup, server, handler, and auth paths stop relying directly on `util.GetDB()` or equivalent hidden runtime accessors.",
+    "Replacement wiring uses explicit dependencies, container-owned seams, or clearly-owned infrastructure boundaries.",
+    "Behavior remains stable for the touched runtime paths."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "019d99d7-3d71-70aa-9f0b-d0f4da7524f0"
+  ],
+  "id": "W01-002",
+  "max_attempts": 3,
+  "notes": [
+    "This wave is about util breakup first, not the full config-service migration.",
+    "Keep changes extraction-ready and consistent with the existing container patterns.",
+    "The purpose is to remove hidden runtime dependency paths before WAVE02 introduces the owned configuration seam."
+  ],
+  "out_of_scope": [
+    "full configuration-service migration",
+    "unrelated handler rewrites",
+    "API envelope changes"
+  ],
+  "profile": "",
+  "prompt": "Remove direct reliance on `util.GetDB()` and adjacent hidden runtime boundaries from the touched startup, server, handler, and auth paths. Treat this as prerequisite runtime-boundary cleanup for the later configuration-service extraction: prefer container-owned wiring, explicit dependencies, or clearly-scoped infrastructure seams over global accessors. Keep behavior stable and avoid pulling the configuration-service extraction into this task except where a shared boundary must be prepared first.",
+  "runner_pid": 135301,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-18T12:14:08.608597+00:00",
+  "status": "running",
+  "title": "WAVE01: Remove hidden util runtime boundaries from touched code paths",
+  "touched_paths": [
+    "../socialpredict/backend/util",
+    "../socialpredict/backend/internal/app",
+    "../socialpredict/backend/server",
+    "../socialpredict/backend/handlers",
+    "../socialpredict/backend/internal/service/auth",
+    "../socialpredict/backend/main.go"
+  ],
+  "uid": "019d99d7-3d71-70aa-9f0b-d0f553db0d37",
+  "verification": {
+    "focus": [
+      "deterministic coverage for touched startup, server, handler, and auth paths",
+      "evidence that dependency wiring still boots and exercises the affected code paths correctly"
+    ],
+    "owner": "software-action-test-reliability-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

@@ -1,0 +1,23 @@
+task_uid: `019d9b66-159d-7381-adbf-5829dff0e1fd`
+task_id: `W04-005`
+status: `completed`
+
+files_changed: `backend/docs/openapi.yaml`, `backend/handlers/envelope.go`, `backend/handlers/cms/homepage/http/handler.go`, `backend/handlers/cms/homepage/http/handler_test.go`, `backend/handlers/bets/buying/buypositionhandler.go`, `backend/handlers/bets/buying/buypositionhandler_test.go`, `backend/handlers/bets/selling/sellpositionhandler.go`, `backend/handlers/bets/selling/sellpositionhandler_test.go`, `backend/handlers/positions/positionshandler.go`, `backend/handlers/positions/positionshandler_test.go`, `backend/handlers/users/changedescription.go`, `backend/handlers/users/changedisplayname.go`, `backend/handlers/users/changedisplayname_test.go`, `backend/handlers/users/changeemoji.go`, `backend/handlers/users/changepersonallinks.go`, `backend/handlers/users/profile_helpers.go`, `backend/handlers/users/profile_handlers_test.go`, `backend/handlers/users/userpositiononmarkethandler.go`, `backend/handlers/users/userpositiononmarkethandler_test.go`
+
+The scoped hotspot handlers now write sanitized `ok/result` and `ok/reason` envelopes instead of leaking raw errors. That includes CMS homepage, bets buy/sell, market positions, profile helper paths, and the authenticated user-market position flow. The touched OpenAPI paths were updated to match the migrated response shapes.
+
+checks_run:
+- `gofmt -w` on touched Go files
+- `go test -vet=off ./handlers/bets/buying -count=1`
+- `go test -vet=off ./handlers/bets/selling -count=1`
+- `go test -vet=off ./handlers/positions -count=1`
+- `go test -vet=off ./handlers/users -run 'Test(ChangeDescriptionHandler_InvalidTokenReturnsFailureEnvelope|ChangeDescriptionHandler_SuccessReturnsEnvelope|WriteProfileError_SanitizesFailureReasons|ChangeDisplayNameHandler_SuccessEnvelope|WriteProfileError_SanitizesValidationFailure|UserMarketPositionHandlerReturnsUserPosition|UserMarketPositionHandlerUnauthorizedWithoutToken)$' -count=1`
+- `go test -vet=off ./handlers/cms/homepage/http -run 'Test(PublicGet_ReturnsHomepageContent|AdminUpdate_(Success|Unauthorized))$' -count=1`
+- `go test -vet=off . -run TestOpenAPISpecValidates -count=1`
+- `/workspace/spec-socialpredict-tasks/.codex/skills/socialpredict-go-architecture-governance/scripts/run_boundary_checks.sh /workspace/socialpredict`
+- `git diff --check` on touched files
+
+follow_ups:
+- `go test -vet=off ./handlers/bets/buying ./handlers/bets/selling ./handlers/positions -count=1` failed only as a combined run because the environment killed the shared `modernc.org/sqlite` build; each package passed when run individually.
+- `check_api_contract_sync.sh /workspace/socialpredict main` reported dirty-worktree drift outside this task scope, so contract verification was based on the touched `openapi.yaml` diff plus `TestOpenAPISpecValidates`.
+- Assumption kept: route organization and HTTP status layout stayed in place while payloads moved onto the shared sanitized envelope helpers.

@@ -1,0 +1,74 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-75b8-a4a3-7349b2560d4f`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-75b8-a4a3-7349b2560d4f/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-75b8-a4a3-7349b2560d4f/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-75b8-a4a3-7349b2560d4f/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-75b8-a4a3-7349b2560d4f/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "Named setup consumers move to the new configuration service instead of direct `setup.*` global accessors.",
+    "`/v0/setup` and `/v0/setup/frontend` remain semantically stable while becoming service-backed.",
+    "Touched wiring and tests are updated to reflect the configuration service as the runtime boundary."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "019d9996-f8a9-75b8-a4a3-7348db798872"
+  ],
+  "id": "W02-002",
+  "max_attempts": 3,
+  "notes": [
+    "Do not introduce the `{ ok, result, reason }` API envelope in this wave unless a touched route already requires a compatibility-safe response cleanup.",
+    "A thin temporary shim is acceptable only if it clearly reduces migration risk; it should not become the new steady-state boundary."
+  ],
+  "out_of_scope": [
+    "broad API envelope migration",
+    "public route redesign",
+    "a long-lived compatibility wrapper as the final architecture"
+  ],
+  "profile": "",
+  "prompt": "Update the direct configuration consumers to use the new configuration service rather than `setup.LoadEconomicsConfig`, `setup.EconomicsConfig`, or similar global accessors. Focus on `server.go`, `handlers/setup`, `handlers/stats`, `handlers/admin/adduser`, `seed`, and any touched container wiring/tests. Keep `/v0/setup` and `/v0/setup/frontend` path semantics stable, but make them service-backed in the same architectural style as the rest of the backend. Prefer moving touched callers directly to the new internal config slice rather than leaving them behind a long-lived compatibility wrapper. Add or update tests and narrow docs where needed.",
+  "runner_pid": 158162,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-18T12:30:31.537600+00:00",
+  "status": "running",
+  "title": "WAVE02: Migrate setup consumers and setup endpoints to the configuration service",
+  "touched_paths": [
+    "../socialpredict/backend/handlers/setup",
+    "../socialpredict/backend/handlers/stats",
+    "../socialpredict/backend/handlers/admin",
+    "../socialpredict/backend/server",
+    "../socialpredict/backend/seed",
+    "../socialpredict/backend/internal/app",
+    "../socialpredict/backend/setup"
+  ],
+  "uid": "019d9996-f8a9-75b8-a4a3-7349b2560d4f",
+  "verification": {
+    "focus": [
+      "deterministic coverage for touched setup consumers and setup endpoints",
+      "evidence that service-backed setup routes preserve existing semantics"
+    ],
+    "owner": "software-action-test-reliability-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

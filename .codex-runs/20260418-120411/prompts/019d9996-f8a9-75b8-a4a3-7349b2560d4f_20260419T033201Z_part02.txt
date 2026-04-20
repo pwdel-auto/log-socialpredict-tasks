@@ -1,0 +1,77 @@
+You are resuming queued automation task W02-002 (019d9996-f8a9-75b8-a4a3-7349b2560d4f) after codex-runner checkpointed the session because the active context window was getting full.
+
+Continue from the existing session state and current repository contents.
+- Reuse the canonical report directory `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-75b8-a4a3-7349b2560d4f`.
+- Continue appending to `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-75b8-a4a3-7349b2560d4f/conversation.ndjson` and `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-75b8-a4a3-7349b2560d4f/decisions.ndjson` rather than creating new report files.
+- Keep `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-75b8-a4a3-7349b2560d4f/summary.json` current as the dispatcher-owned rollup.
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for incremental reads and summary updates when practical.
+- Check `summary.json.context` first. If `handoff_requested` is true, consolidate state before branching into more work.
+- Do not restart the task from scratch.
+- Avoid repeating work that is already complete.
+- Re-read files or rerun checks only when needed to safely continue.
+- Finish with the same concise summary contract as before, including task_uid and task_id.
+
+Latest checkpoint:
+{}
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "Named setup consumers move to the new configuration service instead of direct `setup.*` global accessors.",
+    "`/v0/setup` and `/v0/setup/frontend` remain semantically stable while becoming service-backed.",
+    "Touched wiring and tests are updated to reflect the configuration service as the runtime boundary."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "019d9996-f8a9-75b8-a4a3-7348db798872"
+  ],
+  "id": "W02-002",
+  "last_resumed_at": "2026-04-19T03:32:01.334950+00:00",
+  "max_attempts": 3,
+  "notes": [
+    "Do not introduce the `{ ok, result, reason }` API envelope in this wave unless a touched route already requires a compatibility-safe response cleanup.",
+    "A thin temporary shim is acceptable only if it clearly reduces migration risk; it should not become the new steady-state boundary."
+  ],
+  "out_of_scope": [
+    "broad API envelope migration",
+    "public route redesign",
+    "a long-lived compatibility wrapper as the final architecture"
+  ],
+  "profile": "",
+  "prompt": "Update the direct configuration consumers to use the new configuration service rather than `setup.LoadEconomicsConfig`, `setup.EconomicsConfig`, or similar global accessors. Focus on `server.go`, `handlers/setup`, `handlers/stats`, `handlers/admin/adduser`, `seed`, and any touched container wiring/tests. Keep `/v0/setup` and `/v0/setup/frontend` path semantics stable, but make them service-backed in the same architectural style as the rest of the backend. Prefer moving touched callers directly to the new internal config slice rather than leaving them behind a long-lived compatibility wrapper. Add or update tests and narrow docs where needed.",
+  "runner_pid": 161015,
+  "runner_state": {
+    "context_file": "/workspace/log-socialpredict-tasks/.codex-runs/20260418-120411/context/019d9996-f8a9-75b8-a4a3-7349b2560d4f_20260418T123031Z_part01.ndjson",
+    "event_file": "/workspace/log-socialpredict-tasks/.codex-runs/20260418-120411/events/019d9996-f8a9-75b8-a4a3-7349b2560d4f_20260418T123031Z_part01.ndjson",
+    "message_file": "/workspace/log-socialpredict-tasks/.codex-runs/20260418-120411/messages/019d9996-f8a9-75b8-a4a3-7349b2560d4f_20260418T123031Z_part01.txt",
+    "prompt_file": "/workspace/log-socialpredict-tasks/.codex-runs/20260418-120411/prompts/019d9996-f8a9-75b8-a4a3-7349b2560d4f_20260418T123031Z_part01.txt",
+    "resume_pending": true,
+    "segment": 1,
+    "session_id": "019da092-3dd1-7de3-9ff0-40d866502502",
+    "stderr_file": "/workspace/log-socialpredict-tasks/.codex-runs/20260418-120411/stderr/019d9996-f8a9-75b8-a4a3-7349b2560d4f_20260418T123031Z_part01.stderr.log"
+  },
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-18T12:30:31.537600+00:00",
+  "status": "running",
+  "title": "WAVE02: Migrate setup consumers and setup endpoints to the configuration service",
+  "touched_paths": [
+    "../socialpredict/backend/handlers/setup",
+    "../socialpredict/backend/handlers/stats",
+    "../socialpredict/backend/handlers/admin",
+    "../socialpredict/backend/server",
+    "../socialpredict/backend/seed",
+    "../socialpredict/backend/internal/app",
+    "../socialpredict/backend/setup"
+  ],
+  "uid": "019d9996-f8a9-75b8-a4a3-7349b2560d4f",
+  "verification": {
+    "focus": [
+      "deterministic coverage for touched setup consumers and setup endpoints",
+      "evidence that service-backed setup routes preserve existing semantics"
+    ],
+    "owner": "software-action-test-reliability-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

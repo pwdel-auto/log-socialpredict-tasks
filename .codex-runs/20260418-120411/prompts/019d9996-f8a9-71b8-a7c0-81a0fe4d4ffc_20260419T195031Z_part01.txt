@@ -1,0 +1,72 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-71b8-a7c0-81a0fe4d4ffc`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-71b8-a7c0-81a0fe4d4ffc/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-71b8-a7c0-81a0fe4d4ffc/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-71b8-a7c0-81a0fe4d4ffc/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-71b8-a7c0-81a0fe4d4ffc/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "Shared helpers exist for the `{ ok, result, reason }` response contract.",
+    "At least one representative hotspot flow is migrated using those helpers and demonstrates the intended contract direction.",
+    "Raw error leakage is removed from the touched flow and stable `reason` values are used for handled business-rule failures."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "019d9996-f8a9-736b-93d9-de5a3e5e447f"
+  ],
+  "id": "W04-001",
+  "max_attempts": 3,
+  "notes": [
+    "Do not pull the limited-scope login-token redesign into this task.",
+    "Use this as the early contract proof point before spreading the envelope helpers further."
+  ],
+  "out_of_scope": [
+    "login-token redesign",
+    "full hotspot migration in one pass",
+    "public route reorganization"
+  ],
+  "profile": "",
+  "prompt": "Implement shared backend helpers for the `{ ok, result, reason }` JSON contract described in `backend/docs/API-ISSUES.md`, then apply them to one representative hotspot flow first so the contract direction is proven before broad migration. Use a thin, reviewable slice such as the stats path and any directly-shared helper behavior it needs. Remove raw error leakage, use stable `reason` values for business-rule failures where the backend processed the request correctly, and reserve transport-level 4xx/5xx for malformed, unauthorized, or actual server failures where practical. Add focused tests.",
+  "runner_pid": 190678,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-19T19:50:31.533736+00:00",
+  "status": "running",
+  "title": "WAVE04: Introduce sanitized envelope helpers and migrate a representative hotspot flow",
+  "touched_paths": [
+    "../socialpredict/backend/handlers/stats",
+    "../socialpredict/backend/errors",
+    "../socialpredict/backend/handlers",
+    "../socialpredict/backend/internal",
+    "../socialpredict/backend/docs/API-ISSUES.md"
+  ],
+  "uid": "019d9996-f8a9-71b8-a7c0-81a0fe4d4ffc",
+  "verification": {
+    "focus": [
+      "deterministic response-shape and error-path coverage for the representative hotspot flow",
+      "evidence that shared envelope helpers behave consistently for touched handlers"
+    ],
+    "owner": "software-action-test-reliability-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}
