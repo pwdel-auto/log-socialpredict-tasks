@@ -1,0 +1,27 @@
+{
+  "snapshot_class": "current",
+  "source_repo": "socialpredict",
+  "source_remote": "https://github.com/pwdel-auto/socialpredict.git",
+  "source_ref": {
+    "kind": "branch",
+    "name": "midrun-20260419-fix",
+    "local_commit": "4df6b7f957279d10a82ac4eba229eae44f109c85",
+    "remote_commit": "6f78ccfcfe3d06ae363958015b6321b11589c6b2",
+    "merge_base_with_local_main": "b86b6205e46fbc01739dcbdb12dfb9a153e391f8"
+  },
+  "migrated_at_utc": "2026-04-20T03:58:11Z",
+  "migration_repo": "log-socialpredict-tasks",
+  "primary_log_roots": [
+    ".codex-reports"
+  ],
+  "checksums_file": "SHA256SUMS",
+  "summary": {
+    "tracked_file_count": 157,
+    "task_directory_count": 39,
+    "approximate_size": "868K"
+  },
+  "notes": [
+    "The imported .codex-reports tree was moved out of the socialpredict working tree.",
+    "The source socialpredict repo is expected to ignore .codex-reports after this migration."
+  ]
+}
