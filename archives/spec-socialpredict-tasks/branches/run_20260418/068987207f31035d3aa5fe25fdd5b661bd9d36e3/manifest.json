@@ -1,0 +1,26 @@
+{
+  "snapshot_class": "archive",
+  "source_repo": "spec-socialpredict-tasks",
+  "source_remote": "https://github.com/pwdel-auto/spec-socialpredict-tasks",
+  "source_ref": {
+    "kind": "branch",
+    "name": "run_20260418",
+    "local_commit": "068987207f31035d3aa5fe25fdd5b661bd9d36e3",
+    "remote_commit": "068987207f31035d3aa5fe25fdd5b661bd9d36e3"
+  },
+  "migrated_at_utc": "2026-04-20T04:43:23Z",
+  "migration_repo": "log-socialpredict-tasks",
+  "primary_log_roots": [
+    ".codex-runs"
+  ],
+  "checksums_file": "SHA256SUMS",
+  "summary": {
+    "tracked_file_count": 187,
+    "event_file_count": 43,
+    "approximate_size": "7.9M"
+  },
+  "notes": [
+    "This legacy flat .codex-runs tree predates the newer timestamped log-repo layout.",
+    "Historical task-archive file references were migrated to this archived snapshot path."
+  ]
+}
