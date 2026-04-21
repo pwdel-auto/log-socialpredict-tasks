@@ -1,0 +1,73 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-75b8-a4a3-7348db798872`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-75b8-a4a3-7348db798872/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-75b8-a4a3-7348db798872/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-75b8-a4a3-7348db798872/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-75b8-a4a3-7348db798872/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "A service-backed configuration slice exists under the internal application structure with typed interfaces or models for economics and frontend config access.",
+    "Configuration access is wired through the application container rather than depending on `backend/setup` globals as the primary runtime boundary.",
+    "Current configuration values and external route semantics are preserved."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "019d99d7-3d71-70aa-9f0b-d0f553db0d37"
+  ],
+  "id": "W02-001",
+  "max_attempts": 3,
+  "notes": [
+    "Keep `setup.yaml` as the configuration source asset unless a narrower compatibility shim is clearly better.",
+    "Follow the existing service/container patterns instead of inventing a separate runtime path.",
+    "Do not design `backend/setup` as a permanent special-case boundary."
+  ],
+  "out_of_scope": [
+    "API contract redesign",
+    "moving config into a standalone process",
+    "changing the meaning of existing setup values"
+  ],
+  "profile": "",
+  "prompt": "Create a configuration slice that fits the existing internal application architecture instead of relying on `backend/setup` globals as the runtime integration boundary. Treat `backend/setup/setup.yaml` as the current source data, but introduce a service-backed config layer under the internal packages, define the typed interfaces/models needed for economics and frontend config access, and wire that slice through the application container. Make this slice look and behave as much like the other extraction-ready backend services as practical so it can later move toward its own container with minimal churn. Preserve existing config values and external route semantics. Add focused tests. This is a prerequisite wave, not API contract redesign.",
+  "runner_pid": 146271,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-18T12:19:24.042888+00:00",
+  "status": "running",
+  "title": "WAVE02: Extract a service-backed configuration slice from backend/setup",
+  "touched_paths": [
+    "../socialpredict/backend/setup",
+    "../socialpredict/backend/internal/app",
+    "../socialpredict/backend/internal/service",
+    "../socialpredict/backend/internal/domain",
+    "../socialpredict/backend/internal/repository"
+  ],
+  "uid": "019d9996-f8a9-75b8-a4a3-7348db798872",
+  "verification": {
+    "focus": [
+      "deterministic tests for configuration loading and container wiring",
+      "evidence that existing config-driven behavior remains stable"
+    ],
+    "owner": "software-action-test-reliability-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

@@ -1,0 +1,21 @@
+task_uid: `019d9996-f8a9-71b8-a7c0-81a1c4b0374c`  
+task_id: `W04-002`  
+status: `completed`
+
+`mustChangePassword` is now enforced on the remaining authenticated profile/user handlers that were still bypassing it, while `/v0/login` keeps the current full-JWT issuance model and now returns stable JSON envelopes. `/v0/changepassword` now returns JSON success and JSON failure envelopes instead of plaintext, and `backend/docs/openapi.yaml` was updated to match the touched auth contract. I also updated focused tests and wrote the canonical report summary/decisions under `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-71b8-a7c0-81a1c4b0374c`.
+
+files_changed: `backend/internal/service/auth/loggin.go`, `backend/internal/service/auth/middleware_test.go`, `backend/handlers/users/changepassword.go`, `backend/handlers/users/changepassword_test.go`, `backend/handlers/users/changedisplayname.go`, `backend/handlers/users/changedescription.go`, `backend/handlers/users/changeemoji.go`, `backend/handlers/users/changepersonallinks.go`, `backend/handlers/users/userpositiononmarkethandler.go`, `backend/handlers/users/userpositiononmarkethandler_test.go`, `backend/handlers/users/privateuser/privateuser.go`, `backend/handlers/users/privateuser/privateuser_test.go`, `backend/server/server_test.go`, `backend/docs/openapi.yaml`
+
+checks_run:
+- `gofmt -w` on all touched Go files
+- `GOCACHE=/workspace/socialpredict/.cache/go-build GOMODCACHE=/workspace/socialpredict/.cache/go-mod go test ./internal/service/auth -run 'TestLoginHandler_SuccessResponseEnvelope|TestLoginHandler_InvalidCredentialsReturnsFailureEnvelope|TestValidateUserAndEnforcePasswordChangeGetUser_PasswordChangeRequired' -count=1`
+- `GOCACHE=/workspace/socialpredict/.cache/go-build GOMODCACHE=/workspace/socialpredict/.cache/go-mod go test ./handlers/users -run 'TestChangePasswordHandler_|TestUserMarketPositionHandler' -count=1`
+- `GOCACHE=/workspace/socialpredict/.cache/go-build GOMODCACHE=/workspace/socialpredict/.cache/go-mod go test ./handlers/users/privateuser -run 'TestGetPrivateProfileUserResponse_' -count=1`
+- `GOCACHE=/workspace/socialpredict/.cache/go-build GOMODCACHE=/workspace/socialpredict/.cache/go-mod go test ./server -run 'TestServerBlocksProtectedProfileRoutesWhenPasswordChangeRequired|TestServerRegistersAndServesCoreRoutes|TestServerSetupRoutesUseInjectedConfigService' -count=1`
+- `GOCACHE=/workspace/socialpredict/.cache/go-build GOMODCACHE=/workspace/socialpredict/.cache/go-mod go test ./... -run TestOpenAPISpecValidates -count=1`
+- `GOCACHE=/workspace/socialpredict/.cache/go-build GOMODCACHE=/workspace/socialpredict/.cache/go-mod go vet ./internal/service/auth ./handlers/users/... ./server`
+- `/workspace/spec-socialpredict-tasks/.codex/skills/socialpredict-go-architecture-governance/scripts/run_boundary_checks.sh /workspace/socialpredict`
+
+follow_ups:
+- A broad unfiltered `go test ./handlers/users` still hits the pre-existing unrelated `TestEmojiValidation` failure, so verification stayed focused on the changed auth/user-position/change-password coverage for this task.
+- The target repo still has unrelated pre-existing worktree changes, including the earlier stats/envelope slice and other report artifacts, which I left untouched.

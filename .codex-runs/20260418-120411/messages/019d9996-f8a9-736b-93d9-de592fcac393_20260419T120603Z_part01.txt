@@ -1,0 +1,17 @@
+task_uid: `019d9996-f8a9-736b-93d9-de592fcac393`  
+task_id: `W03-002`  
+status: `completed`
+
+I explicitly spawned `software-action-dispatcher-agent` first, let it coordinate, and then finished the wave in the target repo. The core change is that `internal/domain/bets`, `internal/domain/markets`, and `internal/domain/math` now use `internal/domain/boundary.Bet` instead of depending directly on `socialpredict/models` in production code; repository translation remains at the repository edge. I also updated the affected tests so they exercise the new boundary seam instead of legacy model-shaped bet fixtures, and I updated the canonical task report under `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-736b-93d9-de592fcac393`.
+
+files_changed: `backend/internal/domain/boundary`, `backend/internal/domain/bets`, `backend/internal/domain/markets`, `backend/internal/domain/math`, `backend/internal/repository/bets`, `backend/internal/repository/markets`
+
+checks_run:
+- `/workspace/spec-socialpredict-tasks/.codex/skills/socialpredict-go-architecture-governance/scripts/run_boundary_checks.sh /workspace/socialpredict`
+- `gofmt -l` across the touched domain/repository scopes
+- `GOCACHE=/workspace/.gocache GOMODCACHE=/workspace/.gomodcache go test -count=1 ./internal/domain/bets ./internal/domain/markets ./internal/domain/math/... ./internal/repository/bets ./internal/repository/markets` twice
+- `GOCACHE=/workspace/.gocache GOMODCACHE=/workspace/.gomodcache go vet ./internal/domain/bets ./internal/domain/markets ./internal/domain/math/... ./internal/repository/bets ./internal/repository/markets`
+
+follow_ups:
+- Full-repo `go vet ./...` still reflects unrelated in-flight boundary changes outside this task’s touched paths (`internal/domain/analytics`, `internal/repository/users`, and some handler tests), so this task used focused vet coverage on the changed packages.
+- Assumption: the existing in-flight edits in the touched packages were part of this wave, so I completed and validated that refactor rather than reverting or reworking unrelated dirty-worktree changes.

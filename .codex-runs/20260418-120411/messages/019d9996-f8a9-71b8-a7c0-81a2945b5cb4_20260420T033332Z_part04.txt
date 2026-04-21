@@ -1,0 +1,11 @@
+task_uid: `019d9996-f8a9-71b8-a7c0-81a2945b5cb4`  
+task_id: `W04-003`  
+status: `completed`
+
+files_changed: `backend/docs/openapi.yaml`
+
+checks_run: `go test . -run TestOpenAPISpecValidates -count=1`; targeted route/auth/response cross-checks against `backend/server/server.go` and the touched handlers.
+
+follow_ups: broader `go test ./...` verification in this environment is still limited by disk exhaustion, but the dispatcher summary, event log, and spec alignment are already recorded in `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-71b8-a7c0-81a2945b5cb4`.
+
+The OpenAPI contract is already aligned in the current repo state: the stray `/v0/user/markets/{marketId}` path was removed, `/v0/userposition/{marketId}` now reflects the WAVE04 envelope and auth behavior, market-position routes are tagged under `Markets`, and the touched profile/bet/sell/private-profile routes document the implemented auth and response shapes without changing route organization.

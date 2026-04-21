@@ -1,0 +1,78 @@
+You are resuming queued automation task W03-001 (019d9996-f8a9-736b-93d9-de583bb6112a) after codex-runner checkpointed the session because the active context window was getting full.
+
+Continue from the existing session state and current repository contents.
+- Reuse the canonical report directory `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-736b-93d9-de583bb6112a`.
+- Continue appending to `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-736b-93d9-de583bb6112a/conversation.ndjson` and `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-736b-93d9-de583bb6112a/decisions.ndjson` rather than creating new report files.
+- Keep `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-736b-93d9-de583bb6112a/summary.json` current as the dispatcher-owned rollup.
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for incremental reads and summary updates when practical.
+- Check `summary.json.context` first. If `handoff_requested` is true, consolidate state before branching into more work.
+- Do not restart the task from scratch.
+- Avoid repeating work that is already complete.
+- Re-read files or rerun checks only when needed to safely continue.
+- Finish with the same concise summary contract as before, including task_uid and task_id.
+
+Latest checkpoint:
+{}
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "Explicit boundary types or adapters exist so translation is owned by repositories or explicit edge helpers rather than leaking through internal domain code.",
+    "Each initial target area in markets, bets, math, analytics, and auth-adjacent flows has at least one concrete repository-owned translation path.",
+    "Touched internal domain packages can depend on boundary types rather than directly treating `socialpredict/models` as native policy objects."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "019d9996-f8a9-75b8-a4a3-7349b2560d4f"
+  ],
+  "id": "W03-001",
+  "last_resumed_at": "2026-04-19T11:21:27.082961+00:00",
+  "max_attempts": 3,
+  "notes": [
+    "Preserve behavior and keep repository ownership of persistence concerns clear.",
+    "Avoid a giant flag-day rewrite; build stable seams first.",
+    "Do not start this wave until the configuration slice is container-owned, stable, and no longer leaking global access patterns."
+  ],
+  "out_of_scope": [
+    "full flag-day model rewrite",
+    "API contract changes",
+    "microservice extraction"
+  ],
+  "profile": "",
+  "prompt": "Using the post-WAVE02 container-owned configuration seam as the baseline, introduce explicit boundary types, adapters, and conversion seams so repositories and explicit edge helpers own translation while internal domain/math code can stop treating `socialpredict/models` structs as native policy objects. Keep the first enabling pass concrete: establish at least one repository-owned translation path for each initial target area in markets, bets, math, analytics, and auth-adjacent flows, and make it possible for touched internal domain packages to depend on boundary types rather than `socialpredict/models`. Add focused tests. This is a prerequisite boundary wave, not an API contract wave.",
+  "runner_pid": 165020,
+  "runner_state": {
+    "context_file": "/workspace/log-socialpredict-tasks/.codex-runs/20260418-120411/context/019d9996-f8a9-736b-93d9-de583bb6112a_20260419T034512Z_part01.ndjson",
+    "event_file": "/workspace/log-socialpredict-tasks/.codex-runs/20260418-120411/events/019d9996-f8a9-736b-93d9-de583bb6112a_20260419T034512Z_part01.ndjson",
+    "message_file": "/workspace/log-socialpredict-tasks/.codex-runs/20260418-120411/messages/019d9996-f8a9-736b-93d9-de583bb6112a_20260419T034512Z_part01.txt",
+    "prompt_file": "/workspace/log-socialpredict-tasks/.codex-runs/20260418-120411/prompts/019d9996-f8a9-736b-93d9-de583bb6112a_20260419T034512Z_part01.txt",
+    "resume_pending": true,
+    "segment": 1,
+    "session_id": "019da3d7-a7c3-7523-b843-66ed4a62e4da",
+    "stderr_file": "/workspace/log-socialpredict-tasks/.codex-runs/20260418-120411/stderr/019d9996-f8a9-736b-93d9-de583bb6112a_20260419T034512Z_part01.stderr.log"
+  },
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-19T03:45:12.283415+00:00",
+  "status": "running",
+  "title": "WAVE03: Establish domain-model boundary types and legacy-model adapters",
+  "touched_paths": [
+    "../socialpredict/backend/internal/domain/markets",
+    "../socialpredict/backend/internal/domain/bets",
+    "../socialpredict/backend/internal/domain/math",
+    "../socialpredict/backend/internal/domain/analytics",
+    "../socialpredict/backend/internal/service/auth",
+    "../socialpredict/backend/internal/repository",
+    "../socialpredict/backend/models"
+  ],
+  "uid": "019d9996-f8a9-736b-93d9-de583bb6112a",
+  "verification": {
+    "focus": [
+      "deterministic tests for new translation seams and boundary adapters",
+      "regression evidence for touched repository and internal domain flows"
+    ],
+    "owner": "software-action-test-reliability-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

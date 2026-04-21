@@ -1,0 +1,75 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-736b-93d9-de583bb6112a`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-736b-93d9-de583bb6112a/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-736b-93d9-de583bb6112a/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-736b-93d9-de583bb6112a/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-736b-93d9-de583bb6112a/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "Explicit boundary types or adapters exist so translation is owned by repositories or explicit edge helpers rather than leaking through internal domain code.",
+    "Each initial target area in markets, bets, math, analytics, and auth-adjacent flows has at least one concrete repository-owned translation path.",
+    "Touched internal domain packages can depend on boundary types rather than directly treating `socialpredict/models` as native policy objects."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "019d9996-f8a9-75b8-a4a3-7349b2560d4f"
+  ],
+  "id": "W03-001",
+  "max_attempts": 3,
+  "notes": [
+    "Preserve behavior and keep repository ownership of persistence concerns clear.",
+    "Avoid a giant flag-day rewrite; build stable seams first.",
+    "Do not start this wave until the configuration slice is container-owned, stable, and no longer leaking global access patterns."
+  ],
+  "out_of_scope": [
+    "full flag-day model rewrite",
+    "API contract changes",
+    "microservice extraction"
+  ],
+  "profile": "",
+  "prompt": "Using the post-WAVE02 container-owned configuration seam as the baseline, introduce explicit boundary types, adapters, and conversion seams so repositories and explicit edge helpers own translation while internal domain/math code can stop treating `socialpredict/models` structs as native policy objects. Keep the first enabling pass concrete: establish at least one repository-owned translation path for each initial target area in markets, bets, math, analytics, and auth-adjacent flows, and make it possible for touched internal domain packages to depend on boundary types rather than `socialpredict/models`. Add focused tests. This is a prerequisite boundary wave, not an API contract wave.",
+  "runner_pid": 164504,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-19T03:45:12.283415+00:00",
+  "status": "running",
+  "title": "WAVE03: Establish domain-model boundary types and legacy-model adapters",
+  "touched_paths": [
+    "../socialpredict/backend/internal/domain/markets",
+    "../socialpredict/backend/internal/domain/bets",
+    "../socialpredict/backend/internal/domain/math",
+    "../socialpredict/backend/internal/domain/analytics",
+    "../socialpredict/backend/internal/service/auth",
+    "../socialpredict/backend/internal/repository",
+    "../socialpredict/backend/models"
+  ],
+  "uid": "019d9996-f8a9-736b-93d9-de583bb6112a",
+  "verification": {
+    "focus": [
+      "deterministic tests for new translation seams and boundary adapters",
+      "regression evidence for touched repository and internal domain flows"
+    ],
+    "owner": "software-action-test-reliability-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

@@ -1,0 +1,13 @@
+task_uid: `019d99d7-3d71-70aa-9f0b-d0f553db0d37`
+task_id: `W01-002`
+status: `completed`
+
+Removed hidden DB access from the touched runtime paths by threading the `*gorm.DB` created in [main.go](/workspace/socialpredict/backend/main.go) into [server.go](/workspace/socialpredict/backend/server/server.go), then into the remaining legacy entrypoints in [loggin.go](/workspace/socialpredict/backend/internal/service/auth/loggin.go), [statshandler.go](/workspace/socialpredict/backend/handlers/stats/statshandler.go), and [adduser.go](/workspace/socialpredict/backend/handlers/admin/adduser.go). The corresponding route/auth tests in [server_test.go](/workspace/socialpredict/backend/server/server_test.go) and [middleware_test.go](/workspace/socialpredict/backend/internal/service/auth/middleware_test.go) were updated to inject DB explicitly as well.
+
+files_changed: `backend/main.go`, `backend/server/server.go`, `backend/server/server_test.go`, `backend/handlers/stats/statshandler.go`, `backend/handlers/admin/adduser.go`, `backend/internal/service/auth/loggin.go`, `backend/internal/service/auth/middleware_test.go`
+
+checks_run: `run_boundary_checks.sh /workspace/socialpredict`; `gofmt` wrapper on touched files; `go test ./internal/service/auth ./handlers/admin ./handlers/stats -count=1` twice; `go test ./server -count=1` twice; `go test ./... -run TestOpenAPISpecValidates -count=1`; `go vet ./server ./internal/service/auth ./handlers/admin ./handlers/stats`
+
+follow_ups: `None`
+
+Assumption: untouched legacy callers outside this task may still rely on the shared runtime DB handle; this change only removes that hidden boundary from the startup, server, handler, and auth paths named in scope.

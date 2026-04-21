@@ -1,0 +1,72 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/019d9b66-159d-7381-adbf-5829dff0e1fd`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/019d9b66-159d-7381-adbf-5829dff0e1fd/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/019d9b66-159d-7381-adbf-5829dff0e1fd/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/019d9b66-159d-7381-adbf-5829dff0e1fd/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/019d9b66-159d-7381-adbf-5829dff0e1fd/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "The remaining named hotspot handlers are migrated onto the shared sanitized envelope helpers.",
+    "Touched handlers stop leaking raw errors and use stable, reviewable `reason` values where applicable.",
+    "Route organization remains stable while the broader hotspot migration stays reversible."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "019d9996-f8a9-71b8-a7c0-81a0fe4d4ffc"
+  ],
+  "id": "W04-005",
+  "max_attempts": 3,
+  "notes": [
+    "Keep this as the broader follow-on migration after the first envelope slice proves the helper design.",
+    "Do not broaden this into auth redesign or public route migration."
+  ],
+  "out_of_scope": [
+    "auth redesign",
+    "public route migration",
+    "rewriting handlers not called out in the scoped hotspot list unless touched as shared support"
+  ],
+  "profile": "",
+  "prompt": "After the representative WAVE04 envelope slice is proven, migrate the remaining hotspot handlers called out in `backend/docs/API-ISSUES.md`: CMS homepage, bets buy/sell, positions, and user/profile helper paths as needed. Reuse the shared envelope helpers, preserve route organization, remove raw error leakage, and keep `reason` values stable and reviewable. Add focused tests so the broader migration remains reversible and evidence-driven.",
+  "runner_pid": 204484,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-19T20:19:10.765907+00:00",
+  "status": "running",
+  "title": "WAVE04: Migrate the remaining API hotspot handlers onto the sanitized envelope",
+  "touched_paths": [
+    "../socialpredict/backend/handlers/cms",
+    "../socialpredict/backend/handlers/bets",
+    "../socialpredict/backend/handlers/positions",
+    "../socialpredict/backend/handlers/users",
+    "../socialpredict/backend/errors"
+  ],
+  "uid": "019d9b66-159d-7381-adbf-5829dff0e1fd",
+  "verification": {
+    "focus": [
+      "deterministic response-shape and error-path coverage for the migrated hotspot handlers",
+      "evidence that the broader envelope migration remains behaviorally stable"
+    ],
+    "owner": "software-action-test-reliability-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

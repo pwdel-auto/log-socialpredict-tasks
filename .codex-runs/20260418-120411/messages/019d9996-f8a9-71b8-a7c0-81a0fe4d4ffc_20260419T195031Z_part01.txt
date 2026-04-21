@@ -1,0 +1,25 @@
+task_uid: `019d9996-f8a9-71b8-a7c0-81a0fe4d4ffc`  
+task_id: `W04-001`  
+status: `completed`
+
+The dispatcher was spawned first as requested, coordinated the implementation slice, and I then converged the task with explicit validation specialists and a final report check. The backend now has shared `{ ok, result, reason }` envelope helpers, `GET /v0/stats` uses that contract as the representative hotspot migration, raw internal error text was removed from the touched flow, and the OpenAPI contract was updated to match.
+
+files_changed:
+- `../socialpredict/backend/handlers/envelope.go`
+- `../socialpredict/backend/handlers/envelope_test.go`
+- `../socialpredict/backend/handlers/stats/statshandler.go`
+- `../socialpredict/backend/handlers/stats/statshandler_test.go`
+- `../socialpredict/backend/docs/openapi.yaml`
+- `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-71b8-a7c0-81a0fe4d4ffc/summary.json`
+
+checks_run:
+- `gofmt -w backend/handlers/envelope.go backend/handlers/envelope_test.go backend/handlers/stats/statshandler.go backend/handlers/stats/statshandler_test.go`
+- `gofmt -l backend/handlers/envelope.go backend/handlers/envelope_test.go backend/handlers/stats/statshandler.go backend/handlers/stats/statshandler_test.go`
+- `GOCACHE=/workspace/socialpredict/.cache/go-build GOMODCACHE=/workspace/socialpredict/.cache/go-mod go test ./handlers ./handlers/stats -count=1`
+- `GOCACHE=/workspace/socialpredict/.cache/go-build GOMODCACHE=/workspace/socialpredict/.cache/go-mod go test ./... -run TestOpenAPISpecValidates -count=1`
+- `GOCACHE=/workspace/socialpredict/.cache/go-build GOMODCACHE=/workspace/socialpredict/.cache/go-mod go vet ./...`
+- `GOCACHE=/workspace/socialpredict/.cache/go-build GOMODCACHE=/workspace/socialpredict/.cache/go-mod /workspace/spec-socialpredict-tasks/.codex/skills/socialpredict-go-architecture-governance/scripts/run_boundary_checks.sh /workspace/socialpredict`
+
+follow_ups:
+- Broader handler reliability still has unrelated pre-existing failures in `handlers/users` (`TestEmojiValidation` and a missing bets-table path), so only the changed-package deterministic suite is clean for this task.
+- Specialist agent-spawn/report plumbing did not return synchronous sign-off artifacts in this run; the task was closed on direct deterministic validation evidence and the canonical report was updated accordingly.

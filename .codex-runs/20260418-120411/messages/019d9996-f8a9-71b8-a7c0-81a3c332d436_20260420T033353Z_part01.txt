@@ -1,0 +1,10 @@
+`backend/docs/API-ISSUES.md` was rewritten into a current-state follow-up register aligned with the Wave 1-4 codebase. The stale historical audit/redesign material was removed, completed work is now called out explicitly, and the deferred set is limited to the three scoped items: limited-scope-token login redesign, public route reorganization, and Bets-to-Trades rename. The canonical report summary and verifier event were also updated under `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-71b8-a7c0-81a3c332d436`.
+
+`task_uid`: `019d9996-f8a9-71b8-a7c0-81a3c332d436`  
+`task_id`: `W04-004`  
+`status`: `completed`  
+`files_changed`: `../socialpredict/backend/docs/API-ISSUES.md`  
+`checks_run`: `git diff --check -- backend/docs/API-ISSUES.md`; `GOMODCACHE=/workspace/.gomodcache GOCACHE=/workspace/.gocache go test ./... -run TestOpenAPISpecValidates -count=1`; `git status --short -- backend/docs/API-ISSUES.md backend/docs/openapi.yaml backend/server/server.go`  
+`follow_ups`: `none`
+
+Assumption used: this task was documentation-only, so I did not change backend behavior or `backend/docs/openapi.yaml`.

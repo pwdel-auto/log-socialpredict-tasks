@@ -1,0 +1,13 @@
+task_uid: `019d99d7-3d71-70aa-9f0b-d0f4da7524f0`  
+task_id: `W01-001`  
+status: `completed`
+
+`backend/util` is no longer the active mixed-ownership package. I moved dotenv loading to `backend/internal/app/env`, moved DB config/init/shared-handle ownership to `backend/internal/app/runtime`, rewired startup and legacy shared-DB callers to those packages, and deleted the old `backend/util/*.go` files. The users-domain uniqueness/API-key helpers are now the retained home for that behavior under `backend/internal/domain/users`.
+
+files_changed: `backend/main.go`, `backend/server/server.go`, `backend/server/server_test.go`, `backend/internal/service/auth/loggin.go`, `backend/internal/service/auth/middleware_test.go`, `backend/handlers/admin/adduser.go`, `backend/handlers/stats/statshandler.go`, `backend/handlers/markets/marketdetailshandler_test.go`, `backend/handlers/markets/marketdetailshandler_volume_consistency_test.go`, `backend/handlers/markets/resolvemarket_test.go`, `backend/internal/app/env/devloader.go`, `backend/internal/app/env/devloader_test.go`, `backend/internal/app/runtime/db.go`, `backend/internal/app/runtime/db_test.go`, `backend/internal/domain/users/uniqueness.go`, `backend/internal/domain/users/uniqueness_test.go`, deleted `backend/util/getenv.go`, `backend/util/postgres.go`, `backend/util/modelchecks.go`, `backend/util/apikeys.go`, `backend/util/util_test.go`
+
+checks_run: `gofmt -w` on touched files, `go test ./internal/app/... ./internal/domain/users ./internal/service/auth ./handlers/admin ./handlers/stats ./server ./handlers/markets -count=1` twice, `go vet ./internal/app/... ./internal/domain/users ./internal/service/auth ./handlers/admin ./handlers/stats ./server ./handlers/markets`, `/workspace/spec-socialpredict-tasks/.codex/skills/socialpredict-go-architecture-governance/scripts/run_boundary_checks.sh /workspace/socialpredict`, `go test ./... -run TestOpenAPISpecValidates -count=1`
+
+Assumption: the users-domain helper files under `backend/internal/domain/users/uniqueness.go` and `_test.go` are the intended retained ownership point for uniqueness/API-key behavior in this workspace, so I routed callers there instead of creating another replacement package.
+
+follow_ups: `none`

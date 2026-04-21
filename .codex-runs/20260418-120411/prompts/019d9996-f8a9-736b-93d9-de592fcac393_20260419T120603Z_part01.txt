@@ -1,0 +1,72 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-736b-93d9-de592fcac393`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-736b-93d9-de592fcac393/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-736b-93d9-de592fcac393/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-736b-93d9-de592fcac393/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-736b-93d9-de592fcac393/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "Direct `socialpredict/models` dependencies are removed or materially reduced in the internal markets, bets, and math packages.",
+    "Any remaining translation is pushed toward repositories or narrow edge helpers rather than core domain policy packages.",
+    "Touched domain behavior remains stable."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "019d9996-f8a9-736b-93d9-de583bb6112a"
+  ],
+  "id": "W03-002",
+  "max_attempts": 3,
+  "notes": [
+    "Focus first on `internal/domain/markets`, `internal/domain/bets`, and `internal/domain/math` plus their repository boundaries."
+  ],
+  "out_of_scope": [
+    "analytics-wide cleanup beyond touched dependencies",
+    "API envelope migration",
+    "rewriting unaffected model consumers"
+  ],
+  "profile": "",
+  "prompt": "Using the WAVE03 boundary seams, remove direct `socialpredict/models` dependencies from the internal markets, bets, and math packages as far as practical. Push translation toward repositories or narrow boundary helpers, preserve existing behavior, and update tests. This wave should make the core business/domain layer less persistence-shaped before the API contract work lands.",
+  "runner_pid": 175726,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-19T12:06:03.116867+00:00",
+  "status": "running",
+  "title": "WAVE03: Decouple markets, bets, and math from the legacy models package",
+  "touched_paths": [
+    "../socialpredict/backend/internal/domain/markets",
+    "../socialpredict/backend/internal/domain/bets",
+    "../socialpredict/backend/internal/domain/math",
+    "../socialpredict/backend/internal/repository/markets",
+    "../socialpredict/backend/internal/repository/bets",
+    "../socialpredict/backend/models"
+  ],
+  "uid": "019d9996-f8a9-736b-93d9-de592fcac393",
+  "verification": {
+    "focus": [
+      "deterministic regression coverage for touched markets, bets, and math flows",
+      "evidence that decoupled packages still behave correctly after boundary changes"
+    ],
+    "owner": "software-action-test-reliability-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

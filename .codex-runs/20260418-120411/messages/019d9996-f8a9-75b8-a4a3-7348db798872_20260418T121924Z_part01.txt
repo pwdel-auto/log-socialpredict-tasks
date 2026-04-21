@@ -1,0 +1,10 @@
+Assumption: `backend/setup/setup.yaml` stays the source asset and `setup.LoadEconomicsConfig` remains the compatibility loader, while `internal/service/config` becomes the primary runtime boundary used by the container and server wiring.
+
+- `task_uid`: `019d9996-f8a9-75b8-a4a3-7348db798872`
+- `task_id`: `W02-001`
+- `status`: `completed`
+- `files_changed`: `backend/internal/service/config/service.go`, `backend/internal/service/config/service_test.go`, `backend/internal/app/container.go`, `backend/internal/app/container_test.go`, `backend/handlers/admin/adduser.go`, `backend/handlers/setup/setuphandler.go`, `backend/handlers/setup/setuphandler_test.go`, `backend/handlers/stats/statshandler.go`, `backend/handlers/stats/statshandler_test.go`, `backend/server/server.go`, `backend/server/server_test.go`
+- `checks_run`: `gofmt -w` on touched files; `gofmt -l` on touched files; `go test -count=1 ./internal/app ./internal/service/config ./handlers/setup ./handlers/stats ./server` run twice with workspace-local `GOMODCACHE`/`GOPATH`; `go vet ./internal/app ./internal/service/config ./handlers/setup ./handlers/stats ./server`; `bash /workspace/spec-socialpredict-tasks/.codex/skills/socialpredict-go-architecture-governance/scripts/run_boundary_checks.sh /workspace/socialpredict`
+- `follow_ups`: repo-wide `go test ./...` and `go vet ./...` were not run because verification stayed on the touched backend packages; the spawned dispatcher concluded without spawning specialist agents; the curated report was updated under `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-75b8-a4a3-7348db798872`
+
+What changed: the app container now owns a typed config service from `internal/service/config`; `server` builds and passes that service through the runtime path; setup/admin/stats handlers consume the service instead of using `backend/setup` globals as the primary integration boundary; focused tests were added for config service behavior, container compatibility, setup handlers, and stats wiring while preserving existing setup values and route response shapes.

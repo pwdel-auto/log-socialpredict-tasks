@@ -1,0 +1,72 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-71b8-a7c0-81a2945b5cb4`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-71b8-a7c0-81a2945b5cb4/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-71b8-a7c0-81a2945b5cb4/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-71b8-a7c0-81a2945b5cb4/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-71b8-a7c0-81a2945b5cb4/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "`backend/docs/openapi.yaml` matches the implemented WAVE04 endpoint behavior for touched auth and envelope-migrated routes.",
+    "Success and error payloads, auth requirements, and targeted tag ownership metadata are aligned with the code.",
+    "Route organization remains stable."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "019d9b66-159d-7381-adbf-5829dff0e1fd",
+    "019d9996-f8a9-71b8-a7c0-81a1c4b0374c"
+  ],
+  "id": "W04-003",
+  "max_attempts": 3,
+  "notes": [
+    "No public path migration in this wave.",
+    "Use the post-wave-4 code as the immediate contract source."
+  ],
+  "out_of_scope": [
+    "public path redesign",
+    "speculative contract changes not implemented in code",
+    "Bets-to-Trades renaming"
+  ],
+  "profile": "",
+  "prompt": "Update `backend/docs/openapi.yaml` so the touched endpoints match the implemented WAVE04 auth and `{ ok, result, reason }` response behavior. Align success/error payloads, auth requirements, and targeted tag ownership metadata such as ambiguous market-position tagging. Keep route organization stable; this is contract alignment, not public path redesign.",
+  "runner_pid": 214795,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-19T20:37:09.232084+00:00",
+  "status": "running",
+  "title": "WAVE04: Align OpenAPI and tag ownership with the implemented API behavior",
+  "touched_paths": [
+    "../socialpredict/backend/docs/openapi.yaml",
+    "../socialpredict/backend/docs/API-ISSUES.md",
+    "../socialpredict/backend/server",
+    "../socialpredict/backend/handlers"
+  ],
+  "uid": "019d9996-f8a9-71b8-a7c0-81a2945b5cb4",
+  "verification": {
+    "focus": [
+      "OpenAPI validation evidence for the updated spec",
+      "deterministic confirmation that touched endpoint contracts match the implemented behavior"
+    ],
+    "owner": "software-action-test-reliability-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

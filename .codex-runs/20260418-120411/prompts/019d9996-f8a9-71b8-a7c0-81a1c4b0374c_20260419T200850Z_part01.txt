@@ -1,0 +1,70 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-71b8-a7c0-81a1c4b0374c`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-71b8-a7c0-81a1c4b0374c/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-71b8-a7c0-81a1c4b0374c/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-71b8-a7c0-81a1c4b0374c/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/019d9996-f8a9-71b8-a7c0-81a1c4b0374c/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "`mustChangePassword` is enforced consistently on authenticated user or profile actions other than login and change-password.",
+    "`/v0/login` and `/v0/changepassword` return stable JSON responses aligned with the WAVE04 contract direction.",
+    "The current full-JWT issuance model remains in place."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "019d9996-f8a9-71b8-a7c0-81a0fe4d4ffc"
+  ],
+  "id": "W04-002",
+  "max_attempts": 3,
+  "notes": [
+    "Do not change the broader login workflow beyond what is required for consistent enforcement and JSON response shaping."
+  ],
+  "out_of_scope": [
+    "limited-scope-token redesign",
+    "broader login workflow redesign",
+    "unrelated auth refactors"
+  ],
+  "profile": "",
+  "prompt": "Enforce `mustChangePassword` consistently on authenticated user/profile actions other than login and change-password, and normalize `/v0/login` and `/v0/changepassword` around the WAVE04 JSON response contract. Keep the current full-JWT issuance model on login for now, but return stable JSON envelopes and make change-password success JSON. Add or update tests. The later limited-scope-token redesign stays out of scope.",
+  "runner_pid": 196073,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-19T20:08:50.386973+00:00",
+  "status": "running",
+  "title": "WAVE04: Tighten mustChangePassword enforcement and normalize auth contract responses",
+  "touched_paths": [
+    "../socialpredict/backend/internal/service/auth",
+    "../socialpredict/backend/handlers/users",
+    "../socialpredict/backend/server",
+    "../socialpredict/backend/errors"
+  ],
+  "uid": "019d9996-f8a9-71b8-a7c0-81a1c4b0374c",
+  "verification": {
+    "focus": [
+      "deterministic auth-flow coverage for login, change-password, and blocked authenticated actions",
+      "response-shape verification for touched auth endpoints"
+    ],
+    "owner": "software-action-test-reliability-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}
