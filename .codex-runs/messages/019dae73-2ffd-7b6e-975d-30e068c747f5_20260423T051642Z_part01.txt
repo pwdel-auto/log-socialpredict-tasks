@@ -1,0 +1,10 @@
+Aligned the live markets API surface with the shared failure-reason vocabulary and the current DTOs. The routed handlers now emit stable `ReasonResponse` failures, `POST /v0/markets` returns the correct create DTO shape, `/v0/markets/{id}/projection` reads `amount` and `outcome` from query params, market-bets now use `NOT_FOUND` instead of the legacy synonym, and `backend/docs/openapi.yaml` was updated to match the live markets routes and parse cleanly again.
+
+- `task_uid`: `019dae73-2ffd-7b6e-975d-30e068c747f5`
+- `task_id`: `API-004`
+- `status`: `blocked` by a repo-wide OpenAPI conformance issue. The markets sweep itself is implemented and locally verified, but the required `kin-openapi` wrapper fails on many pre-existing missing `operationId` entries across `backend/docs/openapi.yaml`, so the follow-on Schemathesis sign-off could not be run.
+- `files_changed`: `backend/docs/openapi.yaml`, `backend/handlers/markets/handler.go`, `backend/handlers/markets/failure_helpers.go`, `backend/handlers/markets/marketprojectedprobability.go`, `backend/handlers/markets/dto/requests.go`, `backend/handlers/markets/handler_contract_test.go`, `backend/handlers/bets/betshandler.go`, `backend/handlers/bets/betshandler_test.go`
+- `checks_run`: `go test . ./handlers/markets ./handlers/bets -count=1` twice; `run_boundary_checks.sh`; `check_api_contract_sync.sh`; `run_quality_guardrails.sh`; `run_reliability_suite.sh /workspace/socialpredict ./handlers/markets`; `run_kin_openapi_conformance.sh /workspace/socialpredict`
+- `follow_ups`: add `operationId` values across `backend/docs/openapi.yaml`, then rerun the kin-openapi wrapper and Schemathesis runtime conformance for final API-004 sign-off
+
+Assumption: no live `POST /v0/create` legacy alias exists in the current backend routing, so no alias code or spec entry was added for it.

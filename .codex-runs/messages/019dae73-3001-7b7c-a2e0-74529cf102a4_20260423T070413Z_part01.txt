@@ -1,0 +1,27 @@
+task_uid: `019dae73-3001-7b7c-a2e0-74529cf102a4`  
+task_id: `API-008`  
+status: `completed`
+
+Added deterministic OpenAPI/API conformance regressions and converged the canonical report. The final state has full OpenAPI `operationId` coverage, embedded docs asset validation, route-inventory-versus-spec checks, and a canonical API-002 failure-reason schema enforced by tests. The required verification sign-off was recorded by `software-action-test-reliability-agent`.
+
+files_changed:
+- [openapi.yaml](/workspace/socialpredict/backend/docs/openapi.yaml)
+- [openapi_test.go](/workspace/socialpredict/backend/openapi_test.go)
+- [server.go](/workspace/socialpredict/backend/server/server.go)
+- [server_test.go](/workspace/socialpredict/backend/server/server_test.go)
+- [reasons.go](/workspace/socialpredict/backend/handlers/reasons.go)
+
+checks_run:
+- `gofmt -l /workspace/socialpredict/backend/openapi_test.go /workspace/socialpredict/backend/server/server_test.go /workspace/socialpredict/backend/handlers/reasons.go`
+- `GOCACHE=/workspace/socialpredict/.cache/go-build GOMODCACHE=/workspace/socialpredict/.cache/go-mod go test . -run 'Test(OpenAPI|Embedded)' -count=1`
+- `GOCACHE=/workspace/socialpredict/.cache/go-build GOMODCACHE=/workspace/socialpredict/.cache/go-mod go test ./server -run TestOpenAPISpecMatchesRegisteredRoutes -count=1`
+- `/workspace/spec-socialpredict-tasks/.codex/skills/socialpredict-openapi-kin-conformance/scripts/run_kin_openapi_conformance.sh /workspace/socialpredict`
+- `GOCACHE=/workspace/socialpredict/.cache/go-build GOMODCACHE=/workspace/socialpredict/.cache/go-mod go test . ./server -run 'Test(OpenAPI|Embedded)' -count=1` twice
+- `GOCACHE=/workspace/socialpredict/.cache/go-build GOMODCACHE=/workspace/socialpredict/.cache/go-mod go vet ./...`
+- `GOCACHE=/workspace/socialpredict/.cache/go-build GOMODCACHE=/workspace/socialpredict/.cache/go-mod RUNS=2 ENABLE_RACE=0 /workspace/spec-socialpredict-tasks/.codex/skills/socialpredict-go-testing-reliability/scripts/run_reliability_suite.sh /workspace/socialpredict ./server`
+
+follow_ups:
+- none
+
+assumptions:
+- Completed on top of the existing in-flight API sweep worktree state already present in `/workspace/socialpredict`.

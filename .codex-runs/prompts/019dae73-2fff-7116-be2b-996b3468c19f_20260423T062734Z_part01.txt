@@ -1,0 +1,77 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/019dae73-2fff-7116-be2b-996b3468c19f`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/019dae73-2fff-7116-be2b-996b3468c19f/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/019dae73-2fff-7116-be2b-996b3468c19f/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/019dae73-2fff-7116-be2b-996b3468c19f/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/019dae73-2fff-7116-be2b-996b3468c19f/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "User, position, portfolio, credit, and financial route schemas match actual public/private DTO boundaries.",
+    "Authenticated user routes enforce password-change gating consistently except for intended exempt flows.",
+    "Focused tests cover representative public profile, private profile, mutation, position, and financial/credit responses."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "019dae73-2ffc-7384-8478-1140bc1d7f63",
+    "019dae73-2ffe-7cae-a31d-e314caba370f"
+  ],
+  "id": "API-006",
+  "max_attempts": 3,
+  "notes": [
+    "Public versus private model boundaries are a hard invariant.",
+    "Reuse the API-002 public reason vocabulary; if user/account behavior needs a new public reason, route it through contract/error review rather than creating a route-local synonym.",
+    "Known historical handlers/users failures should be rechecked and classified instead of hidden.",
+    "Keep transaction/accounting behavior integer-first and domain-owned."
+  ],
+  "out_of_scope": [
+    "broad account model redesign",
+    "raw persistence model exposure",
+    "frontend profile changes"
+  ],
+  "profile": "",
+  "prompt": "Sweep user-facing authenticated and public API routes after API-002 has established the initial public `reason` vocabulary, including profile updates, public/private profile payloads, personal links, emoji/display metadata, user positions, portfolio, credit, financial summaries, user markets, and transaction-visible behavior. Preserve public versus private response boundaries, must-change-password enforcement, and domain-owned user business rules. Reuse the shared reason vocabulary for validation, auth, password-change, not-found, and user/account business-rule outcomes. Update OpenAPI and focused tests to match implemented behavior.",
+  "runner_pid": 95301,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-23T06:27:34.862372+00:00",
+  "status": "running",
+  "title": "W04 API: Align users, positions, portfolio, credit, and financial routes",
+  "touched_paths": [
+    "../socialpredict/backend/handlers/users",
+    "../socialpredict/backend/handlers/positions",
+    "../socialpredict/backend/internal/domain/users",
+    "../socialpredict/backend/internal/domain/analytics",
+    "../socialpredict/backend/internal/repository/users",
+    "../socialpredict/backend/docs/openapi.yaml"
+  ],
+  "uid": "019dae73-2fff-7116-be2b-996b3468c19f",
+  "verification": {
+    "focus": [
+      "public/private model boundary preservation",
+      "user route auth and password-change coverage",
+      "OpenAPI schema parity for touched user-facing endpoints"
+    ],
+    "owner": "software-action-test-reliability-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

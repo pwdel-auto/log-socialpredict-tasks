@@ -1,0 +1,77 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/019dae73-3002-782c-bdeb-569256ff5db8`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/019dae73-3002-782c-bdeb-569256ff5db8/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/019dae73-3002-782c-bdeb-569256ff5db8/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/019dae73-3002-782c-bdeb-569256ff5db8/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/019dae73-3002-782c-bdeb-569256ff5db8/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "Runtime API conformance is run against a local backend or the exact blocker is documented with all deterministic checks completed.",
+    "Swagger/OpenAPI artifacts parse, validate, embed, and serve correctly for the updated contract.",
+    "`API-ISSUES.md` reflects current implemented behavior and preserves only real deferred decisions such as limited-scope token redesign, public route reorganization, and bets-to-trades rename."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "019dae73-3001-7b7c-a2e0-74529cf102a4"
+  ],
+  "id": "API-009",
+  "max_attempts": 3,
+  "notes": [
+    "Use `socialpredict-local-backend-runtime` before Schemathesis if no backend is already running.",
+    "Keep final docs grounded in implemented behavior, not aspirational redesign notes.",
+    "Verify no endpoint-area sweep introduced undocumented route-local synonyms for shared public reasons.",
+    "This is the final stop-and-review point for the API sweep queue."
+  ],
+  "out_of_scope": [
+    "production deployment",
+    "new standalone services",
+    "client SDK generation",
+    "deferred token or route redesigns"
+  ],
+  "profile": "",
+  "prompt": "Perform the final API sweep validation. Start or use a local non-Docker backend runtime when available, run scoped Schemathesis/runtime conformance after deterministic OpenAPI checks pass, verify Swagger UI serves the updated contract, verify public `reason` vocabulary consistency from API-002 through the endpoint sweeps, and reconcile `backend/docs/API-ISSUES.md` so it lists only genuinely deferred decisions. Use the verifier agent for diff sanity checks and final validation evidence.",
+  "runner_pid": 134252,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-23T07:23:22.129465+00:00",
+  "status": "running",
+  "title": "W04 API: Run runtime API conformance, reconcile Swagger docs, and verify sweep completion",
+  "touched_paths": [
+    "../socialpredict/backend/docs/openapi.yaml",
+    "../socialpredict/backend/docs/API-ISSUES.md",
+    "../socialpredict/backend/openapi_embed.go",
+    "../socialpredict/backend/openapi_test.go",
+    "../socialpredict/backend/server",
+    "../socialpredict/backend/handlers"
+  ],
+  "uid": "019dae73-3002-782c-bdeb-569256ff5db8",
+  "verification": {
+    "focus": [
+      "final OpenAPI and Swagger validation",
+      "runtime conformance evidence or exact runtime blocker",
+      "diff sanity and architecture invariant preservation"
+    ],
+    "owner": "software-action-verifier-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

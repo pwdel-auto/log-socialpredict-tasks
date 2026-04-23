@@ -1,0 +1,27 @@
+Spawned `software-action-dispatcher-agent` as requested. Its specialist rollup surfaced the last remaining blocker in `/v0/userposition/{marketId}`; I fixed that, completed the user-route/OpenAPI sweep, reran the focused checks, and updated the canonical report at `/workspace/socialpredict/.codex-reports/tasks/019dae73-2fff-7116-be2b-996b3468c19f`.
+
+`task_uid`: `019dae73-2fff-7116-be2b-996b3468c19f`  
+`task_id`: `API-006`  
+`status`: `completed`
+
+`files_changed`:
+- `backend/handlers/failurereason/{failurereason.go, failurereason_test.go}`
+- `backend/handlers/positions/{dto.go, positionshandler.go, positionshandler_test.go}`
+- `backend/handlers/users/{changepassword.go, financial.go, profile_helpers.go, publicuser.go, publicuser_test.go, userpositiononmarkethandler.go, userpositiononmarkethandler_test.go}`
+- `backend/handlers/users/credit/{usercredit.go, usercredit_test.go}`
+- `backend/handlers/users/privateuser/{privateuser.go, privateuser_test.go}`
+- `backend/handlers/users/publicuser/{portfolio.go, portfolio_test.go}`
+- `backend/docs/openapi.yaml`
+
+`checks_run`:
+- `GOMODCACHE=/workspace/.cache/socialpredict-gomod GOPATH=/workspace/.cache/socialpredict-gopath GOCACHE=/workspace/.cache/socialpredict-gobuild go test ./handlers/failurereason ./handlers/users ./handlers/users/credit ./handlers/users/publicuser ./handlers/users/privateuser ./handlers/positions ./server .`
+- `GOMODCACHE=/workspace/.cache/socialpredict-gomod GOPATH=/workspace/.cache/socialpredict-gopath GOCACHE=/workspace/.cache/socialpredict-gobuild go test ./handlers/users -run Test(GetPublicUserHandlerReturnsPublicUser|GetPublicUserHandlerNotFound|GetPublicUserHandlerInternalError|GetUserFinancialHandlerSuccess|GetUserFinancialHandlerUserNotFound|GetUserFinancialHandlerInternalError|ChangeDescriptionHandler_InvalidTokenReturnsFailureEnvelope|ChangeDescriptionHandler_SuccessReturnsEnvelope|WriteProfileError_SanitizesFailureReasons|ChangePasswordHandler_InvalidTokenReturnsFailureEnvelope|ChangePasswordHandler_SuccessResponseEnvelope|UserMarketPositionHandlerReturnsUserPosition|UserMarketPositionHandlerUnauthorizedWithoutToken)$`
+- `GOMODCACHE=/workspace/.cache/socialpredict-gomod GOPATH=/workspace/.cache/socialpredict-gopath GOCACHE=/workspace/.cache/socialpredict-gobuild go test ./handlers/failurereason ./handlers/users/credit ./handlers/users/publicuser ./handlers/users/privateuser ./handlers/positions ./server .`
+- `GOMODCACHE=/workspace/.cache/socialpredict-gomod GOPATH=/workspace/.cache/socialpredict-gopath GOCACHE=/workspace/.cache/socialpredict-gobuild /workspace/spec-socialpredict-tasks/.codex/skills/socialpredict-go-architecture-governance/scripts/run_boundary_checks.sh /workspace/socialpredict`
+- `BASE_REF=main GOMODCACHE=/workspace/.cache/socialpredict-gomod GOPATH=/workspace/.cache/socialpredict-gopath GOCACHE=/workspace/.cache/socialpredict-gobuild /workspace/spec-socialpredict-tasks/.codex/skills/socialpredict-api-contract-drift-control/scripts/check_api_contract_sync.sh /workspace/socialpredict main`
+- `BASE_REF=main GOMODCACHE=/workspace/.cache/socialpredict-gomod GOPATH=/workspace/.cache/socialpredict-gopath GOCACHE=/workspace/.cache/socialpredict-gobuild /workspace/spec-socialpredict-tasks/.codex/skills/socialpredict-go-code-quality-guardrails/scripts/run_quality_guardrails.sh /workspace/socialpredict main`
+
+`follow_ups`:
+- Broad `socialpredict/handlers/users` still has a pre-existing unrelated failure: `TestEmojiValidation/Text_with_HTML` expects HTML-tagged emoji text to pass, while the current sanitizer rejects it as invalid emoji format.
+
+Assumption made: the overlapping dirty worktree edits under the API-006 touched paths were part of this queued task, so I preserved them and finished on top rather than reverting anything.
