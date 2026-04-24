@@ -1,0 +1,10 @@
+Updated the canonical report summary at [summary.json](/workspace/socialpredict/.codex-reports/tasks/019dae73-2ffe-7cae-a31d-e314caba370f/summary.json). I treated unrelated existing worktree drift as pre-existing context and kept the bets slice scoped to contract/test alignment.
+
+- `task_uid`: `019dae73-2ffe-7cae-a31d-e314caba370f`
+- `task_id`: `API-005`
+- `status`: `completed`
+- `files_changed`: [buypositionhandler_test.go](/workspace/socialpredict/backend/handlers/bets/buying/buypositionhandler_test.go), [sellpositionhandler_test.go](/workspace/socialpredict/backend/handlers/bets/selling/sellpositionhandler_test.go), [openapi.yaml](/workspace/socialpredict/backend/docs/openapi.yaml)
+- `checks_run`: `go test ./handlers/bets/... ./internal/domain/bets -count=1 -vet=off` x2, `go test ./... -run TestOpenAPISpecValidates -count=1`, `go vet ./handlers/bets/... ./internal/domain/bets`, `run_boundary_checks.sh /workspace/socialpredict`, `check_api_contract_sync.sh /workspace/socialpredict HEAD`, `run_kin_openapi_conformance.sh /workspace/socialpredict`, scoped Schemathesis on `listMarketBets|placeBet|sellPosition` passed with a non-blocking warning
+- `follow_ups`: no blocker remains for API-005; optional only: inspect the Schemathesis warning if you want tighter request-schema constraints on the three bets operations
+
+What changed: the bets OpenAPI surface now matches the implemented market-bets payload shape and visible statuses, including auth-visible `404` cases and middleware-visible `429 text/plain` responses, and the buy/sell handler tests now cover `PASSWORD_CHANGE_REQUIRED` and `USER_NOT_FOUND` alongside the shared business-rule reasons.

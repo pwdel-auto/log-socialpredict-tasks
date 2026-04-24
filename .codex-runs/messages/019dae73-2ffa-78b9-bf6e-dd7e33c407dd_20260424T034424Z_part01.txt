@@ -1,0 +1,19 @@
+task_uid: `019dae73-2ffa-78b9-bf6e-dd7e33c407dd`  
+task_id: `API-001`  
+status: `completed`
+
+files_changed: [openapi.yaml](/workspace/socialpredict/backend/docs/openapi.yaml:150), [API-ISSUES.md](/workspace/socialpredict/backend/docs/API-ISSUES.md:17)
+
+checks_run:
+- Route inventory comparison: all documented paths are live; only `/swagger`, `/swagger/`, and `/v0/marketprojection/{marketId}/{amount}/{outcome}/` remain undocumented live routes.
+- `TMPDIR=/workspace/socialpredict/.codex-tmp GOCACHE=/workspace/socialpredict/.codex-cache/gocache GOMODCACHE=/workspace/socialpredict/.codex-cache/gomodcache bash /workspace/spec-socialpredict-tasks/.codex/skills/socialpredict-api-contract-drift-control/scripts/check_api_contract_sync.sh /workspace/socialpredict` passed.
+- `TMPDIR=/workspace/socialpredict/.codex-tmp GOCACHE=/workspace/socialpredict/.codex-cache/gocache GOMODCACHE=/workspace/socialpredict/.codex-cache/gomodcache bash /workspace/spec-socialpredict-tasks/.codex/skills/socialpredict-openapi-kin-conformance/scripts/run_kin_openapi_conformance.sh /workspace/socialpredict` loaded and validated the spec, then stopped on 41 pre-existing missing `operationId` findings.
+
+follow_ups:
+- Decide whether `/swagger`, `/swagger/`, and the trailing-slash `/v0/marketprojection/{marketId}/{amount}/{outcome}/` alias belong in the canonical OpenAPI surface.
+- Reconcile `bearerAuth` annotations with the current public-read behavior on Config, Metrics, Markets read endpoints, and public Users read endpoints.
+- Fix the `/v0/markets/{id}/projection` route/handler mismatch and the ignored `created_by` query parameter on `GET /v0/markets`.
+- Normalize remaining plaintext error/status behavior on Metrics, Markets, and Users routes, or document those responses more explicitly.
+- Add missing `operationId` fields or relax that kin-openapi helper requirement.
+
+The canonical report summary and logs under `/workspace/socialpredict/.codex-reports/tasks/019dae73-2ffa-78b9-bf6e-dd7e33c407dd` were updated for this run. Dispatcher and reviewer agents were spawned as requested; the reviewer-agent sign-off did not return before shutdown, so the report records the local validation evidence instead.

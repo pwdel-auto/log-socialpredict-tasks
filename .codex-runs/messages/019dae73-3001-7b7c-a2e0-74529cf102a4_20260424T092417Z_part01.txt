@@ -1,0 +1,8 @@
+Scoped API-008 conformance guards are in place. I added embedded OpenAPI/Swagger asset checks, a source-level route-to-OpenAPI parity test, and a shared public `reason` vocabulary export plus `ReasonResponse.reason` enum lock. I kept the small `server` helper extraction because it removes duplicated test router setup and stayed green under the scoped verification pass.
+
+- task_uid: `019dae73-3001-7b7c-a2e0-74529cf102a4`
+- task_id: `API-008`
+- status: `completed`
+- files_changed: [openapi_test.go](/workspace/socialpredict/backend/openapi_test.go), [envelope.go](/workspace/socialpredict/backend/handlers/envelope.go), [openapi.yaml](/workspace/socialpredict/backend/docs/openapi.yaml), [server.go](/workspace/socialpredict/backend/server/server.go), [server_test.go](/workspace/socialpredict/backend/server/server_test.go)
+- checks_run: `run_kin_openapi_conformance.sh /workspace/socialpredict`; `gofmt -w` on touched Go files; `go test -count=1 . ./server ./handlers` twice with repo-local Go caches; `go vet . ./server ./handlers`; `run_reliability_suite.sh /workspace/socialpredict ./server`
+- follow_ups: no API-008 blocker remains. Earlier repo-wide `./...` reliability reporting still showed an unrelated existing failure in `socialpredict/handlers/users`, `TestEmojiValidation/Text_with_HTML`, with a concurrent SQLite log from `internal/repository/users/repository.go:227`.

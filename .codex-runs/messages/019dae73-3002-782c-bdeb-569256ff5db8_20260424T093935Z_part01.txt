@@ -1,0 +1,25 @@
+task_uid: `019dae73-3002-782c-bdeb-569256ff5db8`  
+task_id: `API-009`  
+status: `completed`
+
+Updated [openapi.yaml](/workspace/socialpredict/backend/docs/openapi.yaml) and [API-ISSUES.md](/workspace/socialpredict/backend/docs/API-ISSUES.md). The final sweep rerun reconciled the served `/openapi.yaml` contract, market search query docs, route-level `429` docs for the exercised public routes, public user GET auth/error docs, and the `ReasonResponse` description. `API-ISSUES.md` now keeps only the real deferred decisions. The canonical report is current in [summary.json](/workspace/socialpredict/.codex-reports/tasks/019dae73-3002-782c-bdeb-569256ff5db8/summary.json), and verifier approval is recorded in the task report.
+
+files_changed:
+- [openapi.yaml](/workspace/socialpredict/backend/docs/openapi.yaml)
+- [API-ISSUES.md](/workspace/socialpredict/backend/docs/API-ISSUES.md)
+
+checks_run:
+- `go test . -run 'Test(OpenAPISpecValidates|EmbeddedOpenAPISpecMatchesDocument|EmbeddedSwaggerUIAssetsPresent|OpenAPIOperationsMatchServerRoutes|ReasonResponseEnumMatchesSharedFailureVocabulary)' -count=1`
+- `go test ./server -run 'Test(ServerRegistersAndServesCoreRoutes|ServerSetupRoutesUseInjectedConfigService|ServerBlocksProtectedProfileRoutesWhenPasswordChangeRequired)' -count=1`
+- `run_kin_openapi_conformance.sh /workspace/socialpredict`
+- `git diff --check -- backend/docs/openapi.yaml backend/docs/API-ISSUES.md`
+- local runtime restart plus `/health`
+- exact `/openapi.yaml` served-vs-repo parity check
+- Swagger UI checks for `/swagger/` and `swagger-initializer.js`
+- manual Schemathesis `--url` pass on 15 selected public/docs operations, evidence in [schemathesis-opid-20260424T100614Z](/workspace/socialpredict/.codex-reports/tasks/019dae73-3002-782c-bdeb-569256ff5db8/schemathesis-opid-20260424T100614Z)
+
+follow_ups:
+- Non-blocking: `/workspace/spec-socialpredict-tasks/.codex/skills/socialpredict-schemathesis-runtime-conformance/scripts/run_schemathesis_runtime_conformance.sh` still uses obsolete `schemathesis --base-url`; installed `v4.15.2` requires `--url`.
+- Non-blocking: Schemathesis still reports non-fatal `schema-validation-mismatch` warnings on 8 read-only operations: `getGlobalLeaderboard`, `listActiveMarkets`, `listClosedMarkets`, `listResolvedMarkets`, `searchMarkets`, `listAllMarketStatuses`, `getPlatformStats`, `getSystemMetrics`.
+
+Assumption: unrelated dirty files already present in the target worktree were left untouched.
