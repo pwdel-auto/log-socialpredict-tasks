@@ -1,0 +1,1 @@
+Read /workspace/spec-socialpredict-tasks/AGENTS.md and print one line: OK.

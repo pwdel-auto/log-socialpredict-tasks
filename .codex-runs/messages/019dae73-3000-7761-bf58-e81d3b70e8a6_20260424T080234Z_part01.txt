@@ -1,0 +1,27 @@
+Implemented API-007 end to end. Stats, system metrics, global and market leaderboards, and `/v0/home` now use the shared success/failure envelopes; CMS home response coverage was tightened; and `backend/docs/openapi.yaml` was synchronized with the live route behavior, including the public-route auth drift on stats/system/global. The only operational adjustment was rerunning the broad Go checks with `GOFLAGS=-p=1` after initial compiler OOM kills; the reruns passed.
+
+task_uid: `019dae73-3000-7761-bf58-e81d3b70e8a6`
+task_id: `API-007`
+status: `completed`
+
+files_changed:
+- `backend/docs/openapi.yaml`
+- `backend/handlers/home.go`, `backend/handlers/home_test.go`
+- `backend/handlers/stats/statshandler.go`, `backend/handlers/stats/statshandler_test.go`
+- `backend/handlers/metrics/getsystemmetrics.go`, `backend/handlers/metrics/getsystemmetrics_test.go`
+- `backend/handlers/metrics/getgloballeaderboard.go`, `backend/handlers/metrics/getgloballeaderboard_test.go`
+- `backend/handlers/markets/handler.go`, `backend/handlers/markets/handler_status_leaderboard_test.go`
+- `backend/handlers/cms/homepage/http/handler.go`, `backend/handlers/cms/homepage/http/handler_test.go`
+- `backend/server/server_contract_test.go`
+
+checks_run:
+- `gofmt -l backend/handlers/stats/statshandler.go backend/handlers/stats/statshandler_test.go backend/handlers/home.go backend/handlers/home_test.go backend/handlers/metrics/getsystemmetrics.go backend/handlers/metrics/getsystemmetrics_test.go backend/handlers/metrics/getgloballeaderboard.go backend/handlers/metrics/getgloballeaderboard_test.go backend/handlers/cms/homepage/http/handler.go backend/handlers/cms/homepage/http/handler_test.go backend/handlers/markets/handler.go backend/handlers/markets/handler_status_leaderboard_test.go backend/server/server_contract_test.go`
+- `env GOFLAGS=-p=1 GOCACHE=/workspace/socialpredict/.cache/go-build GOMODCACHE=/workspace/socialpredict/.cache/gomod go test ./handlers ./handlers/stats ./handlers/metrics ./handlers/cms/homepage/http ./handlers/markets ./handlers/positions ./server ./internal/service/config ./internal/domain/analytics -count=1`
+- `env GOFLAGS=-p=1 GOCACHE=/workspace/socialpredict/.cache/go-build GOMODCACHE=/workspace/socialpredict/.cache/gomod go vet ./handlers ./handlers/stats ./handlers/metrics ./handlers/cms/homepage/http ./handlers/markets ./server ./internal/service/config ./internal/domain/analytics`
+- `env GOCACHE=/workspace/socialpredict/.cache/go-build GOMODCACHE=/workspace/socialpredict/.cache/gomod /workspace/spec-socialpredict-tasks/.codex/skills/socialpredict-go-architecture-governance/scripts/run_boundary_checks.sh /workspace/socialpredict`
+- `env GOFLAGS=-p=1 GOCACHE=/workspace/socialpredict/.cache/go-build GOMODCACHE=/workspace/socialpredict/.cache/gomod BASE_REF=main /workspace/spec-socialpredict-tasks/.codex/skills/socialpredict-api-contract-drift-control/scripts/check_api_contract_sync.sh /workspace/socialpredict main`
+- `env GOFLAGS=-p=1 GOCACHE=/workspace/socialpredict/.cache/go-build GOMODCACHE=/workspace/socialpredict/.cache/gomod RUNS=2 ENABLE_RACE=0 /workspace/spec-socialpredict-tasks/.codex/skills/socialpredict-go-testing-reliability/scripts/run_reliability_suite.sh /workspace/socialpredict ./server`
+- `env GOCACHE=/workspace/socialpredict/.cache/go-build GOMODCACHE=/workspace/socialpredict/.cache/gomod /workspace/spec-socialpredict-tasks/.codex/skills/socialpredict-openapi-kin-conformance/scripts/run_kin_openapi_conformance.sh /workspace/socialpredict`
+
+follow_ups:
+- Repo-wide kin-openapi still has unrelated `operationId` debt on untargeted endpoints outside API-007 scope.

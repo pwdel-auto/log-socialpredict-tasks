@@ -1,0 +1,76 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/019dae73-2ffe-7cae-a31d-e314caba370f`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/019dae73-2ffe-7cae-a31d-e314caba370f/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/019dae73-2ffe-7cae-a31d-e314caba370f/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/019dae73-2ffe-7cae-a31d-e314caba370f/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/019dae73-2ffe-7cae-a31d-e314caba370f/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "Bet buy/sell and market-bets OpenAPI operations match implemented requests, responses, auth, and status codes.",
+    "Business-rule outcomes from the bets domain map to stable route-visible reasons without raw internal leakage.",
+    "Focused tests cover successful buy/sell plus representative failure cases that clients depend on."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "019dae73-2ffd-7b6e-975d-30e068c747f5"
+  ],
+  "id": "API-005",
+  "max_attempts": 3,
+  "notes": [
+    "Preserve 32-bit safety guards when converting `uint64` to platform-sized `uint`.",
+    "Reuse the API-002 public reason vocabulary for bets business-rule outcomes; do not introduce endpoint-local synonyms for shared failures like insufficient balance, invalid outcome, market closed, or no position.",
+    "Keep time-based market enforcement on the server side.",
+    "Do not rename tags, paths, or schemas from bets to trades in this wave."
+  ],
+  "out_of_scope": [
+    "bets-to-trades rename",
+    "market economics redesign",
+    "frontend/client migration"
+  ],
+  "profile": "",
+  "prompt": "Sweep the bets API surface after API-002 has established the initial public `reason` vocabulary: buy/place, sell, user betting constraints, market bet history, and related math-backed response behavior. Preserve bets terminology as the current public contract. Align business-rule failures such as insufficient balance, invalid outcome, market closed, no position, and dust-cap outcomes with the shared stable public reasons and OpenAPI schemas. Add or update focused API and domain tests where contract drift is found.",
+  "runner_pid": 265381,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-24T07:45:58.009997+00:00",
+  "status": "running",
+  "title": "W04 API: Align bets buy/sell routes and market-bets contract",
+  "touched_paths": [
+    "../socialpredict/backend/handlers/bets",
+    "../socialpredict/backend/handlers/math",
+    "../socialpredict/backend/internal/domain/bets",
+    "../socialpredict/backend/internal/domain/math",
+    "../socialpredict/backend/internal/repository/bets",
+    "../socialpredict/backend/docs/openapi.yaml"
+  ],
+  "uid": "019dae73-2ffe-7cae-a31d-e314caba370f",
+  "verification": {
+    "focus": [
+      "bets route/spec parity",
+      "market math and accounting behavior preservation",
+      "business-rule error reason coverage"
+    ],
+    "owner": "software-action-api-conformance-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

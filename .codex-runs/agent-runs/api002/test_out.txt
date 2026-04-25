@@ -1,0 +1,87 @@
+**Recommendation**
+
+Environment-blocked review. I could not inspect the current backend files, tests, or existing report artifacts because every local shell read failed before command execution. Based on the task scope alone, the safest recommendation is to keep the `reason` vocabulary boundary-owned and narrow: define a small shared set of public failure reasons, map existing typed/domain outcomes to that vocabulary at the HTTP boundary, add focused handler/transport tests for response shape and reason stability, and document only the public contract visible to clients.
+
+**Important Risks / Edge Cases**
+
+- Public `reason` values can become an accidental compatibility surface; adding too many or leaking internal/domain-specific causes will create long-term contract debt.
+- Handler/domain boundary drift is the main design risk: if handlers start classifying business cases directly instead of mapping already-typed outcomes, this crosses the repo’s boundary rule.
+- Multiple endpoints may already expose inconsistent error payloads; introducing `reason` in only some routes can create partial-contract confusion.
+- Tests may overfit exact message text instead of asserting stable `reason` values and status-code pairing.
+- OpenAPI drift is likely if response examples/schemas are updated without matching route behavior, or vice versa.
+
+**Likely Affected Areas**
+
+These are inference-based from the repo map and task scope, not confirmed by direct inspection:
+
+- `backend/errors/` for any HTTP-facing error envelope or serialization helper.
+- `backend/handlers/` and subpackages where public error responses are written.
+- `backend/server/` only if there is centralized transport/error wiring.
+- `backend/internal/domain/` and `backend/internal/service/` only indirectly, to confirm handlers are mapping typed outcomes rather than embedding policy.
+- `backend/docs/openapi.yaml` and possibly `backend/docs/API-ISSUES.md` for contract documentation.
+- Focused tests in handler, server, or error-package test files covering public error payloads.
+
+**Follow-on Delegation**
+
+- `openapi-contract-agent`: yes. This task explicitly touches public API contract vocabulary and route-visible docs.
+- `architecture-agent`: likely yes. Boundary ownership of the mapping is a core policy concern.
+- `verifier-agent`: yes, near the end, once implementation exists.
+- `coding-best-practices-agent`: optional, only if the implementation introduces scattered constants/helpers.
+
+**Cross-Specialist Policy Scope**
+
+Yes. This change likely crosses:
+- `openapi-contract-agent` policy scope, because the public error vocabulary must be documented consistently with runtime behavior.
+- `architecture-agent` policy scope, because classification/mapping placement must stay at the boundary without moving business logic into handlers.
+
+**Facts / Checks To Append To Canonical Task Report**
+
+Direct facts:
+- The review pass made no code changes.
+- Direct repository inspection was blocked by the execution environment before any command could run.
+- No current verification state, file contents, or existing tests could be confirmed from this session.
+
+Checks that should be recorded as pending for the implementation/review pass:
+- Confirm a single public error envelope shape for routes in scope.
+- Confirm `reason` values are asserted by tests independently from human-readable messages.
+- Confirm status-code to `reason` mapping is consistent across routes for the same failure class.
+- Confirm OpenAPI documents the same `reason` vocabulary actually emitted by handlers.
+- Confirm any shared constants/helpers stay transport-owned and do not pull business policy into handlers.
+
+**Decision Record Suggestions**
+
+Dispatcher should append or mirror a decision like:
+- Establish `reason` as a small public API vocabulary for common failure classes only; do not expose domain-internal causes or per-endpoint bespoke values.
+- Keep mapping from internal typed outcomes to public `reason` values at the HTTP/transport boundary or boundary-owned helper layer.
+- Treat `reason` values as contract-stable and test them directly.
+- Require OpenAPI or route-visible documentation to enumerate/document the vocabulary used by the implemented routes.
+
+**Verification Command Log**
+
+1. `sed -n '1,220p' /workspace/spec-socialpredict-tasks/.codex/agents/software-action-test-reliability-agent.toml`
+   - Result: failed before execution
+   - Output: `bwrap: No permissions to create a new namespace, likely because the kernel does not allow non-privileged user namespaces.`
+2. `sed -n '1,220p' /workspace/spec-socialpredict-tasks/.codex/skills/socialpredict-go-testing-reliability/SKILL.md`
+   - Result: failed before execution
+   - Output: same `bwrap` namespace error
+3. `rg -n "reason|failure class|error reason|invalid_request|unauthorized|forbidden|not_found|conflict|rate_limit|unprocessable|reason vocabulary" /workspace/socialpredict/backend --glob '!**/vendor/**'`
+   - Result: failed before execution
+   - Output: same `bwrap` namespace error
+4. `pwd`
+   - Result: failed before execution
+   - Output: same `bwrap` namespace error
+
+**Pass / Fail Output Summary**
+
+- `FAIL`: local inspection commands could not execute.
+- `FAIL`: current verification state could not be directly established.
+- `PASS`: no code changes were made, consistent with the coordination/review-only instruction.
+
+**Gap List For Uncovered Behavior**
+
+- Whether a shared public error envelope already exists.
+- Which routes currently emit `reason`, if any.
+- Whether there are already typed domain/service errors suitable for boundary mapping.
+- Which tests already cover error payloads and whether they assert message text vs. stable fields.
+- Whether OpenAPI currently defines error schemas/examples with `reason`.
+- Whether any existing helper package already owns transport error normalization.

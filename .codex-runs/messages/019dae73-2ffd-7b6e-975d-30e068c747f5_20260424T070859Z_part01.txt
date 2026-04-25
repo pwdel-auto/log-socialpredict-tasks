@@ -1,0 +1,32 @@
+Markets handler/spec parity is aligned for the API-004 sweep. I kept handlers thin, moved market failure mapping onto the shared sanitized reason envelope, fixed the main projection route to use query parameters, made list filtering honor `created_by` with status, aligned repository status translation for `closed`, and updated focused tests plus the OpenAPI contract to match the implemented behavior.
+
+Assumptions: the repo already had unrelated uncommitted changes, so I limited this task to the markets-owned paths below and preserved existing legacy alias behavior rather than redesigning routing. Runtime API sign-off used kin-openapi plus direct public-route spot checks because the bundled Schemathesis wrapper is stale.
+
+- `task_uid`: `019dae73-2ffd-7b6e-975d-30e068c747f5`
+- `task_id`: `API-004`
+- `status`: `completed`
+
+- `files_changed`:
+  - `backend/docs/openapi.yaml`
+  - `backend/handlers/markets/dto/requests.go`
+  - `backend/handlers/markets/failure_helpers.go`
+  - `backend/handlers/markets/handler.go`
+  - `backend/handlers/markets/handler_contract_test.go`
+  - `backend/handlers/markets/listmarkets.go`
+  - `backend/handlers/markets/marketprojectedprobability.go`
+  - `backend/internal/repository/markets/repository.go`
+  - `backend/internal/repository/markets/repository_test.go`
+
+- `checks_run`:
+  - `go test ./handlers/markets ./internal/repository/markets -count=1`
+  - `/workspace/spec-socialpredict-tasks/.codex/skills/socialpredict-go-testing-reliability/scripts/run_reliability_suite.sh /workspace/socialpredict ./handlers/markets`
+  - `/workspace/spec-socialpredict-tasks/.codex/skills/socialpredict-api-contract-drift-control/scripts/check_api_contract_sync.sh /workspace/socialpredict main`
+  - `/workspace/spec-socialpredict-tasks/.codex/skills/socialpredict-openapi-kin-conformance/scripts/run_kin_openapi_conformance.sh /workspace/socialpredict`
+  - `/workspace/spec-socialpredict-tasks/.codex/skills/socialpredict-go-code-quality-guardrails/scripts/run_quality_guardrails.sh /workspace/socialpredict main`
+  - `/workspace/spec-socialpredict-tasks/.codex/skills/socialpredict-local-backend-runtime/scripts/start_local_backend_runtime.sh /workspace/socialpredict check`
+  - `/workspace/spec-socialpredict-tasks/.codex/skills/socialpredict-local-backend-runtime/scripts/start_local_backend_runtime.sh /workspace/socialpredict stop`
+  - `/workspace/spec-socialpredict-tasks/.codex/skills/socialpredict-local-backend-runtime/scripts/start_local_backend_runtime.sh /workspace/socialpredict start`
+  - Runtime curl spot checks for `/v0/markets/active`, `/v0/markets/search`, `/v0/markets/status/paused`, `/v0/markets/1`, `/v0/markets/1/projection`, and `/v0/marketprojection/1/10/YES`
+
+- `follow_ups`:
+  - The bundled Schemathesis wrapper still uses the old `--base-url` flag; update it or run against an isolated backend if strict automated runtime sign-off is required later.

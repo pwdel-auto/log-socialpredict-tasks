@@ -1,0 +1,39 @@
+**Findings**
+1. Fail: the live tree does not contain the claimed API-002 implementation. `git diff main...HEAD -- backend` is empty, and the only live backend worktree changes are [openapi.yaml](/workspace/socialpredict/backend/docs/openapi.yaml:150) and [API-ISSUES.md](/workspace/socialpredict/backend/docs/API-ISSUES.md:17). The previously reported `backend/handlers/reasons.go` and `backend/handlers/failurereason/*` files are absent.
+
+2. The small stable public `reason` vocabulary is not established in code. Shared reasons are still just the limited set in [envelope.go](/workspace/socialpredict/backend/handlers/envelope.go:10), while route-local strings are still emitted from [changepassword.go](/workspace/socialpredict/backend/handlers/users/changepassword.go:23), [profile_helpers.go](/workspace/socialpredict/backend/handlers/users/profile_helpers.go:19), [profile_helpers.go](/workspace/socialpredict/backend/handlers/users/profile_helpers.go:69), [buypositionhandler.go](/workspace/socialpredict/backend/handlers/bets/buying/buypositionhandler.go:17), [sellpositionhandler.go](/workspace/socialpredict/backend/handlers/bets/selling/sellpositionhandler.go:17), and [handler.go](/workspace/socialpredict/backend/handlers/cms/homepage/http/handler.go:13).
+
+3. The contract docs do not document the vocabulary. [openapi.yaml](/workspace/socialpredict/backend/docs/openapi.yaml:1739) still defines `ReasonResponse.reason` as an unconstrained string, and the current doc diff is route inventory/drift work at [openapi.yaml](/workspace/socialpredict/backend/docs/openapi.yaml:150), [openapi.yaml](/workspace/socialpredict/backend/docs/openapi.yaml:423), and [API-ISSUES.md](/workspace/socialpredict/backend/docs/API-ISSUES.md:21), not API-002 reason-vocabulary documentation.
+
+4. Focused validation on the current baseline is mostly green, but [handler_test.go](/workspace/socialpredict/backend/handlers/cms/homepage/http/handler_test.go:109) fails deterministically: `TestAdminUpdate_Success` expects `200` and gets `403 {"ok":false,"reason":"INVALID_TOKEN"}`.
+
+**Validation**
+- Pass/fail summary: fail.
+- Diff matches task: no.
+- Commands run:
+  - `git -C /workspace/socialpredict status --short`
+  - `git -C /workspace/socialpredict diff --stat main...HEAD -- backend`
+  - `git -C /workspace/socialpredict diff --stat -- backend`
+  - `go test ./handlers -count=1` x2
+  - `go test ./handlers/bets/buying -count=1` x2
+  - `go test ./handlers/bets/selling -count=1` x2
+  - `go test ./handlers/positions -count=1` x2
+  - `go test ./handlers/users -run 'Test(ChangePasswordHandler_InvalidTokenReturnsFailureEnvelope|ChangeDescriptionHandler_InvalidTokenReturnsFailureEnvelope|WriteProfileError_SanitizesFailureReasons|WriteProfileError_SanitizesValidationFailure|UserMarketPositionHandlerUnauthorizedWithoutToken)$' -count=1` x2
+  - `go test ./handlers/cms/homepage/http -count=1`
+  - `go test ./handlers/cms/homepage/http -run TestAdminUpdate_Success -count=1`
+  - `go test ./... -run TestOpenAPISpecValidates -count=1`
+  - `check_api_contract_sync.sh /workspace/socialpredict main`
+- Result details:
+  - Focused handler checks passed twice except `./handlers/cms/homepage/http`.
+  - OpenAPI validation passed.
+  - Contract-sync helper passed, but only because it sees no route/handler changes since `main`.
+
+**Follow-up**
+- Recommendation: reopen/reconcile API-002. Recover the missing handler/helper implementation first; do not trust the current `summary.json` as the repo truth.
+- Likely affected areas for re-dispatch: `backend/handlers/envelope.go`, `backend/handlers/users/changepassword.go`, `backend/handlers/users/profile_helpers.go`, `backend/handlers/users/userpositiononmarkethandler.go`, `backend/handlers/positions/positionshandler.go`, `backend/handlers/bets/buying/buypositionhandler.go`, `backend/handlers/bets/selling/sellpositionhandler.go`, `backend/handlers/cms/homepage/http/handler.go`, and `backend/docs/openapi.yaml`.
+- Follow-on delegation needed: yes. This is in `openapi-contract-agent` scope for route-visible contract/docs and `error-handling-agent` scope for shared reason ownership/sanitization. No DB or migration specialist is needed.
+- Remaining blocker/risk: stale canonical report state says the task is complete while the live tree does not. If the missing implementation is recovered, re-run the homepage auth test and update/fix its expectation.
+- Recommended recovery commands:
+  - `git -C /workspace/socialpredict reflog --all --date=iso`
+  - `git -C /workspace/socialpredict log --all -- backend/handlers backend/docs/openapi.yaml`
+- Canonical report updates: appended verifier facts to `conversation.ndjson` seq `4` and a blocking decision to `decisions.ndjson` seq `3`.

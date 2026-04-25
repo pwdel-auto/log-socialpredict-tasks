@@ -1,0 +1,77 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/019dae73-2ffc-7384-8478-1140bc1d7f63`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/019dae73-2ffc-7384-8478-1140bc1d7f63/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/019dae73-2ffc-7384-8478-1140bc1d7f63/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/019dae73-2ffc-7384-8478-1140bc1d7f63/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/019dae73-2ffc-7384-8478-1140bc1d7f63/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "Login and change-password routes match the implemented contract in code, tests, and OpenAPI.",
+    "Must-change-password users are allowed only through intended flows and blocked from other authenticated actions through server-side enforcement.",
+    "Setup and frontend setup routes remain service-backed and their OpenAPI schemas match the actual payloads."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "019dae73-2ffb-7463-bd2c-a85943d8e3ed"
+  ],
+  "id": "API-003",
+  "max_attempts": 3,
+  "notes": [
+    "Design decision DP-006 is binding: enforce must-change-password restrictions without redesigning token issuance.",
+    "Reuse the API-002 public reason vocabulary; if an auth/setup outcome needs a new reason, route it through contract/error review rather than creating an endpoint-local synonym.",
+    "Use `software-action-architecture-agent` for auth boundary review if handler/domain ownership becomes unclear.",
+    "Keep `/v0/setup` and `/v0/setup/frontend` route semantics stable."
+  ],
+  "out_of_scope": [
+    "limited-scope or short-lived token redesign",
+    "changing setup.yaml source values",
+    "deployment or infrastructure changes"
+  ],
+  "profile": "",
+  "prompt": "Sweep the auth-adjacent and setup/bootstrap-visible API surface after the runtime/config service work and after API-002 has established the initial public `reason` vocabulary. Verify and, where needed, fix the implemented behavior and OpenAPI contract for login, change-password, must-change-password enforcement, setup/frontend setup, health/docs exposure, and admin add-user behavior. Preserve the current login token contract while documenting and testing server-side password-change gating for authenticated actions. Reuse the shared reason vocabulary for auth, authorization, validation, password-change, not-found, and internal fallback outcomes instead of inventing route-local reason strings.",
+  "runner_pid": 201590,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-24T05:17:10.503993+00:00",
+  "status": "running",
+  "title": "W04 API: Align auth, password-change, setup, and bootstrap-visible routes",
+  "touched_paths": [
+    "../socialpredict/backend/internal/service/auth",
+    "../socialpredict/backend/handlers/users",
+    "../socialpredict/backend/handlers/setup",
+    "../socialpredict/backend/handlers/admin",
+    "../socialpredict/backend/internal/service/config",
+    "../socialpredict/backend/server",
+    "../socialpredict/backend/docs/openapi.yaml"
+  ],
+  "uid": "019dae73-2ffc-7384-8478-1140bc1d7f63",
+  "verification": {
+    "focus": [
+      "auth and password-change route tests",
+      "setup route contract tests",
+      "OpenAPI updates for touched auth/setup paths"
+    ],
+    "owner": "software-action-test-reliability-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

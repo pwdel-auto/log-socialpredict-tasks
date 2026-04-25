@@ -1,0 +1,79 @@
+**Recommendation**
+
+Do not treat API-002 as verification-complete on the current tree. Reopen the task, refresh the canonical report, and require one follow-on implementation pass before verifier handoff.
+
+- Blocker: `go test ./handlers/cms/homepage/http -count=1` failed twice at [handler_test.go](/workspace/socialpredict/backend/handlers/cms/homepage/http/handler_test.go:65). `TestAdminUpdate_Success` expected `200` and got `403 {"ok":false,"reason":"INVALID_TOKEN"}` against [handler.go](/workspace/socialpredict/backend/handlers/cms/homepage/http/handler.go:53).
+- Blocker: `summary.json` updated `2026-04-24T04:13:04Z` says `backend/handlers/reasons.go` and `backend/handlers/failurereason/*` exist, but those paths are missing in the live repo.
+- High: [openapi.yaml](/workspace/socialpredict/backend/docs/openapi.yaml:1739) still defines `ReasonResponse.reason` as an unconstrained string and contains no concrete reason tokens, so the promised stable public vocabulary is not documented.
+
+**Important Risks / Edge Cases**
+
+- Auth-to-reason mapping is still duplicated and brittle because handlers switch on `authsvc.HTTPError.Message` text in [buypositionhandler.go](/workspace/socialpredict/backend/handlers/bets/buying/buypositionhandler.go:97), [sellpositionhandler.go](/workspace/socialpredict/backend/handlers/bets/selling/sellpositionhandler.go:110), [handler.go](/workspace/socialpredict/backend/handlers/cms/homepage/http/handler.go:114), and [profile_helpers.go](/workspace/socialpredict/backend/handlers/users/profile_helpers.go:84).
+- Boundary reason ownership is still fragmented across [envelope.go](/workspace/socialpredict/backend/handlers/envelope.go:8), [changepassword.go](/workspace/socialpredict/backend/handlers/users/changepassword.go:20), [userpositiononmarkethandler.go](/workspace/socialpredict/backend/handlers/users/userpositiononmarkethandler.go:18), and [positionshandler.go](/workspace/socialpredict/backend/handlers/positions/positionshandler.go:15).
+- Full-package verification remains noisy outside API-002: `go test ./handlers/users -count=1` still fails unrelated tests (`TestEmojiValidation`) and hits a missing `bets` table path.
+
+**Specific Files / Areas Likely Affected**
+
+- Shared boundary envelope/constants: [envelope.go](/workspace/socialpredict/backend/handlers/envelope.go:8)
+- Bet buy/sell auth and failure mapping: [buypositionhandler.go](/workspace/socialpredict/backend/handlers/bets/buying/buypositionhandler.go:17), [sellpositionhandler.go](/workspace/socialpredict/backend/handlers/bets/selling/sellpositionhandler.go:15)
+- Homepage admin auth mapping and failing test: [handler.go](/workspace/socialpredict/backend/handlers/cms/homepage/http/handler.go:53), [handler_test.go](/workspace/socialpredict/backend/handlers/cms/homepage/http/handler_test.go:65)
+- User/profile/password reason mapping: [changepassword.go](/workspace/socialpredict/backend/handlers/users/changepassword.go:20), [profile_helpers.go](/workspace/socialpredict/backend/handlers/users/profile_helpers.go:14), [userpositiononmarkethandler.go](/workspace/socialpredict/backend/handlers/users/userpositiononmarkethandler.go:61)
+- Positions handler constants/tests: [positionshandler.go](/workspace/socialpredict/backend/handlers/positions/positionshandler.go:15), [positionshandler_test.go](/workspace/socialpredict/backend/handlers/positions/positionshandler_test.go:238)
+- API docs: [openapi.yaml](/workspace/socialpredict/backend/docs/openapi.yaml:1739)
+
+**Follow-On Delegation / Policy Scope**
+
+- Follow-on delegation is needed.
+- `software-action-error-handling-agent`: boundary-owned reason constants/helpers and consistent auth error mapping.
+- `software-action-openapi-contract-agent`: publish the stable reason vocabulary in `backend/docs/openapi.yaml`.
+- This does cross another specialist’s explicit policy scope: error taxonomy/boundary mapping and OpenAPI contract ownership. It is not primarily an architecture escalation unless implementation starts pushing reusable transport logic into non-boundary layers.
+
+**Verification Command Log**
+
+- `git -C /workspace/socialpredict status --short`
+  Result: `M backend/docs/API-ISSUES.md`, `M backend/docs/openapi.yaml`
+- `go test ...` with default Go cache
+  Result: failed due `/home/agent/go` permission
+- `go test ...` with `/tmp` cache
+  Result: failed because `/tmp` was full
+- `df -h`
+  Result: `/tmp` 100% full; `/workspace` had 3.5G free
+- Re-ran tests with `GOPATH/GOCACHE/GOMODCACHE` under `/workspace/.cache`
+  Result: usable
+- `go test ./handlers ./handlers/bets/buying ./handlers/bets/selling ./handlers/cms/homepage/http ./handlers/positions ./handlers/users -run 'Test(ChangePasswordHandler_InvalidTokenReturnsFailureEnvelope|ChangeDescriptionHandler_InvalidTokenReturnsFailureEnvelope|WriteProfileError_SanitizesFailureReasons|WriteProfileError_SanitizesValidationFailure|UserMarketPositionHandlerUnauthorizedWithoutToken)$' -count=1` twice
+  Result: `handlers`, `buying`, `selling`, `positions`, focused `users` passed twice; `handlers/cms/homepage/http` failed twice
+- `go test ./... -run TestOpenAPISpecValidates -count=1`
+  Result: pass
+- `go vet ./handlers ./handlers/bets/buying ./handlers/bets/selling ./handlers/cms/homepage/http ./handlers/positions ./handlers/users`
+  Result: pass
+- `go test ./handlers/users -count=1`
+  Result: fails unrelated pre-existing tests/noise
+- Presence check for `backend/handlers/reasons.go` and `backend/handlers/failurereason/*`
+  Result: all missing
+
+**Pass/Fail Summary**
+
+- Pass: targeted buy/sell/positions/focused-users reason-envelope tests are stable across two runs.
+- Fail: homepage HTTP package is a deterministic blocker.
+- Pass: OpenAPI validation test and targeted `go vet`.
+- Fail/noisy: full `handlers/users` is still not a clean package gate.
+
+**Gap List**
+
+- No shared `handlers/reasons.go` or `handlers/failurereason` layer to verify.
+- No OpenAPI enum/example/description for the public `reason` vocabulary.
+- No focused coverage for `ADMIN_REQUIRED`, `PASSWORD_CHANGE_REQUIRED`, `USER_NOT_FOUND`, and `AUTH_SERVICE_UNAVAILABLE` as a shared cross-handler contract.
+- No contract test proving identical auth failures map to identical reasons across buy/sell/homepage/profile surfaces.
+
+**Report Facts / Decision Record**
+
+Append to canonical report:
+- Current summary is stale relative to the live branch state.
+- API-002 verification is blocked by deterministic homepage test failure plus missing shared reason artifacts.
+- OpenAPI still lacks concrete public `reason` vocabulary documentation.
+- Focused handler verification is only partially green; full `handlers/users` remains unrelated noise.
+
+Decision record to append/mirror:
+- `Decision`: API-002 is not closure-ready on the current tree.
+- `Reason`: live repo state lacks the shared reason layer claimed by `summary.json`, homepage admin update fails deterministically, and OpenAPI does not yet publish concrete reason tokens.
+- `Impact`: dispatcher should move the task back out of completed state, route follow-up to error-handling + openapi-contract, then return to test-reliability for rerun.

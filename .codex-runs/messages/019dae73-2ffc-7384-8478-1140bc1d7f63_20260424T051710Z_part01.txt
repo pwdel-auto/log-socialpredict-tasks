@@ -1,0 +1,31 @@
+task_uid: `019dae73-2ffc-7384-8478-1140bc1d7f63`  
+task_id: `API-003`  
+status: `completed`
+
+Preserved the existing login token payload per DP-006, kept `/v0/setup` and `/v0/setup/frontend` public/service-backed, and normalized the touched auth/admin failures onto the shared `ReasonResponse` vocabulary. Unrelated existing dirty worktree changes outside this slice were left in place.
+
+files_changed:
+- [loggin.go](/workspace/socialpredict/backend/internal/service/auth/loggin.go)
+- [middleware_test.go](/workspace/socialpredict/backend/internal/service/auth/middleware_test.go)
+- [adduser.go](/workspace/socialpredict/backend/handlers/admin/adduser.go)
+- [adduser_http_test.go](/workspace/socialpredict/backend/handlers/admin/adduser_http_test.go)
+- [server_test.go](/workspace/socialpredict/backend/server/server_test.go)
+- [server_contract_test.go](/workspace/socialpredict/backend/server/server_contract_test.go)
+- [openapi.yaml](/workspace/socialpredict/backend/docs/openapi.yaml)
+- [API-ISSUES.md](/workspace/socialpredict/backend/docs/API-ISSUES.md)
+
+checks_run:
+- `gofmt -l` on all touched Go files
+- `go test -vet=off -count=1 ./internal/service/auth` twice
+- `go test -vet=off -count=1 ./handlers/admin` twice
+- `go test -vet=off -count=1 ./handlers/setup` twice
+- `go test -vet=off -count=1 ./server` twice
+- `go test -vet=off -count=1 ./handlers/users -run 'TestChangePasswordHandler|TestPassword'` twice
+- `go test -vet=off ./... -run TestOpenAPISpecValidates -count=1` twice
+- `go vet ./internal/service/auth ./handlers/admin ./handlers/setup ./server ./handlers/users`
+- `run_boundary_checks.sh /workspace/socialpredict`
+- `check_api_contract_sync.sh /workspace/socialpredict HEAD`
+
+follow_ups:
+- No blocker remains for the API-003 slice.
+- Broader repo-wide suites outside this auth/setup/admin scope were not rerun in this turn.

@@ -1,0 +1,124 @@
+Blocked fact: I could not inspect the live backend files in this session because local shell access is failing at sandbox startup (`bwrap: No permissions to create a new namespace`) and no MCP file resources are available. The coordination below is therefore a conservative repo-structure-based recommendation, not a verified read of current file contents.
+
+**Recommendation**
+
+Adopt a small boundary-owned `reason` vocabulary that is stable, public, and transport-scoped, then map existing typed/internal errors to that vocabulary only at the HTTP serialization boundary. Keep domain and repository layers free to use richer internal error detail; handlers should only choose status + public `reason` + sanitized message/body shape through shared helpers.
+
+Recommended initial vocabulary, kept intentionally small:
+
+- `invalid_request`
+- `unauthenticated`
+- `forbidden`
+- `not_found`
+- `conflict`
+- `rate_limited`
+- `unprocessable`
+- `dependency_unavailable`
+- `internal`
+
+This should likely live beside existing HTTP error serialization code, not in domain packages. The smallest defensible change is probably in `backend/errors/httperror.go` plus focused handler-facing helper coverage and one route-visible doc surface in `backend/docs/openapi.yaml`.
+
+**Error Taxonomy Plan**
+
+- Define public constants for the stable `reason` values in the HTTP/boundary error package.
+- Add a boundary helper that converts existing internal/typed errors into `(status, reason, safe body fields)`.
+- Preserve existing response envelope shape if one already exists; add `reason` rather than redesigning error responses.
+- Treat `reason` as API contract, not as a dump of Go error types or DB errors.
+- Default unknown/unclassified failures to `internal`.
+- Avoid adding operation-specific reasons unless already required by route behavior; prefer stable common classes.
+
+**Boundary Mapping Table**
+
+| Internal failure class | HTTP status | Public `reason` | Notes |
+|---|---:|---|---|
+| Validation/input parse failure | 400 | `invalid_request` | Bad query/body/path/header syntax or missing required input |
+| Authentication missing/invalid | 401 | `unauthenticated` | Do not reveal token/session specifics |
+| Authenticated but not allowed | 403 | `forbidden` | Covers ownership/admin/policy denial |
+| Missing resource/entity | 404 | `not_found` | Avoid existence leaks where policy requires 403 |
+| Duplicate/state collision | 409 | `conflict` | Unique constraint or incompatible state transition |
+| Semantic business-rule rejection | 422 | `unprocessable` | Valid syntax, rejected by domain rule |
+| Rate/security throttling | 429 | `rate_limited` | Keep retry details minimal unless already standard |
+| Upstream/service temporarily unavailable | 503 | `dependency_unavailable` | For setup/dependency/load failures visible at boundary |
+| Unexpected/unclassified failure | 500 | `internal` | Never expose internals |
+
+**Important Risks / Edge Cases**
+
+- `403` vs `404` is the highest leakage risk. Some routes should not confirm resource existence.
+- `400` vs `422` can drift if handlers currently mix parse errors and domain validation failures.
+- Unique-constraint or DB-state errors must not leak raw DB strings while still mapping consistently to `conflict`.
+- Rate-limit and auth middleware may already emit responses outside handler-local code paths; those paths must share the same `reason` vocabulary or be explicitly exempted.
+- If some handlers already return bespoke error JSON, introducing `reason` inconsistently will create contract drift.
+- OpenAPI should document the common vocabulary without falsely claiming every route returns every reason.
+
+**Leakage And Sanitization Risk Register**
+
+- Raw database errors: must never surface in `message`; map to `conflict` or `internal`.
+- Auth/session/token failures: never distinguish expired vs unknown vs malformed unless already public contract.
+- Permission denials: prefer `forbidden`; use `not_found` where existence itself is sensitive.
+- Internal dependency/setup errors: expose only `dependency_unavailable` or `internal`, not configuration names, URLs, or secrets.
+- Domain/business errors: expose stable category only; keep market/accounting internals out of free-text messages.
+- Panic/unhandled errors: force `internal`, log privately, sanitize response body.
+
+**Specific Files / Areas Likely Affected**
+
+Most likely touch points, based on repo layout:
+
+- `/workspace/socialpredict/backend/errors/httperror.go`
+- `/workspace/socialpredict/backend/errors/httperror_test.go`
+- `/workspace/socialpredict/backend/server/server.go`
+- Middleware or auth/security response paths under:
+  - `/workspace/socialpredict/backend/internal/service/auth/`
+  - `/workspace/socialpredict/backend/security/`
+- Handler packages that currently write bespoke errors directly:
+  - `/workspace/socialpredict/backend/handlers/...`
+- Route-visible docs:
+  - `/workspace/socialpredict/backend/docs/openapi.yaml`
+  - possibly `/workspace/socialpredict/backend/docs/README.md` if the spec should avoid repetitive prose
+
+**Follow-On Delegation Needed**
+
+Yes.
+
+- `software-action-openapi-contract-agent`: required for contract wording, schema reuse, and route/spec alignment.
+- `software-action-verifier-agent`: required for end-state validation and drift sanity checks.
+- Optional `go-style-agent` only if the implementation introduces new exported constants/helpers and naming is debated.
+
+**Crosses Another Specialist’s Explicit Policy Scope**
+
+Yes.
+
+- OpenAPI and route-visible documentation are explicitly in `software-action-openapi-contract-agent` scope.
+- Final validation/sign-off is explicitly reserved for `software-action-verifier-agent`.
+- This change should not cross into domain/business-rule ownership if implemented correctly; if mapping pressure starts altering domain error design broadly, that becomes architecture-sensitive and should be escalated.
+
+**Rollout Hotspots And Follow-Ups**
+
+- Audit all non-handler boundary emitters first: auth middleware, security middleware, server-global error handlers.
+- Standardize only the public vocabulary now; do not attempt a repo-wide internal error refactor in the same change.
+- Reuse one shared OpenAPI error schema/component if possible, with `reason` enum documented centrally.
+- Add focused tests around serialization/mapping, not broad handler rewrites.
+- After rollout, watch for handlers still returning ad hoc error bodies without `reason`.
+
+**Facts And Checks To Append To The Canonical Task Report**
+
+Given the inspection blocker, I would append these as coordination facts / required checks rather than verified implementation facts:
+
+- Session limitation: local file inspection blocked by sandbox startup failure (`bwrap` namespace error); recommendation produced from workspace instructions and repo map only.
+- Proposed public `reason` vocabulary: `invalid_request`, `unauthenticated`, `forbidden`, `not_found`, `conflict`, `rate_limited`, `unprocessable`, `dependency_unavailable`, `internal`.
+- Boundary rule: mapping belongs in HTTP/boundary serialization helpers, not domain logic or repositories.
+- Required implementation audit targets: `errors/httperror.go`, auth/security middleware emitters, any bespoke handler error writers, and OpenAPI error schema/docs.
+- Required verification checks after implementation:
+  - focused tests for status-to-`reason` mapping
+  - negative check that raw DB/auth/internal strings do not leak in API bodies
+  - OpenAPI validation for documented `reason` field/enum
+  - spot-check `403` vs `404` handling on sensitive resources
+
+**Decision Record For `decisions.ndjson`**
+
+Recommended decision to mirror:
+
+- `API-002 decision: introduce a small stable public HTTP error reason vocabulary at the boundary layer only; internal/domain errors remain implementation details and are mapped to public reasons during HTTP serialization. Initial vocabulary limited to common cross-route classes to minimize contract churn and prevent leakage.`
+
+If the dispatcher wants a second record:
+
+- `API-002 decision: OpenAPI documentation of public error reasons is contract-owned by the openapi-contract specialist; implementation must avoid embedding route/business policy in handlers while standardizing boundary error output.`
