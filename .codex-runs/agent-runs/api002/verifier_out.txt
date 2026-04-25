@@ -1,0 +1,76 @@
+**Pass/Fail**
+
+Fail for verification completeness. I could not inspect the current task state or target-repo diff because every local shell read command failed before execution with a sandbox namespace error, and no MCP filesystem resource was available as a fallback.
+
+**Commands Run / Recommended**
+
+Ran and failed:
+- `sed -n '1,220p' /workspace/spec-socialpredict-tasks/.codex/agents/software-action-verifier-agent.toml`
+- `git -C /workspace/socialpredict status --short`
+- `git -C /workspace/socialpredict diff --stat`
+- `pwd`
+
+Observed failure on each:
+- `bwrap: No permissions to create a new namespace, likely because the kernel does not allow non-privileged user namespaces.`
+
+Recommended once the environment allows local reads:
+- `sed -n '1,220p' /workspace/spec-socialpredict-tasks/.codex/agents/software-action-verifier-agent.toml`
+- `git -C /workspace/socialpredict status --short`
+- `git -C /workspace/socialpredict diff -- backend`
+- `git -C /workspace/socialpredict diff --unified=80 -- backend/errors backend/handlers backend/docs`
+- `git -C /workspace/socialpredict diff --name-only`
+- `cd /workspace/socialpredict/backend && go test ./errors/... ./handlers/... ./server/...`
+- `cd /workspace/socialpredict/backend && go test ./...`
+- `cd /workspace/socialpredict/backend && go test -run OpenAPI ./...`
+
+**Verification Result**
+
+I cannot truthfully confirm:
+- whether the diff matches API-002
+- which files were actually changed
+- whether tests pass
+- whether the change crossed handler/domain boundaries
+- whether docs and route-visible behavior stayed aligned
+
+**Likely Affected Areas**
+
+Based on the task scope only, the review should focus on:
+- `backend/errors/` for stable public `reason` constants/helpers and HTTP error serialization
+- `backend/handlers/` for boundary-owned mapping helpers only, without business logic migration into handlers
+- `backend/docs/openapi.yaml` or equivalent route-visible docs for the documented `reason` vocabulary
+- focused tests under `backend/errors/`, `backend/handlers/`, `backend/server/`, or OpenAPI validation tests
+
+**Important Risks / Edge Cases To Check**
+
+- The `reason` vocabulary may be introduced inconsistently across handlers, producing unstable public API behavior.
+- Handler code may start classifying domain/business failures directly instead of consuming boundary-owned mapping helpers.
+- OpenAPI may document `reason` values that are not actually emitted, or omit emitted values.
+- Existing clients may rely on prior free-form error messages if `reason` was added without preserving backward-compatible fields.
+- Tests may cover one route family but miss other public endpoints that reuse the same error envelope.
+
+**Delegation / Specialist Scope**
+
+Follow-on delegation is likely needed only if inspection reveals scope drift:
+- `openapi-contract-agent` if route-visible docs or `backend/docs/openapi.yaml` changed and need contract alignment review.
+- `test-reliability-agent` if the change added/updated error-envelope tests and coverage looks narrow or flaky.
+- `architecture-agent` if handlers now own reusable policy or business classification logic.
+
+This task does cross another specialist’s explicit policy scope if OpenAPI or route-visible contract text changed.
+
+**Facts To Append To Canonical Task Report**
+
+Append these facts as verification notes:
+- Verifier pass attempted on 2026-04-24 UTC.
+- No code changes were made by verifier.
+- Verification was blocked before repo inspection by sandbox failure preventing all local shell reads.
+- No conclusion could be reached on diff/task match, boundary compliance, or test status.
+- Re-run verifier after restoring local command execution or providing filesystem-resource access.
+
+**Decision Record To Append / Mirror**
+
+Suggested decision entry:
+- `verification-blocked`: final verification could not proceed because the execution environment rejected all local shell commands with a `bwrap` namespace error; dispatcher should requeue verifier after environment repair or provide an alternate read path.
+
+**Remaining Risk / Blocker / Follow-up**
+
+Current blocker is environmental, not code-level: local repository inspection is unavailable. Until that is fixed, the task should not be marked verifier-approved.

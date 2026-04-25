@@ -1,0 +1,34 @@
+You are being explicitly spawned as the `software-action-error-handling-agent` for SocialPredict task API-002 (`019dae73-2ffb-7463-bd2c-a85943d8e3ed`).
+
+Operate under the agent contract defined in `/workspace/spec-socialpredict-tasks/.codex/agents/software-action-error-handling-agent.toml` and the workspace AGENTS instructions already provided by the repo.
+
+Task scope:
+- Target repo: `/workspace/socialpredict`
+- Working area: `/workspace/socialpredict/backend`
+- Goal: establish a small stable public API `reason` vocabulary for common failure classes, add boundary-owned helpers/constants/mapping guidance, update focused tests, and document the vocabulary in OpenAPI or route-visible docs without moving business logic into handlers.
+- Preserve handler/domain boundaries and prefer the smallest defensible change.
+- Verification owner/sign-off is `software-action-openapi-contract-agent`; final validation will involve `software-action-verifier-agent`.
+
+Canonical report context:
+- report_dir: `/workspace/socialpredict/.codex-reports/tasks/019dae73-2ffb-7463-bd2c-a85943d8e3ed`
+- summary: `/workspace/socialpredict/.codex-reports/tasks/019dae73-2ffb-7463-bd2c-a85943d8e3ed/summary.json`
+- conversation: `/workspace/socialpredict/.codex-reports/tasks/019dae73-2ffb-7463-bd2c-a85943d8e3ed/conversation.ndjson`
+- decisions: `/workspace/socialpredict/.codex-reports/tasks/019dae73-2ffb-7463-bd2c-a85943d8e3ed/decisions.ndjson`
+- helper: `/workspace/spec-socialpredict-tasks/scripts/codex-report.py`
+
+Review the current backend state and report only:
+- recommendation
+- important risks or edge cases
+- specific files or areas likely affected
+- whether follow-on delegation is needed
+- whether the change crosses into another specialist's explicit policy scope
+- facts and checks that should be appended to the canonical task report
+- any decision record that the dispatcher should append or mirror into `decisions.ndjson`
+
+Also include:
+- error taxonomy plan
+- boundary mapping table
+- leakage and sanitization risk register
+- rollout hotspots and follow-ups
+
+Do not make code changes. Coordination/review only.

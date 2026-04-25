@@ -1,0 +1,73 @@
+**Recommendation**
+Proceed with a minimal additive contract pass. Keep the existing `{ ok, reason }` failure envelope and preserve current route-visible strings, but formalize a small shared boundary vocabulary in [handlers/envelope.go](/workspace/socialpredict/backend/handlers/envelope.go:8) plus shared auth-mapping helpers under `backend/handlers/**`. Document common reasons in [openapi.yaml](/workspace/socialpredict/backend/docs/openapi.yaml:1739) with descriptions/examples, and document endpoint-specific business reasons per operation instead of forcing a global enum.
+
+The current contract already has shared reasons, but they are only partially centralized: common auth mapping is duplicated in [profile_helpers.go](/workspace/socialpredict/backend/handlers/users/profile_helpers.go:84), [buypositionhandler.go](/workspace/socialpredict/backend/handlers/bets/buying/buypositionhandler.go:97), [sellpositionhandler.go](/workspace/socialpredict/backend/handlers/bets/selling/sellpositionhandler.go:110), and [privateuser.go](/workspace/socialpredict/backend/handlers/users/privateuser/privateuser.go:34), while [cms/homepage/http/handler.go](/workspace/socialpredict/backend/handlers/cms/homepage/http/handler.go:114) already diverges.
+
+**Endpoint Delta Table**
+
+| Area | Current state | Recommended delta | Compatibility |
+| --- | --- | --- | --- |
+| `components/schemas/ReasonResponse` | `reason` is only `type: string`; no vocabulary docs | Add shared-reason description/examples, keep `string` | Additive |
+| `POST /v0/login` | Uses `ReasonResponse`; live reasons include `INVALID_REQUEST`, `INVALID_CREDENTIALS`, `AUTH_INTERNAL_ERROR` via [loggin.go](/workspace/socialpredict/backend/internal/service/auth/loggin.go:194) | Document current reasons; do not rename in this pass | Additive if preserved, breaking if renamed |
+| `POST /v0/bet`, `POST /v0/sell` | Shared auth reasons plus business reasons (`BET_VALIDATION_FAILED`, `MARKET_CLOSED`, `INSUFFICIENT_BALANCE`, `NO_POSITION`, `DUST_CAP_EXCEEDED`) | Keep business reasons local, add per-status examples | Additive |
+| `POST /v0/profilechange/*`, `POST /v0/changepassword`, `GET /v0/userposition/{marketId}` | Mixed shared constants and raw literals like `INVALID_CREDENTIALS`, `INVALID_USER_DATA`, `"MARKET_NOT_FOUND"` | Replace common literals with shared constants/helpers; preserve endpoint-specific reasons | Additive if strings preserved |
+| `PUT /v0/admin/content/home` | Spec says 403 = admin required; code can collapse 403 auth failures to `INVALID_TOKEN` | Fix mapper and document `ADMIN_REQUIRED` vs `PASSWORD_CHANGE_REQUIRED` | Observable behavior change for current broken branch |
+| `GET /v0/stats`, `GET /v0/content/home` | Route-specific reasons (`STATS_UNAVAILABLE`, `HOME_CONTENT_NOT_FOUND`) | Document as endpoint-specific examples, not common vocabulary | Additive |
+
+**Contract Compatibility Assessment**
+Lowest-risk path: preserve all currently emitted reason strings and make the change additive through constants, mapping helpers, and OpenAPI examples/descriptions. Do not tighten `reason` to a strict enum: there are 27 live reason strings in code and `ReasonResponse` is referenced in 67 response slots, so a closed enum would either be incomplete or breaking.
+
+High risk: the admin homepage mapper currently treats unmapped 403 auth errors as `INVALID_TOKEN`. I reproduced a failing focused test with `go test ./handlers/cms/homepage/http -run 'TestAdminUpdate_Success' -count=1`, which returned `403 {"ok":false,"reason":"INVALID_TOKEN"}`. Because `RequireAdmin` enforces password-change first and `models.User.MustChangePassword` defaults to `true` in [models/user.go](/workspace/socialpredict/backend/models/user.go:13), this branch is plausible in real traffic.
+
+**Important Risks / Edge Cases**
+- High: leaving [cms/homepage/http/handler.go](/workspace/socialpredict/backend/handlers/cms/homepage/http/handler.go:114) as-is undermines any “stable common auth reason” claim.
+- High: renaming existing public reasons such as `AUTH_INTERNAL_ERROR`, `BET_VALIDATION_FAILED`, `SELL_VALIDATION_FAILED`, or `INVALID_USER_DATA` is a contract change, not just cleanup.
+- Follow-up: [API-ISSUES.md](/workspace/socialpredict/backend/docs/API-ISSUES.md:35) already tracks unrelated auth/content-type drift; API-002 should stay scoped to `reason` vocabulary and not absorb that baseline.
+
+**Specific Files / Areas Likely Affected**
+- [handlers/envelope.go](/workspace/socialpredict/backend/handlers/envelope.go:8)
+- [handlers/users/profile_helpers.go](/workspace/socialpredict/backend/handlers/users/profile_helpers.go:14)
+- [handlers/users/changepassword.go](/workspace/socialpredict/backend/handlers/users/changepassword.go:20)
+- [handlers/users/userpositiononmarkethandler.go](/workspace/socialpredict/backend/handlers/users/userpositiononmarkethandler.go:61)
+- [handlers/users/privateuser/privateuser.go](/workspace/socialpredict/backend/handlers/users/privateuser/privateuser.go:34)
+- [handlers/bets/buying/buypositionhandler.go](/workspace/socialpredict/backend/handlers/bets/buying/buypositionhandler.go:16)
+- [handlers/bets/selling/sellpositionhandler.go](/workspace/socialpredict/backend/handlers/bets/selling/sellpositionhandler.go:16)
+- [handlers/cms/homepage/http/handler.go](/workspace/socialpredict/backend/handlers/cms/homepage/http/handler.go:12)
+- [handlers/stats/statshandler.go](/workspace/socialpredict/backend/handlers/stats/statshandler.go:43)
+- [internal/service/auth/loggin.go](/workspace/socialpredict/backend/internal/service/auth/loggin.go:194)
+- [docs/openapi.yaml](/workspace/socialpredict/backend/docs/openapi.yaml:47)
+
+**Follow-On Delegation / Scope**
+- Follow-on delegation needed: `software-action-verifier-agent` after implementation.
+- No mandatory DB-migration review.
+- This stays inside openapi-contract scope if helpers remain boundary-owned under `backend/handlers/**`.
+- It crosses architecture scope only if someone proposes moving public reason mapping into `internal/service/auth` or another non-handler package.
+
+**Spec Sync Evidence**
+- `ReasonResponse` is currently defined only as `{ ok:false, reason:string }` at [openapi.yaml](/workspace/socialpredict/backend/docs/openapi.yaml:1739).
+- OpenAPI currently references `ReasonResponse` in 67 response slots.
+- Live code currently emits 27 distinct reason strings across handlers/auth hotspots.
+- Current working tree is dirty in `backend/docs/openapi.yaml` and `backend/docs/API-ISSUES.md`; review was against working-tree state.
+- `check_api_contract_sync.sh /workspace/socialpredict`: structural pass, but only against committed `origin/main...HEAD` diff.
+- `go test -run TestOpenAPISpecValidates -count=1 .`: pass.
+- `go test ./handlers -run 'TestWrite(Result|BusinessFailure)'`: pass.
+- `go test ./handlers/users -run 'Test(ChangePasswordHandler_InvalidTokenReturnsFailureEnvelope|ChangeDescriptionHandler_InvalidTokenReturnsFailureEnvelope|WriteProfileError_SanitizesFailureReasons|WriteProfileError_SanitizesValidationFailure|UserMarketPositionHandlerUnauthorizedWithoutToken)'`: pass.
+- `go test ./handlers/stats -run 'TestStatsHandler(RequiresConfigService|SanitizesDatabaseErrors|ReturnsServiceBackedConfiguration)'`: pass.
+- `go test ./handlers/bets/buying -run 'TestPlaceBetHandler_(Success|ErrorMapping|InvalidJSON)'`: pass.
+- `go test ./handlers/bets/selling -run 'TestSellPositionHandler_(Success|ErrorMapping|InvalidJSON)'`: pass.
+- `go test ./handlers/positions -run 'TestMarket(PositionsHandlerWithService_FailureEnvelope|UserPositionHandlerWithService_FailureEnvelope|PositionsHandlerWithService_IncludesZeroPositionUsers)'`: pass.
+- `go test ./internal/service/auth -run 'Test(AuthServiceRequireAdmin_EnforcesPasswordChange|ValidateUserAndEnforcePasswordChangeGetUser_PasswordChangeRequired|ValidateTokenAndGetUser_(MissingHeader|InvalidToken))'`: pass.
+- `go test ./handlers/cms/homepage/http -run 'TestAdminUpdate_Success'`: fail with `403 {"ok":false,"reason":"INVALID_TOKEN"}`.
+
+**Report-Ready Facts / Decisions**
+- Facts to append:
+  - Shared failure constants exist, but only 8 are centralized today; common auth mapping is duplicated.
+  - `ReasonResponse` is reused widely, but OpenAPI does not currently document allowed/shared reasons.
+  - The admin homepage auth mapper is a live contract inconsistency in scope.
+  - Existing API drift outside `reason` vocabulary remains tracked in `API-ISSUES.md` and should stay out of API-002.
+- Decision records to append or mirror:
+  - `ReasonResponse` stays a string-based envelope in API-002; no global enum tightening.
+  - API-002 defines shared common reasons plus endpoint-specific documented reasons; it does not force a universal normalization of all existing strings.
+  - Public reason mapping remains boundary-owned in `backend/handlers/**`, not in domain/auth internals.
+  - `PUT /v0/admin/content/home` must not collapse password-change gating into `INVALID_TOKEN`.
+  - Preserve existing login reasons unless dispatcher explicitly approves a compatibility-changing rename.

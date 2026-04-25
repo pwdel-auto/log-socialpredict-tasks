@@ -1,0 +1,93 @@
+Recommendation
+
+Adopt this as a shared boundary contract, not a domain contract: define the public `reason` vocabulary once in `backend/errors/` (or an adjacent boundary-owned helper under `backend/handlers/...` only if the repo already keeps transport DTO helpers there), keep `reason` optional for backward compatibility, and document it through the shared OpenAPI error schema used by route responses. The smallest defensible change is:
+
+- add public constants plus a narrow mapping helper at the HTTP boundary
+- map only common transport-visible failure classes, not domain-specific business cases
+- update focused serialization tests in `backend/errors/httperror_test.go` and one or two route-facing tests where the reason is emitted
+- update `backend/docs/openapi.yaml` so the shared error response schema includes `reason` and describes the stable vocabulary and unknown-value tolerance
+
+Important risks and edge cases
+
+- Main compatibility risk: making `reason` required would be a wire break for existing clients.
+- Secondary compatibility risk: using a closed OpenAPI `enum` for `reason` makes future additions breaking for strict/generated clients. Safer contract: `type: string`, examples, documented known values, and explicit “clients must tolerate unknown values”.
+- Boundary leak risk: handlers should not infer detailed business semantics just to produce a prettier `reason`. Only map already-classified outcomes from existing errors.
+- Consistency risk: if some handlers still write ad hoc JSON errors, the vocabulary will fragment immediately.
+- Auth edge case: `401` and `403` must not collapse into one reason; keep unauthorized vs forbidden distinct.
+- Validation edge case: request-shape/parse failures, missing required inputs, and semantic invalid state should not all share one bucket unless the existing error model already does that.
+
+Specific files or areas likely affected
+
+- `backend/errors/httperror.go`
+- `backend/errors/httperror_test.go`
+- shared error-writing call sites under `backend/handlers/`
+- any route tests asserting exact error bodies
+- `backend/docs/openapi.yaml`
+- possibly `backend/docs/API-ISSUES.md` or `backend/docs/README.md` if the repo uses route-visible prose notes alongside the spec
+- if setup/config endpoints already expose stable public errors, check `backend/handlers/setup/`
+
+Endpoint delta table
+
+| Area | Path/method delta | Response-contract delta |
+|---|---|---|
+| Existing endpoints using shared HTTP error envelope | None recommended | Add optional `reason` field to existing error body |
+| Auth-protected endpoints | None recommended | Document stable auth-related reasons such as unauthorized/forbidden |
+| Validation-heavy mutation endpoints | None recommended | Document stable validation/conflict/not_found style reasons where already emitted |
+| Setup/public read endpoints | None recommended | Only if they already return shared error envelope; otherwise no forced change |
+
+Contract compatibility assessment
+
+Conditionally compatible and low-risk if `reason` is additive and optional. High-risk if the change also normalizes previously inconsistent response shapes or introduces a required field. From an OpenAPI perspective, prefer:
+
+- additive property on the existing shared error schema
+- `string` rather than closed `enum`
+- examples for the initial vocabulary
+- explicit note that unknown future values are allowed
+
+Whether follow-on delegation is needed
+
+- `software-action-go-style-agent`: not necessary for the contract decision itself.
+- `software-action-test-reliability-agent`: useful once implementation starts, because exact-body assertions are the most likely regression point.
+- `architecture-agent`: only if implementation begins introducing domain-to-transport classification logic outside the existing error types.
+- `software-action-verifier-agent`: yes, already expected for final sign-off.
+
+Whether this crosses another specialist’s explicit policy scope
+
+Yes, but only lightly:
+- It touches `architecture-agent` scope if reason mapping starts encoding business/domain policy in handlers.
+- It touches `test-reliability-agent` scope for assertion updates and regression coverage.
+- It remains primarily in `openapi-contract-agent` scope as long as the work stays at the shared HTTP error envelope and spec-sync layer.
+
+Spec sync evidence
+
+Evidence available to me is limited because this session could not read the local workspace files directly; the shell failed before any local inspection. I could confirm the public repository and backend tree are present on GitHub, but I could not verify the exact local branch contents for `/workspace/socialpredict/backend/docs/openapi.yaml` or `/workspace/socialpredict/backend/errors/httperror.go` in this spawned session. Given the workspace instructions, the intended spec/source pair is:
+
+- `backend/errors/httperror.go`
+- `backend/docs/openapi.yaml`
+
+That is the correct sync boundary for this task, but local branch verification is still outstanding.
+
+Facts and checks to append to the canonical task report
+
+- Coordination recommendation: keep `reason` boundary-owned and additive in the shared HTTP error envelope.
+- Compatibility recommendation: `reason` should be optional; clients should tolerate absent and unknown values.
+- OpenAPI recommendation: avoid a closed enum unless the team is willing to treat vocabulary expansion as a contract change.
+- Verification gap: local workspace inspection was blocked by shell sandbox failure in this session, so exact branch-state verification of `httperror.go`, tests, and `openapi.yaml` remains required before sign-off.
+- Validation checklist for implementation pass:
+  - confirm all shared error responses serialize `reason` consistently
+  - confirm no handler-specific ad hoc error payloads bypass the shared envelope
+  - confirm OpenAPI shared error schema includes `reason`
+  - confirm at least one route-facing test covers emitted `reason`
+  - confirm existing clients are not forced to send or parse `reason`
+
+Decision record the dispatcher should append or mirror into `decisions.ndjson`
+
+- `API-002 decision`: Public error `reason` remains a transport-boundary field owned by shared HTTP error helpers, not by domain services or handler-specific business logic.
+- `API-002 decision`: The initial `reason` vocabulary is documented as a stable known set but must be treated as non-exhaustive by clients.
+- `API-002 decision`: No endpoint path or method changes are required; this is a shared error-schema refinement only.
+- `API-002 decision`: Final verifier pass must confirm local branch spec/code sync because this coordination review could not directly inspect the workspace files.
+
+Sources
+
+- https://github.com/openpredictionmarkets/socialpredict
+- https://github.com/openpredictionmarkets/socialpredict/tree/main/backend

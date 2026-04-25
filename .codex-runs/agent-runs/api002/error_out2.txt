@@ -1,0 +1,74 @@
+**Recommendation**
+Keep API-002 narrow and boundary-owned. The best home for the initial public `reason` vocabulary is [backend/handlers/envelope.go](/workspace/socialpredict/backend/handlers/envelope.go:8), not `backend/errors`, because the live `{ok, reason}` envelope already lives there and `backend/errors/httperror.go` is legacy `{error: ...}` code with no active handler usage.
+
+Use uppercase snake case to match the repo’s existing contract, add one shared boundary helper for auth error classification, and normalize only handlers that already emit `ReasonResponse`-style JSON. Do not broaden this task into fixing all plaintext `http.Error(...)` routes. For OpenAPI, document the initial shared vocabulary in `ReasonResponse` descriptions/examples, not a strict global enum yet, because the backend still has plaintext middleware/errors and route-local reason synonyms.
+
+**Error Taxonomy Plan**
+Core shared reasons I’d recommend for API-002:
+
+`METHOD_NOT_ALLOWED`, `INVALID_REQUEST`, `INVALID_TOKEN`, `AUTHORIZATION_DENIED`, `PASSWORD_CHANGE_REQUIRED`, `USER_NOT_FOUND`, `MARKET_NOT_FOUND`, `VALIDATION_FAILED`, `MARKET_CLOSED`, `INSUFFICIENT_BALANCE`, `INVALID_OUTCOME`, `INVALID_AMOUNT`, `NO_POSITION`, `INSUFFICIENT_SHARES`, `DUST_CAP_EXCEEDED`, `INTERNAL_ERROR`
+
+Guidance:
+- Keep `INVALID_TOKEN` as the current shared 401 reason unless the auth sweep wants a repo-wide rename to `AUTHENTICATION_REQUIRED`. Do not carry both.
+- Keep `PASSWORD_CHANGE_REQUIRED` distinct from generic 403 authorization failure.
+- Prefer resource-specific not-found reasons already in use over a new generic `NOT_FOUND` for this slice.
+- Retire route-local synonyms for shared classes: `BET_VALIDATION_FAILED`, `SELL_VALIDATION_FAILED`, `ADMIN_REQUIRED`, `STATS_UNAVAILABLE`, `AUTH_SERVICE_UNAVAILABLE`, `DISPLAY_NAME_UPDATE_FAILED`, `DESCRIPTION_UPDATE_FAILED`, `EMOJI_UPDATE_FAILED`, `PERSONAL_LINKS_UPDATE_FAILED`, `HOMEPAGE_UPDATE_FAILED` should not become part of the shared public base list.
+
+**Boundary Mapping Table**
+| Source class | Status | Public reason | Boundary note |
+| --- | --- | --- | --- |
+| Unsupported method | 405 | `METHOD_NOT_ALLOWED` | Transport-only |
+| JSON/path/query parse failure | 400 | `INVALID_REQUEST` | Transport-only |
+| Missing or invalid bearer token | 401 | `INVALID_TOKEN` | Centralize auth mapping |
+| Authenticated but must change password | 403 | `PASSWORD_CHANGE_REQUIRED` | Separate from generic authz |
+| Other authorization failure | 403 | `AUTHORIZATION_DENIED` | Replace `ADMIN_REQUIRED` if touched |
+| User missing | 404 | `USER_NOT_FOUND` | Stable/resource-specific |
+| Market missing | 404 | `MARKET_NOT_FOUND` | Stable/resource-specific |
+| Generic field/domain validation | 400 | `VALIDATION_FAILED` | Use when no narrower shared reason exists |
+| Invalid bet/sell outcome | 400 | `INVALID_OUTCOME` | Prefer over route-local validation synonym |
+| Invalid bet/sell amount | 400 | `INVALID_AMOUNT` | Prefer over route-local validation synonym |
+| Market closed | 409 | `MARKET_CLOSED` | Shared business-rule reason |
+| Insufficient balance | 422 | `INSUFFICIENT_BALANCE` | Shared business-rule reason |
+| No position / insufficient shares / dust cap | 422 | `NO_POSITION` / `INSUFFICIENT_SHARES` / `DUST_CAP_EXCEEDED` | Shared sell reasons |
+| Unexpected/dependency failure | 500 | `INTERNAL_ERROR` | Do not expose subsystem names |
+
+**Leakage And Sanitization Risk Register**
+- `high`: auth-to-reason mapping is duplicated and keyed off `HTTPError.Message` text in [profile_helpers.go](/workspace/socialpredict/backend/handlers/users/profile_helpers.go:84), [buypositionhandler.go](/workspace/socialpredict/backend/handlers/bets/buying/buypositionhandler.go:97), [sellpositionhandler.go](/workspace/socialpredict/backend/handlers/bets/selling/sellpositionhandler.go:110), and [homepage handler.go](/workspace/socialpredict/backend/handlers/cms/homepage/http/handler.go:114). Message drift will silently change public reasons.
+- `high`: validation classification in [profile_helpers.go](/workspace/socialpredict/backend/handlers/users/profile_helpers.go:36) is substring-based on raw error text, so unrelated message wording can change public behavior.
+- `high`: raw internal error strings still leak through plaintext handlers in [createmarket.go](/workspace/socialpredict/backend/handlers/markets/createmarket.go:72), [getsystemmetrics.go](/workspace/socialpredict/backend/handlers/metrics/getsystemmetrics.go:11), and [getgloballeaderboard.go](/workspace/socialpredict/backend/handlers/metrics/getgloballeaderboard.go:10).
+- `high`: no request-boundary panic recovery was found in [server.go](/workspace/socialpredict/backend/server/server.go:98) or `backend/security/**`.
+- `follow-up`: rate-limit middleware still emits plaintext 429s in [ratelimit.go](/workspace/socialpredict/backend/security/ratelimit.go:87), so the `reason` vocabulary is not a universal backend contract yet.
+- `follow-up`: a strict global OpenAPI enum on `ReasonResponse.reason` would be inaccurate while [openapi.yaml](/workspace/socialpredict/backend/docs/openapi.yaml:1739) still models `reason` as free-form and live routes/middleware still diverge.
+
+**Specific Files Or Areas Likely Affected**
+- Shared boundary: [backend/handlers/envelope.go](/workspace/socialpredict/backend/handlers/envelope.go:8), [backend/docs/openapi.yaml](/workspace/socialpredict/backend/docs/openapi.yaml:1739)
+- Repeated auth mapping: [backend/handlers/users/profile_helpers.go](/workspace/socialpredict/backend/handlers/users/profile_helpers.go:84), [backend/handlers/users/privateuser/privateuser.go](/workspace/socialpredict/backend/handlers/users/privateuser/privateuser.go:34), [backend/handlers/bets/buying/buypositionhandler.go](/workspace/socialpredict/backend/handlers/bets/buying/buypositionhandler.go:97), [backend/handlers/bets/selling/sellpositionhandler.go](/workspace/socialpredict/backend/handlers/bets/selling/sellpositionhandler.go:110), [backend/handlers/cms/homepage/http/handler.go](/workspace/socialpredict/backend/handlers/cms/homepage/http/handler.go:114)
+- Current synonym emitters: [backend/handlers/users/changepassword.go](/workspace/socialpredict/backend/handlers/users/changepassword.go:20), [backend/handlers/users/userpositiononmarkethandler.go](/workspace/socialpredict/backend/handlers/users/userpositiononmarkethandler.go:61), [backend/handlers/bets/buying/buypositionhandler.go](/workspace/socialpredict/backend/handlers/bets/buying/buypositionhandler.go:16), [backend/handlers/bets/selling/sellpositionhandler.go](/workspace/socialpredict/backend/handlers/bets/selling/sellpositionhandler.go:16), [backend/handlers/stats/statshandler.go](/workspace/socialpredict/backend/handlers/stats/statshandler.go:43)
+- Focused tests to update: [backend/handlers/envelope_test.go](/workspace/socialpredict/backend/handlers/envelope_test.go:1), [backend/handlers/users/profile_handlers_test.go](/workspace/socialpredict/backend/handlers/users/profile_handlers_test.go:1), [backend/handlers/users/changepassword_test.go](/workspace/socialpredict/backend/handlers/users/changepassword_test.go:313), plus representative bets/positions/homepage handler tests if those mappings are touched.
+
+**Rollout Hotspots And Follow-Ups**
+- API-002 should touch only already-JSON reason-bearing handlers and shared helpers first.
+- Markets create/list/search/details/resolution, metrics, public user routes, and rate-limit middleware should stay follow-on sweep work, not part of this stabilization slice.
+- If the team wants to eliminate message-string switching completely, a small internal auth error classifier is worth considering later, but public reason mapping should still stay at the HTTP boundary.
+- Panic recovery should be tracked separately as a high-severity boundary hardening item.
+
+**Delegation And Policy Scope**
+- Follow-on delegation is needed: `software-action-openapi-contract-agent` is mandatory for route-visible schema/doc updates and sign-off.
+- `software-action-test-reliability-agent` is recommended for focused mapping tests.
+- This does cross another specialist’s explicit policy scope: OpenAPI contract ownership, and possibly architecture ownership only if helper placement moves out of `backend/handlers`.
+- No DB-migration scope is involved.
+
+**Facts And Checks For The Canonical Report**
+- Boundary check passed: `run_boundary_checks.sh /workspace/socialpredict` reported `PASS: all architecture boundary checks passed`.
+- Shared `reason` boundary already exists in [backend/handlers/envelope.go](/workspace/socialpredict/backend/handlers/envelope.go:8) with eight base constants.
+- OpenAPI currently models [ReasonResponse](/workspace/socialpredict/backend/docs/openapi.yaml:1739) as `{ ok: false, reason: string }` with no enum.
+- `ReasonResponse` is already referenced by `/v0/bet`, `/v0/sell`, `/v0/stats`, `/v0/changepassword`, `/v0/userposition/{marketId}`, and `/v0/admin/content/home`.
+- Current shared-vocabulary drift points are duplicated auth mapping, route-local validation/internal-failure synonyms, plaintext middleware 429s, and no panic recovery.
+- Go-based verification was attempted but blocked by environment: first a module-cache permission failure under `/home/agent/go`, then local-cache retries failed with `no space left on device`. No Go test or `go test`-based OpenAPI validation completed in this review pass.
+- No code changes were made.
+
+**Decision Records For `decisions.ndjson`**
+- API-002 shared public reasons should live at the HTTP boundary in `backend/handlers`, not in domain services and not as public strings owned by `internal/service/auth`.
+- The initial shared public reason vocabulary should use existing repo style: uppercase snake case, with one shared reason per cross-route failure class and no new route-local synonyms for shared outcomes.
+- `ReasonResponse.reason` should remain an open string in OpenAPI for now; document the initial shared vocabulary via description/examples until plaintext/middleware drift and legacy synonyms are reduced.
+- Auth `HTTPError` to public `reason` mapping should be centralized in one boundary helper before endpoint sweeps continue.
