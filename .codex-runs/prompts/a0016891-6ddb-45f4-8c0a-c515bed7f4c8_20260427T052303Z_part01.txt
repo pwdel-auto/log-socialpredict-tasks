@@ -1,0 +1,74 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/a0016891-6ddb-45f4-8c0a-c515bed7f4c8`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/a0016891-6ddb-45f4-8c0a-c515bed7f4c8/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/a0016891-6ddb-45f4-8c0a-c515bed7f4c8/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/a0016891-6ddb-45f4-8c0a-c515bed7f4c8/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/a0016891-6ddb-45f4-8c0a-c515bed7f4c8/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "The touched code and tests make startup-validated immutable economics snapshots explicit for the running process.",
+    "No touched path introduces or relies on hot reload for economics or other accounting-sensitive policy.",
+    "Accounting-sensitive workflow boundaries touched in this task either persist the required economics values durably or document a precise remaining gap with tests guarding the current behavior."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "72a14560-e1b5-4c08-8fde-e00b9c08881c",
+    "9d4ea064-e561-4e10-92f9-2320e116dc44"
+  ],
+  "id": "WAVE01-CFG-005",
+  "max_attempts": 3,
+  "notes": [
+    "This is the WAVE01 stop-and-review point before creating later production-note waves.",
+    "Financial and accounting correctness is binary; prefer explicit protection over speculative flexibility."
+  ],
+  "out_of_scope": [
+    "global background-job or observability work",
+    "production-note wave 02 and beyond",
+    "broad deployment-system redesign"
+  ],
+  "profile": "",
+  "prompt": "Finish the configuration-management wave by making the accounting-sensitive semantics explicit in code and tests. Ensure the touched backend paths treat economics policy as startup-validated and immutable for the running process, reject live-mutation or hot-reload behavior for accounting-sensitive policy, and persist accounting-relevant economics into durable workflow or domain state where correctness requires historical stability. Keep this task tightly scoped to what the touched code can safely support now; if a full persistence decision cannot be completed, implement the highest-value protections and document the exact follow-up boundary.",
+  "runner_pid": 386845,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-27T05:23:03.322511+00:00",
+  "status": "running",
+  "title": "WAVE01 Config: Lock economics snapshot semantics and protect accounting correctness",
+  "touched_paths": [
+    "../socialpredict/backend/internal/service/config",
+    "../socialpredict/backend/internal/domain",
+    "../socialpredict/backend/internal/app",
+    "../socialpredict/backend/seed",
+    "../socialpredict/backend/setup"
+  ],
+  "uid": "a0016891-6ddb-45f4-8c0a-c515bed7f4c8",
+  "verification": {
+    "focus": [
+      "financial and accounting correctness protections",
+      "immutable snapshot semantics",
+      "durability or explicit gap documentation for touched accounting-sensitive flows"
+    ],
+    "owner": "software-action-test-reliability-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

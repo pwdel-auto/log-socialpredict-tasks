@@ -1,0 +1,10 @@
+Runtime config now loads through an explicit source seam instead of relying on `setup` package initialization. `main` injects `setup.EmbeddedSource{}`, `setup` keeps the embedded asset plus legacy translation/access paths, and the touched tests now cover both explicit embedded-source loading and the legacy singleton compatibility path. The report was updated at [summary.json](/workspace/socialpredict/.codex-reports/tasks/57d5f112-1626-41cb-a301-fcef5f406136/summary.json).
+
+- `task_uid`: `57d5f112-1626-41cb-a301-fcef5f406136`
+- `task_id`: `WAVE01-CFG-002`
+- `status`: `in_review`
+- `files_changed`: [backend/internal/app/runtime/config.go](/workspace/socialpredict/backend/internal/app/runtime/config.go), [backend/internal/app/runtime/config_test.go](/workspace/socialpredict/backend/internal/app/runtime/config_test.go), [backend/main.go](/workspace/socialpredict/backend/main.go), [backend/setup/setup.go](/workspace/socialpredict/backend/setup/setup.go), [backend/setup/setup_test.go](/workspace/socialpredict/backend/setup/setup_test.go)
+- `checks_run`: `run_boundary_checks.sh /workspace/socialpredict`; `gofmt -l` on touched backend Go files; `go test ./internal/app/runtime ./internal/service/config ./setup -count=1` twice; `go test ./... -run TestOpenAPISpecValidates -count=1`; `go vet ./...`
+- `follow_ups`: explicit `software-action-architecture-agent` sign-off was not captured before the dispatcher concluded, so the task was left in `in_review`
+
+Assumption: the pre-existing dirty-tree config-service changes from the prerequisite wave were treated as baseline and preserved.

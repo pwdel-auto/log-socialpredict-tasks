@@ -1,0 +1,31 @@
+task_uid: `0f7f5441-86ad-4d5a-9814-f13990fefbe3`  
+task_id: `WAVE01-CFG-001`  
+status: `completed`
+
+`backend/internal/service/config` now owns the application-policy types and loader boundary. I kept `backend/setup/setup.yaml` as the source asset, added a source-bytes seam via `setup.SourceBytes()`, routed runtime loading through `config.NewYAMLLoader(...)`, and limited legacy `setup` translation to unmigrated container wiring with `FromSetup` / `ToSetup()` rather than forcing a wider refactor in this slice. Focused tests now exercise the owned types and injected loader seam without depending on `setup` globals, YAML parsing, or `init()` side effects.
+
+Assumption: I treated the active untracked files `backend/internal/service/config/types.go`, `backend/internal/service/config/loader.go`, and `backend/internal/service/config/loader_test.go` as part of this task’s implementation surface, because the package now depends on them and the scoped tests validate them. Required architecture sign-off was approved, and the verifier marked the diff ready to land.
+
+files_changed:
+- `backend/internal/service/config/service.go`
+- `backend/internal/service/config/service_test.go`
+- `backend/internal/service/config/types.go`
+- `backend/internal/service/config/loader.go`
+- `backend/internal/service/config/loader_test.go`
+- `backend/internal/app/runtime/config.go`
+- `backend/internal/app/runtime/config_test.go`
+- `backend/internal/app/container.go`
+- `backend/setup/setup.go`
+- `backend/server/server_test.go`
+
+checks_run:
+- `go test -count=1 ./internal/service/config ./internal/app/runtime`
+- `go test -count=1 ./internal/service/config ./internal/app/runtime ./internal/app ./server`
+- `go test -count=1 ./internal/service/config ./internal/app/runtime ./internal/app ./server`
+- `go vet ./internal/service/config ./internal/app/runtime ./internal/app ./server`
+- `/workspace/spec-socialpredict-tasks/.codex/skills/socialpredict-go-architecture-governance/scripts/run_boundary_checks.sh /workspace/socialpredict`
+- `go test ./... -run TestOpenAPISpecValidates -count=1`
+
+follow_ups:
+- Make the transitional `any`-based compatibility shims fail fast after the remaining `setup` consumers are migrated.
+- Optionally add an end-to-end assertion for `LoadConfigService()` against the real embedded `setup.yaml` asset in a later slice.

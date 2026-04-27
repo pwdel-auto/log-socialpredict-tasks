@@ -1,0 +1,10 @@
+Completed `WAVE01-CFG-004` by replacing raw `setup` config usage in bets and analytics with narrow domain-owned immutable config structs, and projecting those slices from [`backend/internal/app/container.go`](/workspace/socialpredict/backend/internal/app/container.go). The canonical task report summary was updated at [`summary.json`](/workspace/socialpredict/.codex-reports/tasks/9d4ea064-e561-4e10-92f9-2320e116dc44/summary.json). Architecture sign-off was recorded as `approved-with-followups`.
+
+- `task_uid`: `9d4ea064-e561-4e10-92f9-2320e116dc44`
+- `task_id`: `WAVE01-CFG-004`
+- `status`: `completed`
+- `files_changed`: `backend/internal/domain/bets/service.go`, `backend/internal/domain/bets/bet_support.go`, `backend/internal/domain/bets/service_helpers_test.go`, `backend/internal/domain/bets/service_test.go`, `backend/internal/domain/analytics/service.go`, `backend/internal/domain/analytics/financials.go`, `backend/internal/domain/analytics/financialsnapshot_test.go`, `backend/internal/domain/analytics/system_metrics.go`, `backend/internal/domain/analytics/systemmetrics_integration_test.go`, `backend/internal/app/container.go`, `backend/handlers/metrics/getsystemmetrics_test.go`, `backend/handlers/metrics/getgloballeaderboard_test.go`
+- `checks_run`: `gofmt -l` on touched files, boundary checks script, `go test ./internal/domain/bets ./internal/domain/analytics ./internal/app ./handlers/metrics -count=1` twice, `go test ./... -run TestOpenAPISpecValidates -count=1`, `go vet ./...`
+- `follow_ups`: keep future config migrations container-owned and domain-local per architecture sign-off; the dispatcher’s separate verifier-agent artifact was interrupted, so equivalent verification was completed directly in the main workspace
+
+Assumption: the repo already had in-progress config-service refactor changes in the dirty worktree, and this task extended them without touching unrelated files.

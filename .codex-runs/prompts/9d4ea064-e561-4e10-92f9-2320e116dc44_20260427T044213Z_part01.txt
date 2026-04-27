@@ -1,0 +1,73 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/9d4ea064-e561-4e10-92f9-2320e116dc44`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/9d4ea064-e561-4e10-92f9-2320e116dc44/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/9d4ea064-e561-4e10-92f9-2320e116dc44/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/9d4ea064-e561-4e10-92f9-2320e116dc44/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/9d4ea064-e561-4e10-92f9-2320e116dc44/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "Touched domain-facing services no longer depend directly on raw `setup` configuration types or loaders.",
+    "The migrated consumers use the smallest accounting-safe policy slice or interface they need.",
+    "Focused tests prove behavior stability for the touched betting, analytics, or market flows."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "57d5f112-1626-41cb-a301-fcef5f406136"
+  ],
+  "id": "WAVE01-CFG-004",
+  "max_attempts": 3,
+  "notes": [
+    "Use the smallest accounting-safe config slices possible.",
+    "Do not move business policy back into handlers or runtime bootstrap."
+  ],
+  "out_of_scope": [
+    "economics redesign",
+    "OpenAPI sweeps",
+    "full repository/model decoupling beyond touched paths"
+  ],
+  "profile": "",
+  "prompt": "Continue WAVE01 by removing raw `setup`-typed configuration and broad config dependencies from domain-facing consumers, especially bets, analytics, and any directly affected market flows. Replace `*setup.EconomicConfig`, `setup.EconConfigLoader`, and similar leaks with narrow immutable policy slices or consumer-owned interfaces that preserve dependency direction. Keep integer-first economics behavior unchanged and avoid persistence-model leakage.",
+  "runner_pid": 376259,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-27T04:42:13.264568+00:00",
+  "status": "running",
+  "title": "WAVE01 Config: Migrate bets, analytics, and markets config dependencies to narrow immutable slices",
+  "touched_paths": [
+    "../socialpredict/backend/internal/domain/bets",
+    "../socialpredict/backend/internal/domain/analytics",
+    "../socialpredict/backend/internal/domain/markets",
+    "../socialpredict/backend/internal/app/container.go",
+    "../socialpredict/backend/internal/service/config"
+  ],
+  "uid": "9d4ea064-e561-4e10-92f9-2320e116dc44",
+  "verification": {
+    "focus": [
+      "dependency direction in domain-facing code",
+      "elimination of raw setup-type leakage",
+      "behavior-preserving economics usage"
+    ],
+    "owner": "software-action-architecture-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}
