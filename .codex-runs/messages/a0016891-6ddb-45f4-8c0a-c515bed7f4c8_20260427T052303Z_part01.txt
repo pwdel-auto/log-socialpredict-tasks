@@ -1,0 +1,26 @@
+task_uid: `a0016891-6ddb-45f4-8c0a-c515bed7f4c8`  
+task_id: `WAVE01-CFG-005`  
+status: `completed`
+
+The task is complete and the curated report is finalized at [summary.json](/workspace/socialpredict/.codex-reports/tasks/a0016891-6ddb-45f4-8c0a-c515bed7f4c8/summary.json). The resulting backend state makes startup-loaded economics explicit and immutable for the running process: config/setup now defensively copy startup snapshots, accounting-sensitive services consume fixed config slices, and regression tests cover both source-mutation and caller-mutation paths.
+
+files_changed:
+- `backend/internal/service/config/{loader.go,loader_test.go,service.go,service_test.go,types.go}`
+- `backend/internal/app/{container.go,runtime/config.go,runtime/config_test.go}`
+- `backend/setup/{setup.go,setup_test.go}`
+- `backend/internal/domain/analytics/{financials.go,financialsnapshot_test.go,service.go,system_metrics.go,systemmetrics_integration_test.go,systemmetrics_test.go}`
+- `backend/internal/domain/bets/{bet_support.go,service.go,service_helpers_test.go,service_test.go}`
+- `backend/seed/{seed.go,seed_test.go,seed_users_test.go}`
+- `backend/handlers/{metrics/getgloballeaderboard_test.go,metrics/getsystemmetrics_test.go,setup/setuphandler_test.go,stats/statshandler.go,stats/statshandler_test.go}`
+- `backend/{main.go,server/server_test.go}`
+
+checks_run:
+- `gofmt -l backend/internal/service/config/service.go backend/internal/service/config/service_test.go backend/internal/service/config/types.go`
+- `go test ./internal/service/config ./internal/app/runtime ./setup ./seed ./internal/domain/bets ./internal/domain/analytics ./handlers/setup ./handlers/stats ./handlers/metrics ./server -count=1` run twice
+- `go test ./... -run TestOpenAPISpecValidates -count=1`
+- `go vet ./...`
+
+follow_ups:
+- `System metrics still recompute historical fee/cost totals from the injected process snapshot. If economics values ever change across deployments, exact historical reporting will require durable per-market or per-bet fee/cost persistence instead of recomputation from the current process snapshot.`
+
+Assumption: process-lifetime immutability is the intended protection for this wave; no broader persistence redesign was introduced beyond the explicit follow-up boundary above.
