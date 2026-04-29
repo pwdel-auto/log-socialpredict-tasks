@@ -1,0 +1,84 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/0f7f5441-86ad-4d5a-9814-f13990fefbe3`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/0f7f5441-86ad-4d5a-9814-f13990fefbe3/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/0f7f5441-86ad-4d5a-9814-f13990fefbe3/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/0f7f5441-86ad-4d5a-9814-f13990fefbe3/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/0f7f5441-86ad-4d5a-9814-f13990fefbe3/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "`backend/internal/service/config` no longer depends on type aliases to `backend/setup` for its public owned types.",
+    "Configuration loading is expressed through an explicit loader seam that preserves current source-asset behavior while clarifying ownership.",
+    "Focused tests cover the owned config types and loader behavior without relying on `setup` globals or `init()`-driven access."
+  ],
+  "approval": "never",
+  "attempts": 2,
+  "depends_on": [],
+  "finished_at": "2026-04-27T04:02:54.194031+00:00",
+  "id": "WAVE01-CFG-001",
+  "last_exit_code": 0,
+  "last_summary": "task_uid: `0f7f5441-86ad-4d5a-9814-f13990fefbe3`  \ntask_id: `WAVE01-CFG-001`  \nstatus: `completed`\n\n`backend/internal/service/config` now owns the application-policy types and loader boundary. I kept `backend/setup/setup.yaml` as the source asset, added a source-bytes seam via `setup.SourceBytes()`, routed runtime loading through `config.NewYAMLLoader(...)`, and limited legacy `setup` translation to unmigrated container wiring with `FromSetup` / `ToSetup()` rather than forcing a wider refactor in this slice. Focused tests now exercise the owned types and injected loader seam without depending on `setup` globals, YAML parsing, or `init()` side effects.\n\nAssumption: I treated the active untracked files `backend/internal/service/config/types.go`, `backend/internal/service/config/loader.go`, and `backend/internal/service/config/loader_test.go` as part of this task\u2019s implementation surface, because the package now depends on them and the scoped tests validate them. Required architecture sign-off was approved, and the verifier marked the diff ready to land.\n\nfiles_changed:\n- `backend/internal/service/config/service.go`\n- `backend/internal/service/config/service_test.go`\n- `backend/internal/service/config/types.go`\n- `backend/internal/service/config/loader.go`\n- `backend/internal/service/config/loader_test.go`\n- `backend/internal/app/runtime/config.go`\n- `backend/internal/app/runtime/config_test.go`\n- `backend/internal/app/container.go`\n- `backend/setup/setup.go`\n- `backend/server/server_test.go`\n\nchecks_run:\n- `go test -count=1 ./internal/service/config ./internal/app/runtime`\n- `go test -count=1 ./internal/service/config ./internal/app/runtime ./internal/app ./server`\n- `go test -count=1 ./internal/service/config ./internal/app/runtime ./internal/app ./server`\n- `go vet ./internal/service/config ./internal/app/runtime ./internal/app ./server`\n- `/workspace/spec-socialpredict-tasks/.codex/skills/socialpredict-go-architecture-governance/scripts/run_boundary_checks.sh /workspace/socialpredict`\n- `go test ./... -run TestOpenAPISpecValidates -count=1`\n\nfollow_ups:\n- Make the transitional `any`-based compatibility shims fail fast after the remaining `setup` consumers are migrated.\n- Optionally add an end-to-end assertion for `LoadConfigService()` against the real embedded `setup.yaml` asset in a later slice.",
+  "max_attempts": 3,
+  "notes": [
+    "This is WAVE01 only: configuration-management boundary completion.",
+    "Preserve `backend/setup/setup.yaml` as the migration-time source asset.",
+    "Do not introduce a new generic top-level `config/` subsystem."
+  ],
+  "out_of_scope": [
+    "removing `backend/setup/setup.yaml` as the source asset",
+    "migrating all handlers and domain services in this task",
+    "hot-reload or external config-store design"
+  ],
+  "profile": "",
+  "prompt": "Use `lib/design/design-plan.json` and `../socialpredict/README/PRODUCTION-NOTES/BACKEND/01-configuration-management.md` as the binding design context for WAVE01 configuration-management. Complete the first useful slice by making `backend/internal/service/config` own application-policy configuration types instead of aliasing `backend/setup` types. Preserve current runtime behavior while introducing an explicit loader seam and tests that prove the owned types can be exercised without `setup` globals, YAML parsing, or `init()` side effects. Keep this task focused on the config service boundary itself; do not yet migrate every downstream consumer.",
+  "runner_pid": 400853,
+  "runner_state": {
+    "context_file": "/workspace/log-socialpredict-tasks/.codex-runs/context/0f7f5441-86ad-4d5a-9814-f13990fefbe3_20260427T031822Z_part01.ndjson",
+    "event_file": "/workspace/log-socialpredict-tasks/.codex-runs/events/0f7f5441-86ad-4d5a-9814-f13990fefbe3_20260427T031822Z_part01.ndjson",
+    "message_file": "/workspace/log-socialpredict-tasks/.codex-runs/messages/0f7f5441-86ad-4d5a-9814-f13990fefbe3_20260427T031822Z_part01.txt",
+    "paused": false,
+    "prompt_file": "/workspace/log-socialpredict-tasks/.codex-runs/prompts/0f7f5441-86ad-4d5a-9814-f13990fefbe3_20260427T031822Z_part01.txt",
+    "resume_pending": false,
+    "segment": 1,
+    "session_id": "019dccf1-f7e2-75b3-9684-72138753ad85",
+    "stderr_file": "/workspace/log-socialpredict-tasks/.codex-runs/stderr/0f7f5441-86ad-4d5a-9814-f13990fefbe3_20260427T031822Z_part01.stderr.log"
+  },
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-28T11:53:11.444585+00:00",
+  "status": "running",
+  "title": "WAVE01 Config: Replace setup aliases with owned application-policy config types",
+  "touched_paths": [
+    "../socialpredict/backend/internal/service/config",
+    "../socialpredict/backend/internal/app/runtime/config.go",
+    "../socialpredict/backend/setup"
+  ],
+  "uid": "0f7f5441-86ad-4d5a-9814-f13990fefbe3",
+  "verification": {
+    "focus": [
+      "owned config-type boundary",
+      "dependency direction away from setup aliases",
+      "tests that avoid legacy singleton behavior"
+    ],
+    "owner": "software-action-architecture-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

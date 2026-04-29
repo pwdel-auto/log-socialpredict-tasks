@@ -1,0 +1,87 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/d4e8fc6d-58bc-4217-8c51-c91fda76f304`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/d4e8fc6d-58bc-4217-8c51-c91fda76f304/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/d4e8fc6d-58bc-4217-8c51-c91fda76f304/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/d4e8fc6d-58bc-4217-8c51-c91fda76f304/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/d4e8fc6d-58bc-4217-8c51-c91fda76f304/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "Touched server or runtime code exposes explicit, deterministic health or readiness semantics appropriate for orchestration.",
+    "Health and readiness handling remains separate from application metrics routes and does not repurpose `/v0/system/metrics` as an infrastructure probe.",
+    "Focused route and runtime tests cover the touched health or readiness behavior."
+  ],
+  "approval": "never",
+  "attempts": 2,
+  "depends_on": [
+    "bdf17c69-6dda-4fa5-8e81-6bb3a32d0272"
+  ],
+  "finished_at": "2026-04-28T03:59:24.284333+00:00",
+  "id": "WAVE02-LOG-004",
+  "last_exit_code": 0,
+  "last_summary": "task_uid: `d4e8fc6d-58bc-4217-8c51-c91fda76f304`  \ntask_id: `WAVE02-LOG-004`  \nstatus: `blocked`  \nfiles_changed: `[]`  \nchecks_run: `[\"spawned dispatcher-agent\", \"attempted local repo/report inspection via shell commands\"]`  \nfollow_ups: `[\"Resolve sandbox command-execution failure (`bwrap: No permissions to create a new namespace`) so the target repo and report files can be inspected/edited\", \"After access is restored, dispatcher should involve architecture-agent for required sign-off, then test-reliability-agent and verifier-agent as needed\"]`\n\nThe required dispatcher step was completed by spawning `dispatcher-agent`. It concluded the smallest useful specialist set should include `architecture-agent` for required sign-off, plus `test-reliability-agent` and `verifier-agent` after implementation. No code or report updates were possible because every local command attempt failed with the sandbox namespace error, so I could not inspect `../socialpredict/backend`, modify files, run tests, or update `/workspace/socialpredict/.codex-reports/tasks/d4e8fc6d-58bc-4217-8c51-c91fda76f304`.\n\nAssumption: the environment-level `bwrap` failure is external to the repository and not fixable from within this task run.",
+  "max_attempts": 3,
+  "notes": [
+    "Keep `/health` simple and orchestration-friendly.",
+    "Do not collapse health and metrics into one generic observability abstraction.",
+    "Do not treat health endpoints as a proxy for telemetry pipeline status."
+  ],
+  "out_of_scope": [
+    "Prometheus or external metrics backend rollout",
+    "OpenTelemetry Collector rollout",
+    "distributed tracing rollout",
+    "public API taxonomy redesign"
+  ],
+  "profile": "",
+  "prompt": "After runtime logging boundaries are stable, harden the backend's operator-facing health signals. Clarify `/health` and any new readiness or liveness behavior so orchestration and deploy diagnostics can rely on explicit semantics, while keeping `/v0/system/metrics` separate as an application route. Reuse existing runtime and DB seams where practical, keep the implementation deterministic, and avoid inventing a broad observability subsystem or smuggling generic telemetry-backend status into health probes.",
+  "runner_pid": 496373,
+  "runner_state": {
+    "context_file": "/workspace/log-socialpredict-tasks/.codex-runs/context/d4e8fc6d-58bc-4217-8c51-c91fda76f304_20260428T035809Z_part01.ndjson",
+    "event_file": "/workspace/log-socialpredict-tasks/.codex-runs/events/d4e8fc6d-58bc-4217-8c51-c91fda76f304_20260428T035809Z_part01.ndjson",
+    "message_file": "/workspace/log-socialpredict-tasks/.codex-runs/messages/d4e8fc6d-58bc-4217-8c51-c91fda76f304_20260428T035809Z_part01.txt",
+    "paused": false,
+    "prompt_file": "/workspace/log-socialpredict-tasks/.codex-runs/prompts/d4e8fc6d-58bc-4217-8c51-c91fda76f304_20260428T035809Z_part01.txt",
+    "resume_pending": false,
+    "segment": 1,
+    "session_id": "019dd23c-bf2a-7f00-bdf2-3c54935d09dc",
+    "stderr_file": "/workspace/log-socialpredict-tasks/.codex-runs/stderr/d4e8fc6d-58bc-4217-8c51-c91fda76f304_20260428T035809Z_part01.stderr.log"
+  },
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-28T13:48:20.188522+00:00",
+  "status": "running",
+  "title": "WAVE02 Logging: Harden health and readiness semantics without conflating metrics",
+  "touched_paths": [
+    "../socialpredict/backend/server",
+    "../socialpredict/backend/internal/app/runtime",
+    "../socialpredict/backend/main.go"
+  ],
+  "uid": "d4e8fc6d-58bc-4217-8c51-c91fda76f304",
+  "verification": {
+    "focus": [
+      "clear runtime-boundary ownership for health and readiness",
+      "separation from application metrics routes",
+      "minimal and deterministic readiness semantics"
+    ],
+    "owner": "software-action-architecture-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

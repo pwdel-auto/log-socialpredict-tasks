@@ -1,0 +1,23 @@
+task_uid: `72a14560-e1b5-4c08-8fde-e00b9c08881c`  
+task_id: `WAVE01-CFG-003`  
+status: `completed`
+
+The target repo already had the setup/stats/seed consumer migration in place, so this run narrowed the remaining adjacent whole-tree access in [service.go](/workspace/socialpredict/backend/internal/service/config/service.go:1) and added regression coverage in [service_test.go](/workspace/socialpredict/backend/internal/service/config/service_test.go:1). `RuntimeService.Economics()` and `Frontend()` now return direct frozen value slices instead of routing through `Current()` and cloning the whole `AppConfig` first. The dispatcher also refreshed the curated report summary at [summary.json](/workspace/socialpredict/.codex-reports/tasks/72a14560-e1b5-4c08-8fde-e00b9c08881c/summary.json:1).
+
+files_changed:
+- [service.go](/workspace/socialpredict/backend/internal/service/config/service.go:1)
+- [service_test.go](/workspace/socialpredict/backend/internal/service/config/service_test.go:1)
+
+checks_run:
+- `gofmt -l` on touched files
+- `run_boundary_checks.sh /workspace/socialpredict`
+- `rg -n "configService\.Current\(|\.Current\(" handlers/setup handlers/stats seed`
+- `rg -n "return s\.Current\(\)\.(Economics|Frontend)" internal/service/config/service.go`
+- `go test ./internal/service/config ./handlers/setup ./handlers/stats ./seed -count=1` twice
+- `go test ./... -run TestOpenAPISpecValidates -count=1`
+- `go vet ./internal/service/config ./handlers/setup ./handlers/stats ./seed`
+
+follow_ups:
+- none
+
+Assumption: the already-landed setup/stats/seed narrowing in the target repo was the intended baseline for this queued run, so only the residual config-service accessor smell needed a live code change.

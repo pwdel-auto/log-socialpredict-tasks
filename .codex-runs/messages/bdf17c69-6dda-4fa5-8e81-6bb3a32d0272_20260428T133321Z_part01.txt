@@ -1,0 +1,11 @@
+task_uid: `bdf17c69-6dda-4fa5-8e81-6bb3a32d0272`  
+task_id: `WAVE02-LOG-003`  
+status: `completed`
+
+Converged the runtime-boundary logging work in the dirty tree without reverting existing edits. Startup and fatal paths stay on `backend/logger` in [main.go](/workspace/socialpredict/backend/main.go:1), request correlation/logging now sits at the outer HTTP boundary in [requestboundary.go](/workspace/socialpredict/backend/security/requestboundary.go:1) and [server.go](/workspace/socialpredict/backend/server/server.go:1), and `server.Start` now owns graceful shutdown logging through an `http.Server` with signal-aware shutdown. The middleware propagates or generates `X-Request-Id`, extracts `traceparent`, and emits OTel-aligned `trace_id` / `span_id` / `trace_flags` fields. Focused deterministic coverage was added in [requestboundary_test.go](/workspace/socialpredict/backend/security/requestboundary_test.go:1) and [server_test.go](/workspace/socialpredict/backend/server/server_test.go:1). The curated report was updated at [summary.json](/workspace/socialpredict/.codex-reports/tasks/bdf17c69-6dda-4fa5-8e81-6bb3a32d0272/summary.json:1).
+
+files_changed: `["backend/main.go","backend/server/server.go","backend/server/server_test.go","backend/security/requestboundary.go","backend/security/requestboundary_test.go","backend/logger/simplelogging.go","backend/logger/simplelogging_test.go"]`
+
+checks_run: `["gofmt -w touched Go files","go test ./logger -count=1 (repo-local caches) x2","go test ./security -run TestRequestBoundaryMiddlewareAddsContextHeaderAndStructuredLog|TestSecurityMiddleware|TestLoginSecurityMiddleware -count=1 (repo-local caches) x2","go test ./server -run TestBuildHandlerPropagatesRequestIDToPublicRoutes|TestServerRegistersAndServesCoreRoutes -count=1 (repo-local caches) x4","run_boundary_checks.sh /workspace/socialpredict","gofmt -l touched Go files","go vet ./... (repo-local caches)"]`
+
+follow_ups: `["Monitor workspace disk pressure before broader Go rebuilds or full reliability-suite reruns.","Keep panic recovery and shared 405/429 failure translation in the W03 wave unless a later task explicitly pulls them forward."]`
