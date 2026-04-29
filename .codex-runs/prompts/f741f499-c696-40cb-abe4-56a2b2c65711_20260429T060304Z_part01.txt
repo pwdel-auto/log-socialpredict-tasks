@@ -1,0 +1,72 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/f741f499-c696-40cb-abe4-56a2b2c65711`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/f741f499-c696-40cb-abe4-56a2b2c65711/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/f741f499-c696-40cb-abe4-56a2b2c65711/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/f741f499-c696-40cb-abe4-56a2b2c65711/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/f741f499-c696-40cb-abe4-56a2b2c65711/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "One high-value protected `/v0` route family is migrated off raw `http.Error`, status-only failures, or ad hoc strings in touched paths and uses the shared failure translation from earlier tasks.",
+    "For the touched family, stable public `reason` values are used only where behavior has converged, and any retained plain-text exception is explicit and documented as temporary.",
+    "OpenAPI and production notes are updated route-by-route for the touched family and do not overclaim universal error-envelope coverage."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "a6bfad12-fc36-4480-b5ae-691919703684"
+  ],
+  "id": "WAVE03-ERR-004",
+  "max_attempts": 3,
+  "notes": [
+    "Prefer the smallest protected `/v0` family that yields fast feedback and exposes the contract choice clearly.",
+    "Retain `PlainTextErrorResponse` only where behavior has not yet converged and mark it as temporary."
+  ],
+  "out_of_scope": [
+    "universal ReasonResponse rollout",
+    "full `backend/errors` retirement",
+    "telemetry exporter or tracing backend rollout"
+  ],
+  "profile": "",
+  "prompt": "Use the new boundary writers and auth outcomes to migrate the highest-value protected `/v0` route family off raw `http.Error`, status-only failures, or ad hoc strings. Adopt stable public `reason` values only where behavior has converged, keep any remaining plain-text exception explicit and temporary, and update `backend/docs/openapi.yaml` plus `README/PRODUCTION-NOTES/BACKEND/03-error-handling.md` route-by-route for the touched family without claiming universal envelope coverage.",
+  "runner_pid": 34887,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-29T06:03:04.352102+00:00",
+  "status": "running",
+  "title": "WAVE03 Error Handling: Migrate the first protected /v0 route family onto shared failure translation and accurate route docs",
+  "touched_paths": [
+    "../socialpredict/backend/handlers",
+    "../socialpredict/backend/server",
+    "../socialpredict/backend/docs/openapi.yaml",
+    "../socialpredict/README/PRODUCTION-NOTES/BACKEND/03-error-handling.md"
+  ],
+  "uid": "f741f499-c696-40cb-abe4-56a2b2c65711",
+  "verification": {
+    "focus": [
+      "accurate touched-route failure contracts",
+      "explicit migration-state documentation for any plain-text exception",
+      "route-family alignment between implementation and OpenAPI"
+    ],
+    "owner": "software-action-openapi-contract-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

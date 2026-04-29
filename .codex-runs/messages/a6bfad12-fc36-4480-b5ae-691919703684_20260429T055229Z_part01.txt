@@ -1,0 +1,18 @@
+task_uid: `a6bfad12-fc36-4480-b5ae-691919703684`  
+task_id: `WAVE03-ERR-003`  
+status: `completed`
+
+Spawned `software-action-dispatcher-agent`; it coordinated architecture and verifier specialist work and updated the canonical report.
+
+files_changed: auth service error types, `handlers/authhttp`, auth-consuming handlers under users/bets/markets/admin/CMS, and focused auth/handler tests.
+
+what changed: replaced `internal/service/auth.HTTPError` with typed `auth.AuthError` / `ErrorKind`; HTTP status/reason mapping now lives at the handler boundary via `handlers/authhttp`. Protected touched routes enforce must-change-password, while `/v0/changepassword` remains token-only so forced-password-change users can complete the reset.
+
+checks_run:
+- `gofmt` on touched Go files: pass
+- boundary checks: pass
+- focused auth/protected route packages: pass
+- `go test ./handlers/users -run 'Test(ChangePassword|Password|UserMarketPosition|ChangeDescription|ChangeDisplayName|ChangePersonalLinks|ChangeEmojiHandler)'`: pass
+- broader `go test ... ./handlers/users/... ...`: fails only on unrelated `TestEmojiValidation/Text_with_HTML`
+
+follow_ups: investigate the existing `handlers/users` emoji validation test expectation outside this auth task.

@@ -1,0 +1,26 @@
+task_uid: `f741f499-c696-40cb-abe4-56a2b2c65711`  
+task_id: `WAVE03-ERR-004`  
+status: `completed`
+
+Changed the protected profile/password `/v0` family contract docs and cleanup:
+- `backend/docs/openapi.yaml`
+- `backend/handlers/users/profile_helpers.go`
+- `backend/handlers/users/changeemoji_test.go`
+- `README/PRODUCTION-NOTES/BACKEND/03-error-handling.md`
+
+What changed:
+- Documented `/v0/privateprofile`, `/v0/profilechange/*`, and `/v0/changepassword` as migrated to JSON `ReasonResponse`, including `405 METHOD_NOT_ALLOWED`.
+- Removed the leftover ad hoc profile reason helper.
+- Updated production notes route-by-route and kept legacy public user/credit/portfolio plain-text behavior documented as temporary.
+- Fixed a stale emoji test expectation to match current safe sanitizer behavior.
+
+Checks run:
+- `go test -p=1 ./handlers/users`
+- `go test -p=1 ./handlers/authhttp ./handlers/users/privateuser ./handlers/users ./server`
+- `go vet ./handlers/authhttp ./handlers/users ./handlers/users/privateuser ./server`
+- `check_api_contract_sync.sh /workspace/socialpredict HEAD`
+- `run_boundary_checks.sh /workspace/socialpredict`
+- OpenAPI contract signoff and verifier pass recorded in the report.
+
+follow_ups:
+- Broader shared `429/405` rollout remains outside this task scope and should stay route/documentation accurate in later waves.

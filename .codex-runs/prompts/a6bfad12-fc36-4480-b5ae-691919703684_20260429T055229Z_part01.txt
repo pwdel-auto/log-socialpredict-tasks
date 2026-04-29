@@ -1,0 +1,72 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/a6bfad12-fc36-4480-b5ae-691919703684`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/a6bfad12-fc36-4480-b5ae-691919703684/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/a6bfad12-fc36-4480-b5ae-691919703684/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/a6bfad12-fc36-4480-b5ae-691919703684/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/a6bfad12-fc36-4480-b5ae-691919703684/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "Touched auth flows no longer expose `internal/service/auth.HTTPError` and instead return typed internal outcomes that can be mapped at the HTTP boundary.",
+    "Touched boundary code translates auth outcomes into responses without reintroducing transport leakage into internal services.",
+    "Must-change-password behavior is tightened and covered by focused tests for the touched protected-route flow."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "1448e15d-34a0-49af-bf2d-504b9530f7f1"
+  ],
+  "id": "WAVE03-ERR-003",
+  "max_attempts": 3,
+  "notes": [
+    "HTTP mapping belongs in handlers or middleware, not in `internal/service/auth`.",
+    "Preserve current auth protection semantics except for the intended must-change-password tightening."
+  ],
+  "out_of_scope": [
+    "credential or session model redesign",
+    "broad protected-route envelope migration outside touched auth paths",
+    "unrelated auth UX changes"
+  ],
+  "profile": "",
+  "prompt": "Replace `internal/service/auth.HTTPError` with cleaner typed internal auth outcomes before HTTP mapping occurs. Update the touched auth middleware and handlers to translate those outcomes only at the boundary, tighten must-change-password behavior, and preserve current route-protection semantics elsewhere. Keep this slice focused on eliminating auth-local HTTP transport leakage rather than starting a broader route-family envelope sweep.",
+  "runner_pid": 27198,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-29T05:52:29.235398+00:00",
+  "status": "running",
+  "title": "WAVE03 Error Handling: Replace auth HTTP transport errors with typed internal outcomes",
+  "touched_paths": [
+    "../socialpredict/backend/internal/service/auth",
+    "../socialpredict/backend/server",
+    "../socialpredict/backend/security",
+    "../socialpredict/backend/handlers/users"
+  ],
+  "uid": "a6bfad12-fc36-4480-b5ae-691919703684",
+  "verification": {
+    "focus": [
+      "removal of auth-local HTTP transport leakage",
+      "typed internal auth outcomes",
+      "must-change-password enforcement at the boundary"
+    ],
+    "owner": "software-action-architecture-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

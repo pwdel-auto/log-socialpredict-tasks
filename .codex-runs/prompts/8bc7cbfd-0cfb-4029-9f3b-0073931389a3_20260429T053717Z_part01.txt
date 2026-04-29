@@ -1,0 +1,71 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/8bc7cbfd-0cfb-4029-9f3b-0073931389a3`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/8bc7cbfd-0cfb-4029-9f3b-0073931389a3/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/8bc7cbfd-0cfb-4029-9f3b-0073931389a3/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/8bc7cbfd-0cfb-4029-9f3b-0073931389a3/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/8bc7cbfd-0cfb-4029-9f3b-0073931389a3/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "Touched request paths receive application-owned request correlation at the server boundary without pushing correlation plumbing into handlers or domain services.",
+    "Unexpected request-path panics are recovered at the boundary with sanitized client responses and correlated runtime diagnostics.",
+    "Focused tests verify panic recovery and correlation behavior deterministically for the touched boundary paths."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "668dbea3-f70a-46c2-9683-877f2e45f480"
+  ],
+  "id": "WAVE03-ERR-001",
+  "max_attempts": 3,
+  "notes": [
+    "Start at the request boundary; do not create a new cross-cutting universal error package.",
+    "Keep panic responses sanitized and correlation-friendly."
+  ],
+  "out_of_scope": [
+    "shared 405 or 429 failure-writer rollout",
+    "auth outcome redesign",
+    "generic retry or circuit-breaker behavior"
+  ],
+  "profile": "",
+  "prompt": "Use `lib/design/design-plan.json` and `../socialpredict/README/PRODUCTION-NOTES/BACKEND/03-error-handling.md` as the binding design context for WAVE03 error handling. Complete the first useful slice by adding application-owned request correlation and panic-recovery behavior at the server boundary. Keep handlers and domain logic free of new error-policy growth, return sanitized client failures for unexpected request-path panics, and make the correlation path compatible with later OpenTelemetry-aligned runtime telemetry without introducing a new universal error hierarchy.",
+  "runner_pid": 2423,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-29T05:37:17.366551+00:00",
+  "status": "running",
+  "title": "WAVE03 Error Handling: Add request correlation and panic recovery at the server boundary",
+  "touched_paths": [
+    "../socialpredict/backend/server",
+    "../socialpredict/backend/security",
+    "../socialpredict/backend/logger"
+  ],
+  "uid": "8bc7cbfd-0cfb-4029-9f3b-0073931389a3",
+  "verification": {
+    "focus": [
+      "deterministic panic-recovery behavior",
+      "boundary-owned request correlation",
+      "sanitized client failure handling"
+    ],
+    "owner": "software-action-test-reliability-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}
