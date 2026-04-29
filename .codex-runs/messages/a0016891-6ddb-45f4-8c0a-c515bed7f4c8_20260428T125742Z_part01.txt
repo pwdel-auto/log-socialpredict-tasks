@@ -1,0 +1,21 @@
+`task_uid`: `a0016891-6ddb-45f4-8c0a-c515bed7f4c8`  
+`task_id`: `WAVE01-CFG-005`  
+`status`: `completed`
+
+The required dispatcher flow was used via `software-action-dispatcher-agent`. It concluded the current repo state already satisfies this wave, so no additional code changes were needed beyond the existing config-service diff. The canonical report was refreshed at [summary.json](/workspace/socialpredict/.codex-reports/tasks/a0016891-6ddb-45f4-8c0a-c515bed7f4c8/summary.json).
+
+`files_changed`:
+- Active worktree diff is limited to [service.go](/workspace/socialpredict/backend/internal/service/config/service.go) and [service_test.go](/workspace/socialpredict/backend/internal/service/config/service_test.go).
+- The canonical task-level changed file set remains the backend paths recorded in [summary.json](/workspace/socialpredict/.codex-reports/tasks/a0016891-6ddb-45f4-8c0a-c515bed7f4c8/summary.json).
+
+`checks_run`:
+- `gofmt -l backend/internal/service/config/service.go backend/internal/service/config/service_test.go` passed
+- `run_boundary_checks.sh /workspace/socialpredict` passed
+- `go test ./internal/service/config ./internal/app/runtime ./setup ./seed ./internal/domain/bets ./internal/domain/analytics ./handlers/setup ./handlers/stats ./handlers/metrics ./server -count=1` passed twice
+- `go test ./... -run TestOpenAPISpecValidates -count=1` passed
+- `go vet ./...` passed
+
+`follow_ups`:
+- Historically exact system-metrics accounting across future economics rollouts still needs durable per-market or per-bet fee/cost persistence instead of recomputing from the current process snapshot.
+
+Assumption: this wave’s intended boundary is process-lifetime immutability of startup-validated economics, not a broader persistence redesign.

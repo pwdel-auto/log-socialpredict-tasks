@@ -1,0 +1,74 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/09cf942d-17bd-4e94-b6b7-eb70d497cf7d`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/09cf942d-17bd-4e94-b6b7-eb70d497cf7d/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/09cf942d-17bd-4e94-b6b7-eb70d497cf7d/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/09cf942d-17bd-4e94-b6b7-eb70d497cf7d/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/09cf942d-17bd-4e94-b6b7-eb70d497cf7d/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "No touched non-test backend code imports `socialpredict/logging`.",
+    "Any necessary test support is moved or replaced without preserving duplicate package ownership.",
+    "`backend/logging` is deleted and focused checks cover the migrated behavior for the touched paths.",
+    "No touched path replaces `backend/logger` with a direct application-level OpenTelemetry logging abstraction."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "a0016891-6ddb-45f4-8c0a-c515bed7f4c8"
+  ],
+  "id": "WAVE02-LOG-001",
+  "max_attempts": 3,
+  "notes": [
+    "Treat `backend/logging` as deletion-only scope.",
+    "Do not introduce a new wrapper package or long-lived compatibility layer.",
+    "Do not solve this task by wiring business code directly to an OpenTelemetry SDK."
+  ],
+  "out_of_scope": [
+    "request-correlation rollout",
+    "health and readiness redesign",
+    "metrics or tracing expansion"
+  ],
+  "profile": "",
+  "prompt": "Use `lib/design/design-plan.json` and `../socialpredict/README/PRODUCTION-NOTES/BACKEND/02-logging-observability.md` as the binding design context for WAVE02 logging and observability. Complete the first useful slice by migrating the remaining touched backend code off `socialpredict/logging` and onto `socialpredict/logger`, porting or replacing any minimal test seam that truly needs to survive, and deleting `backend/logging`. Preserve current behavior for the touched flows, avoid leaving a compatibility shim behind, and do not replace the logger boundary with direct OpenTelemetry SDK-coupled application code.",
+  "runner_pid": 398046,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-28T03:54:27.450062+00:00",
+  "status": "running",
+  "title": "WAVE02 Logging: Standardize on backend/logger and delete backend/logging",
+  "touched_paths": [
+    "../socialpredict/backend/logger",
+    "../socialpredict/backend/logging",
+    "../socialpredict/backend/handlers/markets"
+  ],
+  "uid": "09cf942d-17bd-4e94-b6b7-eb70d497cf7d",
+  "verification": {
+    "focus": [
+      "package unification onto backend/logger",
+      "deletion of backend/logging without a compatibility shim",
+      "behavior-preserving migration for touched callers",
+      "preservation of backend/logger as the application-facing adapter"
+    ],
+    "owner": "software-action-logging-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

@@ -1,0 +1,89 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/8e76fa6e-2576-4021-965e-3c96fed3d4d1`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/8e76fa6e-2576-4021-965e-3c96fed3d4d1/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/8e76fa6e-2576-4021-965e-3c96fed3d4d1/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/8e76fa6e-2576-4021-965e-3c96fed3d4d1/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/8e76fa6e-2576-4021-965e-3c96fed3d4d1/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "`backend/logger` exposes a clearer minimal runtime boundary for the touched callers without introducing a second logging abstraction or direct SDK-coupled replacement.",
+    "The touched logger contract makes the initial OpenTelemetry-aligned correlation or field vocabulary explicit for the surviving callers.",
+    "Touched logging behavior has explicit tests guarding stable runtime usage and safe handling expectations for secrets or sensitive values.",
+    "Touched runtime call sites can use the surviving logger package without reintroducing per-package logging dialects."
+  ],
+  "approval": "never",
+  "attempts": 2,
+  "depends_on": [
+    "09cf942d-17bd-4e94-b6b7-eb70d497cf7d"
+  ],
+  "finished_at": "2026-04-28T03:56:58.478246+00:00",
+  "id": "WAVE02-LOG-002",
+  "last_exit_code": 0,
+  "last_summary": "task_uid: `8e76fa6e-2576-4021-965e-3c96fed3d4d1`  \ntask_id: `WAVE02-LOG-002`  \nstatus: `blocked`\n\nI explicitly spawned `software-action-dispatcher-agent` and waited for it to conclude. It confirmed the task should likely have used `architecture-agent`, `coding-best-practices-agent`, and `verifier-agent`, but no specialist work was actionable because the environment blocked all repository access first.\n\nNo files were changed: `files_changed: []`\n\nChecks run:\n- attempted dispatcher coordination via subagent\n- attempted local shell inspection of touched paths and report helper\n- attempted MCP resource discovery\n\nResult:\n- every shell command failed before execution with `bwrap: No permissions to create a new namespace...`\n- no MCP resources were exposed\n- I could not read `../socialpredict/backend`, inspect or update the canonical report files, run tests, or make code changes\n\nAssumptions:\n- the blocker is environmental, not repo-specific\n- task execution can resume once shell access or equivalent workspace resource access is restored\n\nfollow_ups:\n- restore functional workspace command execution or expose the repo through MCP resources\n- rerun the task so the logger boundary, caller updates, tests, and verifier sign-off can be completed end-to-end",
+  "max_attempts": 3,
+  "notes": [
+    "Keep logging at runtime and transport boundaries, not in core domain policy.",
+    "Never log secrets, passwords, tokens, or API keys.",
+    "If JSON logs are emitted outside OTLP, prefer top-level `trace_id`, `span_id`, and `trace_flags`."
+  ],
+  "out_of_scope": [
+    "a full structured-logging redesign",
+    "tracing framework rollout",
+    "application metrics changes outside touched callers"
+  ],
+  "profile": "",
+  "prompt": "After package unification, harden `backend/logger` as the sole backend runtime log-emission adapter. Make the surviving logger boundary explicit for startup, server, and middleware use; define the minimal stable helper surface, message or field vocabulary expectations, OpenTelemetry-aligned correlation expectations, and redaction or no-secret rules in code and tests; and remove ad hoc patterns that would preserve unsafe or reflection-heavy logging behavior. Keep the work small and runtime-focused; do not start a full structured-logging platform or couple callers directly to exporter-specific APIs.",
+  "runner_pid": 466348,
+  "runner_state": {
+    "context_file": "/workspace/log-socialpredict-tasks/.codex-runs/context/8e76fa6e-2576-4021-965e-3c96fed3d4d1_20260428T035535Z_part01.ndjson",
+    "event_file": "/workspace/log-socialpredict-tasks/.codex-runs/events/8e76fa6e-2576-4021-965e-3c96fed3d4d1_20260428T035535Z_part01.ndjson",
+    "message_file": "/workspace/log-socialpredict-tasks/.codex-runs/messages/8e76fa6e-2576-4021-965e-3c96fed3d4d1_20260428T035535Z_part01.txt",
+    "paused": false,
+    "prompt_file": "/workspace/log-socialpredict-tasks/.codex-runs/prompts/8e76fa6e-2576-4021-965e-3c96fed3d4d1_20260428T035535Z_part01.txt",
+    "resume_pending": false,
+    "segment": 1,
+    "session_id": "019dd23a-6731-7780-9f62-5c44a3eccb44",
+    "stderr_file": "/workspace/log-socialpredict-tasks/.codex-runs/stderr/8e76fa6e-2576-4021-965e-3c96fed3d4d1_20260428T035535Z_part01.stderr.log"
+  },
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-28T13:17:03.597064+00:00",
+  "status": "running",
+  "title": "WAVE02 Logging: Define the minimal stable backend/logger contract with redaction and OpenTelemetry-aligned guardrails",
+  "touched_paths": [
+    "../socialpredict/backend/logger",
+    "../socialpredict/backend/logger/README_SIMPLELOGGING.md",
+    "../socialpredict/backend/main.go",
+    "../socialpredict/backend/server"
+  ],
+  "uid": "8e76fa6e-2576-4021-965e-3c96fed3d4d1",
+  "verification": {
+    "focus": [
+      "minimal stable logger contract",
+      "OpenTelemetry-aligned field and correlation vocabulary",
+      "redaction and no-secret guardrails",
+      "avoidance of a second logging abstraction"
+    ],
+    "owner": "software-action-logging-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

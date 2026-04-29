@@ -1,0 +1,74 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/bdf17c69-6dda-4fa5-8e81-6bb3a32d0272`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/bdf17c69-6dda-4fa5-8e81-6bb3a32d0272/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/bdf17c69-6dda-4fa5-8e81-6bb3a32d0272/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/bdf17c69-6dda-4fa5-8e81-6bb3a32d0272/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/bdf17c69-6dda-4fa5-8e81-6bb3a32d0272/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "Touched startup, server, and middleware paths emit runtime diagnostics through `backend/logger` rather than raw `log` calls or ad hoc local patterns.",
+    "Request or correlation context is added at the boundary layer instead of being pushed into domain logic or unrelated handlers.",
+    "Any touched serialized correlation fields are compatible with later OpenTelemetry trace-log correlation instead of inventing a second naming scheme.",
+    "Focused tests cover the new boundary logging behavior or helpers deterministically for the touched paths."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "8e76fa6e-2576-4021-965e-3c96fed3d4d1"
+  ],
+  "id": "WAVE02-LOG-003",
+  "max_attempts": 3,
+  "notes": [
+    "Prefer middleware and runtime-boundary injection over handler-local logger construction.",
+    "Keep stdout or stderr-first emission suitable for process and container aggregation.",
+    "Do not start a full tracing rollout in this task."
+  ],
+  "out_of_scope": [
+    "full tracing rollout",
+    "broad handler-by-handler logging sweeps",
+    "metrics redesign"
+  ],
+  "profile": "",
+  "prompt": "With one logger package and a stable contract, add runtime-boundary logging for startup, shutdown or fatal paths, and request lifecycle or correlation where it belongs: `main.go`, `server`, and middleware or security seams. Keep handlers and domain services thin, prefer one vocabulary, use OpenTelemetry-compatible correlation shape at the boundary, and avoid scattering logger construction through business code. Preserve existing endpoint behavior while making deploy, restart, and request diagnostics more deterministic.",
+  "runner_pid": 398610,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-28T03:56:58.556372+00:00",
+  "status": "running",
+  "title": "WAVE02 Logging: Add lifecycle and request-boundary logging through server and middleware seams",
+  "touched_paths": [
+    "../socialpredict/backend/main.go",
+    "../socialpredict/backend/server",
+    "../socialpredict/backend/security",
+    "../socialpredict/backend/logger"
+  ],
+  "uid": "bdf17c69-6dda-4fa5-8e81-6bb3a32d0272",
+  "verification": {
+    "focus": [
+      "runtime-boundary placement of logging",
+      "request or correlation context handling compatible with later tracing",
+      "deterministic verification for touched logging helpers"
+    ],
+    "owner": "software-action-logging-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

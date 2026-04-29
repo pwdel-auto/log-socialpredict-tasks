@@ -1,0 +1,75 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/8e76fa6e-2576-4021-965e-3c96fed3d4d1`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/8e76fa6e-2576-4021-965e-3c96fed3d4d1/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/8e76fa6e-2576-4021-965e-3c96fed3d4d1/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/8e76fa6e-2576-4021-965e-3c96fed3d4d1/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/8e76fa6e-2576-4021-965e-3c96fed3d4d1/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "`backend/logger` exposes a clearer minimal runtime boundary for the touched callers without introducing a second logging abstraction or direct SDK-coupled replacement.",
+    "The touched logger contract makes the initial OpenTelemetry-aligned correlation or field vocabulary explicit for the surviving callers.",
+    "Touched logging behavior has explicit tests guarding stable runtime usage and safe handling expectations for secrets or sensitive values.",
+    "Touched runtime call sites can use the surviving logger package without reintroducing per-package logging dialects."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "09cf942d-17bd-4e94-b6b7-eb70d497cf7d"
+  ],
+  "id": "WAVE02-LOG-002",
+  "max_attempts": 3,
+  "notes": [
+    "Keep logging at runtime and transport boundaries, not in core domain policy.",
+    "Never log secrets, passwords, tokens, or API keys.",
+    "If JSON logs are emitted outside OTLP, prefer top-level `trace_id`, `span_id`, and `trace_flags`."
+  ],
+  "out_of_scope": [
+    "a full structured-logging redesign",
+    "tracing framework rollout",
+    "application metrics changes outside touched callers"
+  ],
+  "profile": "",
+  "prompt": "After package unification, harden `backend/logger` as the sole backend runtime log-emission adapter. Make the surviving logger boundary explicit for startup, server, and middleware use; define the minimal stable helper surface, message or field vocabulary expectations, OpenTelemetry-aligned correlation expectations, and redaction or no-secret rules in code and tests; and remove ad hoc patterns that would preserve unsafe or reflection-heavy logging behavior. Keep the work small and runtime-focused; do not start a full structured-logging platform or couple callers directly to exporter-specific APIs.",
+  "runner_pid": 398321,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-28T03:55:35.862005+00:00",
+  "status": "running",
+  "title": "WAVE02 Logging: Define the minimal stable backend/logger contract with redaction and OpenTelemetry-aligned guardrails",
+  "touched_paths": [
+    "../socialpredict/backend/logger",
+    "../socialpredict/backend/logger/README_SIMPLELOGGING.md",
+    "../socialpredict/backend/main.go",
+    "../socialpredict/backend/server"
+  ],
+  "uid": "8e76fa6e-2576-4021-965e-3c96fed3d4d1",
+  "verification": {
+    "focus": [
+      "minimal stable logger contract",
+      "OpenTelemetry-aligned field and correlation vocabulary",
+      "redaction and no-secret guardrails",
+      "avoidance of a second logging abstraction"
+    ],
+    "owner": "software-action-logging-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

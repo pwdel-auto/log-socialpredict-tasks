@@ -1,0 +1,10 @@
+Implemented separate liveness and readiness semantics in the backend: `/health` stays a simple process probe, `/readyz` is now a distinct readiness probe that requires both the runtime readiness gate and live DB reachability, and `/v0/system/metrics` remains untouched as an application route. Focused route/runtime tests and OpenAPI parity were updated accordingly.
+
+Assumptions: I integrated with the pre-existing in-flight readiness wiring already present in `backend/main.go` and `backend/internal/app/runtime/readiness.go` instead of replacing it. Validation used repo-local Go cache/tmp env overrides because the runner’s default Go cache paths were unwritable.
+
+task_uid: `d4e8fc6d-58bc-4217-8c51-c91fda76f304`  
+task_id: `WAVE02-LOG-004`  
+status: `completed`  
+files_changed: `["backend/server/server.go","backend/server/server_test.go","backend/internal/app/runtime/db.go","backend/internal/app/runtime/db_test.go","backend/docs/openapi.yaml"]`  
+checks_run: `["gofmt -l backend/internal/app/runtime/db.go backend/internal/app/runtime/db_test.go backend/server/server.go backend/server/server_test.go","go test ./internal/app/runtime ./server -count=1","go test . -run 'TestOpenAPISpecValidates|TestEmbeddedOpenAPISpecMatchesDocument|TestOpenAPIOperationsMatchServerRoutes' -count=1","run_boundary_checks.sh /workspace/socialpredict","run_reliability_suite.sh /workspace/socialpredict ./server (RUNS=2)","run_reliability_suite.sh /workspace/socialpredict ./internal/app/runtime (RUNS=2)","check_api_contract_sync.sh /workspace/socialpredict HEAD","run_quality_guardrails.sh /workspace/socialpredict HEAD"]`  
+follow_ups: `[]`

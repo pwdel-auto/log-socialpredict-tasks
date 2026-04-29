@@ -1,0 +1,30 @@
+task_uid: `668dbea3-f70a-46c2-9683-877f2e45f480`  
+task_id: `WAVE02-LOG-005`  
+status: `completed`
+
+Changed the metrics/reporting seam so `/v0/system/metrics` stays application-owned and distinct from `/health` and `/readyz`. The final workspace adds narrow handler interfaces in `handlers/metrics`, groups application reporting routes explicitly in `server.go`, clarifies logger trace helpers as correlation-only rather than exporter contracts, and adds a contract test proving probe vs. application-route behavior stays separate. The canonical report at `/workspace/socialpredict/.codex-reports/tasks/668dbea3-f70a-46c2-9683-877f2e45f480` is finalized with dispatcher and verifier entries.
+
+Assumptions:
+- Verification used repo-local Go cache/temp directories because the default Go cache and temp paths were unavailable in this environment.
+- No OpenAPI behavior change was intended beyond preserving the existing route contract and validating it.
+
+files_changed:
+- `backend/handlers/metrics/service.go`
+- `backend/handlers/metrics/getsystemmetrics.go`
+- `backend/handlers/metrics/getgloballeaderboard.go`
+- `backend/server/server.go`
+- `backend/server/server_contract_test.go`
+- `backend/logger/simplelogging.go`
+- `backend/logger/README_SIMPLELOGGING.md`
+
+checks_run:
+- `gofmt` on converged touched files
+- `run_boundary_checks.sh /workspace/socialpredict`
+- `go test ./handlers/metrics ./server -count=1` twice with repo-local caches and `GOFLAGS=-p=1`
+- `go test ./... -run TestOpenAPISpecValidates -count=1`
+- `run_quality_guardrails.sh /workspace/socialpredict HEAD`
+- `check_api_contract_sync.sh /workspace/socialpredict HEAD`
+- `software-action-verifier-agent` bounded sign-off: `PASS`
+
+follow_ups:
+- `none`

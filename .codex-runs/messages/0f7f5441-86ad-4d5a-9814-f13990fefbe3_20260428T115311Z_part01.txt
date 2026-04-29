@@ -1,0 +1,29 @@
+task_uid: `0f7f5441-86ad-4d5a-9814-f13990fefbe3`  
+task_id: `WAVE01-CFG-001`  
+status: `completed`
+
+I explicitly spawned `software-action-dispatcher-agent` as requested. Assumption: the clean target repo already contained the intended WAVE01 implementation, so this run converged by re-verifying that slice and refreshing the canonical report rather than making new code edits. The dispatcher updated [summary.json](/workspace/socialpredict/.codex-reports/tasks/0f7f5441-86ad-4d5a-9814-f13990fefbe3/summary.json), appended a verification event, and the target worktree is clean.
+
+files_changed:
+- `backend/internal/service/config/service.go`
+- `backend/internal/service/config/service_test.go`
+- `backend/internal/service/config/types.go`
+- `backend/internal/service/config/loader.go`
+- `backend/internal/service/config/loader_test.go`
+- `backend/internal/app/runtime/config.go`
+- `backend/internal/app/runtime/config_test.go`
+- `backend/internal/app/container.go`
+- `backend/setup/setup.go`
+- `backend/server/server_test.go`
+
+checks_run:
+- `gofmt -l backend/internal/service/config/*.go backend/internal/app/runtime/config.go backend/internal/app/runtime/config_test.go backend/internal/app/container.go backend/setup/setup.go backend/server/server_test.go`
+- `/workspace/spec-socialpredict-tasks/.codex/skills/socialpredict-go-architecture-governance/scripts/run_boundary_checks.sh /workspace/socialpredict`
+- `env GOTMPDIR=/workspace/.tmp/go-build GOCACHE=/workspace/.cache/go-build GOMODCACHE=/workspace/.cache/go-mod GOPATH=/workspace/.cache/go-path go test -count=1 ./internal/service/config ./internal/app/runtime ./internal/app ./server`
+- `env GOTMPDIR=/workspace/.tmp/go-build GOCACHE=/workspace/.cache/go-build GOMODCACHE=/workspace/.cache/go-mod GOPATH=/workspace/.cache/go-path go test -count=1 ./internal/service/config ./internal/app/runtime ./internal/app ./server`
+- `env GOTMPDIR=/workspace/.tmp/go-build GOCACHE=/workspace/.cache/go-build GOMODCACHE=/workspace/.cache/go-mod GOPATH=/workspace/.cache/go-path go test ./... -run TestOpenAPISpecValidates -count=1`
+- `env GOTMPDIR=/workspace/.tmp/go-build GOCACHE=/workspace/.cache/go-build GOMODCACHE=/workspace/.cache/go-mod GOPATH=/workspace/.cache/go-path go vet ./internal/service/config ./internal/app/runtime ./internal/app ./server`
+
+follow_ups:
+- Make transitional `any`-based compatibility shims fail fast after the remaining `setup` consumers are migrated.
+- Optionally add an end-to-end assertion for `LoadConfigService()` against the real embedded `setup.yaml` asset in a later slice.

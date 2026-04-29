@@ -1,0 +1,86 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/57d5f112-1626-41cb-a301-fcef5f406136`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/57d5f112-1626-41cb-a301-fcef5f406136/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/57d5f112-1626-41cb-a301-fcef5f406136/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/57d5f112-1626-41cb-a301-fcef5f406136/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/57d5f112-1626-41cb-a301-fcef5f406136/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "The migrated runtime path no longer depends on `setup` package-global accessors or `init()`-driven loading.",
+    "`backend/setup` is narrowed toward source-asset and translation responsibilities for the touched path.",
+    "Focused tests demonstrate that runtime configuration initialization works through explicit seams rather than singleton state."
+  ],
+  "approval": "never",
+  "attempts": 2,
+  "depends_on": [
+    "0f7f5441-86ad-4d5a-9814-f13990fefbe3"
+  ],
+  "finished_at": "2026-04-27T04:30:32.135847+00:00",
+  "id": "WAVE01-CFG-002",
+  "last_exit_code": 0,
+  "last_summary": "Runtime config now loads through an explicit source seam instead of relying on `setup` package initialization. `main` injects `setup.EmbeddedSource{}`, `setup` keeps the embedded asset plus legacy translation/access paths, and the touched tests now cover both explicit embedded-source loading and the legacy singleton compatibility path. The report was updated at [summary.json](/workspace/socialpredict/.codex-reports/tasks/57d5f112-1626-41cb-a301-fcef5f406136/summary.json).\n\n- `task_uid`: `57d5f112-1626-41cb-a301-fcef5f406136`\n- `task_id`: `WAVE01-CFG-002`\n- `status`: `in_review`\n- `files_changed`: [backend/internal/app/runtime/config.go](/workspace/socialpredict/backend/internal/app/runtime/config.go), [backend/internal/app/runtime/config_test.go](/workspace/socialpredict/backend/internal/app/runtime/config_test.go), [backend/main.go](/workspace/socialpredict/backend/main.go), [backend/setup/setup.go](/workspace/socialpredict/backend/setup/setup.go), [backend/setup/setup_test.go](/workspace/socialpredict/backend/setup/setup_test.go)\n- `checks_run`: `run_boundary_checks.sh /workspace/socialpredict`; `gofmt -l` on touched backend Go files; `go test ./internal/app/runtime ./internal/service/config ./setup -count=1` twice; `go test ./... -run TestOpenAPISpecValidates -count=1`; `go vet ./...`\n- `follow_ups`: explicit `software-action-architecture-agent` sign-off was not captured before the dispatcher concluded, so the task was left in `in_review`\n\nAssumption: the pre-existing dirty-tree config-service changes from the prerequisite wave were treated as baseline and preserved.",
+  "max_attempts": 3,
+  "notes": [
+    "Treat `setup` as transitional, not final architecture.",
+    "Keep startup validation explicit and fail-fast."
+  ],
+  "out_of_scope": [
+    "changing the source asset format",
+    "broad refactors outside configuration-related seams",
+    "domain-consumer migration beyond touched runtime paths"
+  ],
+  "profile": "",
+  "prompt": "After the owned config types exist, reduce `backend/setup` toward the design-plan target role: source asset and translation seam only. Remove or isolate `init()`-driven loading, package-global convenience access, and other singleton behavior from the migrated runtime path while preserving current behavior for the backend entrypoint. The goal is to stop `setup` from acting as the long-term runtime boundary. Keep the migration reversible and avoid a flag-day rewrite.",
+  "runner_pid": 406815,
+  "runner_state": {
+    "context_file": "/workspace/log-socialpredict-tasks/.codex-runs/context/57d5f112-1626-41cb-a301-fcef5f406136_20260427T040254Z_part01.ndjson",
+    "event_file": "/workspace/log-socialpredict-tasks/.codex-runs/events/57d5f112-1626-41cb-a301-fcef5f406136_20260427T040254Z_part01.ndjson",
+    "message_file": "/workspace/log-socialpredict-tasks/.codex-runs/messages/57d5f112-1626-41cb-a301-fcef5f406136_20260427T040254Z_part01.txt",
+    "paused": false,
+    "prompt_file": "/workspace/log-socialpredict-tasks/.codex-runs/prompts/57d5f112-1626-41cb-a301-fcef5f406136_20260427T040254Z_part01.txt",
+    "resume_pending": false,
+    "segment": 1,
+    "session_id": "019dcd1a-bc4a-7b80-9802-61251e972e00",
+    "stderr_file": "/workspace/log-socialpredict-tasks/.codex-runs/stderr/57d5f112-1626-41cb-a301-fcef5f406136_20260427T040254Z_part01.stderr.log"
+  },
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-28T11:59:00.709860+00:00",
+  "status": "running",
+  "title": "WAVE01 Config: Reduce backend/setup to a source-asset and translation seam",
+  "touched_paths": [
+    "../socialpredict/backend/setup",
+    "../socialpredict/backend/internal/app/runtime",
+    "../socialpredict/backend/main.go",
+    "../socialpredict/backend/internal/service/config"
+  ],
+  "uid": "57d5f112-1626-41cb-a301-fcef5f406136",
+  "verification": {
+    "focus": [
+      "setup seam reduction",
+      "removal of migrated global access paths",
+      "behavior-preserving runtime initialization"
+    ],
+    "owner": "software-action-architecture-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

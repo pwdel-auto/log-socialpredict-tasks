@@ -1,0 +1,88 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/a0016891-6ddb-45f4-8c0a-c515bed7f4c8`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/a0016891-6ddb-45f4-8c0a-c515bed7f4c8/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/a0016891-6ddb-45f4-8c0a-c515bed7f4c8/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/a0016891-6ddb-45f4-8c0a-c515bed7f4c8/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/a0016891-6ddb-45f4-8c0a-c515bed7f4c8/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "The touched code and tests make startup-validated immutable economics snapshots explicit for the running process.",
+    "No touched path introduces or relies on hot reload for economics or other accounting-sensitive policy.",
+    "Accounting-sensitive workflow boundaries touched in this task either persist the required economics values durably or document a precise remaining gap with tests guarding the current behavior."
+  ],
+  "approval": "never",
+  "attempts": 2,
+  "depends_on": [
+    "72a14560-e1b5-4c08-8fde-e00b9c08881c",
+    "9d4ea064-e561-4e10-92f9-2320e116dc44"
+  ],
+  "finished_at": "2026-04-27T05:35:46.148696+00:00",
+  "id": "WAVE01-CFG-005",
+  "last_exit_code": 0,
+  "last_summary": "task_uid: `a0016891-6ddb-45f4-8c0a-c515bed7f4c8`  \ntask_id: `WAVE01-CFG-005`  \nstatus: `completed`\n\nThe task is complete and the curated report is finalized at [summary.json](/workspace/socialpredict/.codex-reports/tasks/a0016891-6ddb-45f4-8c0a-c515bed7f4c8/summary.json). The resulting backend state makes startup-loaded economics explicit and immutable for the running process: config/setup now defensively copy startup snapshots, accounting-sensitive services consume fixed config slices, and regression tests cover both source-mutation and caller-mutation paths.\n\nfiles_changed:\n- `backend/internal/service/config/{loader.go,loader_test.go,service.go,service_test.go,types.go}`\n- `backend/internal/app/{container.go,runtime/config.go,runtime/config_test.go}`\n- `backend/setup/{setup.go,setup_test.go}`\n- `backend/internal/domain/analytics/{financials.go,financialsnapshot_test.go,service.go,system_metrics.go,systemmetrics_integration_test.go,systemmetrics_test.go}`\n- `backend/internal/domain/bets/{bet_support.go,service.go,service_helpers_test.go,service_test.go}`\n- `backend/seed/{seed.go,seed_test.go,seed_users_test.go}`\n- `backend/handlers/{metrics/getgloballeaderboard_test.go,metrics/getsystemmetrics_test.go,setup/setuphandler_test.go,stats/statshandler.go,stats/statshandler_test.go}`\n- `backend/{main.go,server/server_test.go}`\n\nchecks_run:\n- `gofmt -l backend/internal/service/config/service.go backend/internal/service/config/service_test.go backend/internal/service/config/types.go`\n- `go test ./internal/service/config ./internal/app/runtime ./setup ./seed ./internal/domain/bets ./internal/domain/analytics ./handlers/setup ./handlers/stats ./handlers/metrics ./server -count=1` run twice\n- `go test ./... -run TestOpenAPISpecValidates -count=1`\n- `go vet ./...`\n\nfollow_ups:\n- `System metrics still recompute historical fee/cost totals from the injected process snapshot. If economics values ever change across deployments, exact historical reporting will require durable per-market or per-bet fee/cost persistence instead of recomputation from the current process snapshot.`\n\nAssumption: process-lifetime immutability is the intended protection for this wave; no broader persistence redesign was introduced beyond the explicit follow-up boundary above.",
+  "max_attempts": 3,
+  "notes": [
+    "This is the WAVE01 stop-and-review point before creating later production-note waves.",
+    "Financial and accounting correctness is binary; prefer explicit protection over speculative flexibility."
+  ],
+  "out_of_scope": [
+    "global background-job or observability work",
+    "production-note wave 02 and beyond",
+    "broad deployment-system redesign"
+  ],
+  "profile": "",
+  "prompt": "Finish the configuration-management wave by making the accounting-sensitive semantics explicit in code and tests. Ensure the touched backend paths treat economics policy as startup-validated and immutable for the running process, reject live-mutation or hot-reload behavior for accounting-sensitive policy, and persist accounting-relevant economics into durable workflow or domain state where correctness requires historical stability. Keep this task tightly scoped to what the touched code can safely support now; if a full persistence decision cannot be completed, implement the highest-value protections and document the exact follow-up boundary.",
+  "runner_pid": 440751,
+  "runner_state": {
+    "context_file": "/workspace/log-socialpredict-tasks/.codex-runs/context/a0016891-6ddb-45f4-8c0a-c515bed7f4c8_20260427T052303Z_part01.ndjson",
+    "event_file": "/workspace/log-socialpredict-tasks/.codex-runs/events/a0016891-6ddb-45f4-8c0a-c515bed7f4c8_20260427T052303Z_part01.ndjson",
+    "message_file": "/workspace/log-socialpredict-tasks/.codex-runs/messages/a0016891-6ddb-45f4-8c0a-c515bed7f4c8_20260427T052303Z_part01.txt",
+    "paused": false,
+    "prompt_file": "/workspace/log-socialpredict-tasks/.codex-runs/prompts/a0016891-6ddb-45f4-8c0a-c515bed7f4c8_20260427T052303Z_part01.txt",
+    "resume_pending": false,
+    "segment": 1,
+    "session_id": "019dcd64-1d14-7d53-8d3d-7eeee8e8f830",
+    "stderr_file": "/workspace/log-socialpredict-tasks/.codex-runs/stderr/a0016891-6ddb-45f4-8c0a-c515bed7f4c8_20260427T052303Z_part01.stderr.log"
+  },
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-28T12:57:42.418083+00:00",
+  "status": "running",
+  "title": "WAVE01 Config: Lock economics snapshot semantics and protect accounting correctness",
+  "touched_paths": [
+    "../socialpredict/backend/internal/service/config",
+    "../socialpredict/backend/internal/domain",
+    "../socialpredict/backend/internal/app",
+    "../socialpredict/backend/seed",
+    "../socialpredict/backend/setup"
+  ],
+  "uid": "a0016891-6ddb-45f4-8c0a-c515bed7f4c8",
+  "verification": {
+    "focus": [
+      "financial and accounting correctness protections",
+      "immutable snapshot semantics",
+      "durability or explicit gap documentation for touched accounting-sensitive flows"
+    ],
+    "owner": "software-action-test-reliability-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}
