@@ -1,0 +1,74 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/991c8ea5-19c8-4a16-885e-7d03c7e489e3`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/991c8ea5-19c8-4a16-885e-7d03c7e489e3/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/991c8ea5-19c8-4a16-885e-7d03c7e489e3/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/991c8ea5-19c8-4a16-885e-7d03c7e489e3/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/991c8ea5-19c8-4a16-885e-7d03c7e489e3/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "The chosen protected route family enforces `mustChangePassword` consistently at the boundary with the shared failure reason instead of mixed ad hoc behavior.",
+    "Login and `/v0/changepassword` remain intentionally usable when `mustChangePassword` is set.",
+    "Focused route tests and touched API documentation reflect the migrated enforcement behavior without overstating wider coverage."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "9df6daaf-aab4-4893-b816-f5f70244ae2e"
+  ],
+  "id": "WAVE05-SEC-004",
+  "max_attempts": 3,
+  "notes": [
+    "Preserve the current login and change-password exception behavior intentionally.",
+    "Prefer one coherent protected route family over a broad unaudited auth sweep."
+  ],
+  "out_of_scope": [
+    "broader token redesign",
+    "full authenticated-route sweep in one task",
+    "authorization framework redesign"
+  ],
+  "profile": "",
+  "prompt": "With reusable auth and boundary helpers in place, make the `mustChangePassword` rule explicit across the next protected route family rather than relying on whichever handlers already happen to call the auth helper correctly. Preserve the intentional exceptions for login and `/v0/changepassword`, block the chosen authenticated slice consistently with the shared failure reason, and update route tests plus OpenAPI or production-note text for the touched endpoints without claiming universal route-family completion.",
+  "runner_pid": 139057,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-30T05:29:40.396207+00:00",
+  "status": "running",
+  "title": "WAVE05 Security: Make must-change-password enforcement explicit across the next protected route family",
+  "touched_paths": [
+    "../socialpredict/backend/internal/service/auth",
+    "../socialpredict/backend/handlers/users",
+    "../socialpredict/backend/handlers/admin",
+    "../socialpredict/backend/handlers/bets",
+    "../socialpredict/backend/server",
+    "../socialpredict/backend/docs/openapi.yaml"
+  ],
+  "uid": "991c8ea5-19c8-4a16-885e-7d03c7e489e3",
+  "verification": {
+    "focus": [
+      "explicit `mustChangePassword` boundary behavior for the touched route family",
+      "preserved login and change-password exceptions",
+      "accurate contract documentation for the migrated slice"
+    ],
+    "owner": "software-action-openapi-contract-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

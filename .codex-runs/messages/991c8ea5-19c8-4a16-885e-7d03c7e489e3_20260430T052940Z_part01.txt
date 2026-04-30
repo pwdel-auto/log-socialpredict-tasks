@@ -1,0 +1,22 @@
+task_uid: `991c8ea5-19c8-4a16-885e-7d03c7e489e3`  
+task_id: `WAVE05-SEC-004`  
+status: `completed`
+
+Implemented explicit `mustChangePassword` boundary enforcement for the private action route family: `/v0/bet`, `/v0/sell`, and `/v0/userposition/{marketId}`. Login and `/v0/changepassword` remain outside that wrapper and intentionally usable when `MustChangePassword` is set.
+
+files_changed:
+- `server/server.go`
+- `server/server_test.go`
+- `docs/openapi.yaml`
+- `../README/PRODUCTION-NOTES/BACKEND/05-security-hardening.md`
+
+checks_run:
+- `go test -count=1 ./server ./handlers/bets/buying ./handlers/bets/selling ./handlers/users` twice
+- `go test -count=1 ./internal/service/auth`
+- `check_api_contract_sync.sh /workspace/socialpredict HEAD`
+- `run_boundary_checks.sh /workspace/socialpredict`
+- `run_quality_guardrails.sh /workspace/socialpredict HEAD`
+
+follow_ups: None.
+
+Note: the worktree already had unrelated modified files before this task; I left them untouched. The first Go test attempt hit an unwritable default module cache under `/home/agent/go`, then passed with explicit writable cache paths.
