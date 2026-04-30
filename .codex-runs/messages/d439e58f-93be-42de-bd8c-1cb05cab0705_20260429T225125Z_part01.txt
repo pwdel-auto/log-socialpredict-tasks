@@ -1,0 +1,30 @@
+task_uid: `d439e58f-93be-42de-bd8c-1cb05cab0705`  
+task_id: `WAVE04-DB-005`  
+status: `completed`
+
+Spawned `software-action-dispatcher-agent`; it coordinated specialist review and verifier sign-off.
+
+Changed bet placement to require an explicit transaction unit of work. The GORM adapter now scopes user balance reads/debits and bet insertion to one transaction, with Postgres `FOR UPDATE` protection on the user row. Removed the buy-side compensation ledger path from the active placement workflow and added rollback coverage for failed bet creation.
+
+files_changed:
+- `internal/domain/bets/bet_place.go`
+- `internal/domain/bets/bet_support.go`
+- `internal/domain/bets/errors.go`
+- `internal/domain/bets/service.go`
+- `internal/domain/bets/service_helpers_test.go`
+- `internal/domain/bets/service_test.go`
+- `internal/repository/bets/place_transaction.go`
+- `internal/repository/bets/place_transaction_test.go`
+- `README/PRODUCTION-NOTES/BACKEND/04-database-layer.md`
+
+checks_run:
+- `gofmt`
+- `go test -count=1 ./internal/domain/bets ./internal/repository/bets`
+- `run_boundary_checks.sh /workspace/socialpredict`
+- `run_quality_guardrails.sh /workspace/socialpredict`
+- `run_reliability_suite.sh /workspace/socialpredict ./internal/domain/bets`
+- `run_reliability_suite.sh /workspace/socialpredict ./internal/repository/bets`
+
+follow_ups:
+- Sell-position and market-resolution transaction/concurrency surfaces remain inventoried but not migrated in this wave.
+- Caching and Redis remain explicitly deferred.

@@ -1,0 +1,72 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/63c28c0d-db5e-4036-a78d-8f2953ead2be`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/63c28c0d-db5e-4036-a78d-8f2953ead2be/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/63c28c0d-db5e-4036-a78d-8f2953ead2be/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/63c28c0d-db5e-4036-a78d-8f2953ead2be/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/63c28c0d-db5e-4036-a78d-8f2953ead2be/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "Touched startup code no longer treats migrations or any still-startup-owned seed writes as implicit every-replica work.",
+    "Migration or schema-incompatibility failure in the touched startup path no longer degrades to warning-only continuation; the process fails closed or remains unready.",
+    "Focused tests cover the chosen startup-writer gate and migration failure posture deterministically for the touched path."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "700db0a4-da61-4d6f-883a-4bf6d1d5b468"
+  ],
+  "id": "WAVE04-DB-002",
+  "max_attempts": 3,
+  "notes": [
+    "The enforcement mechanism may be leader-only mode, a dedicated startup-writer mode, or a DB-backed serialization seam, but it must be explicit.",
+    "Do not leave warning-only migration failure or `AutoMigrate` fallback as the production end state."
+  ],
+  "out_of_scope": [
+    "final cluster-orchestration redesign",
+    "unrelated schema changes",
+    "caching or Redis rollout"
+  ],
+  "profile": "",
+  "prompt": "After the runtime DB seam is explicit, tighten the startup mutation path. Replace warning-only or every-replica default behavior around migrations and any still-startup-owned seed writes with an explicit startup-writer seam that preserves the current repo shape. Choose the smallest reversible enforcement the backend can support now, but make it impossible for request-serving startup to treat shared schema or seed mutation as an implicit every-process responsibility. Fail closed or remain unready on unsafe schema state, and keep caching or Redis out of scope.",
+  "runner_pid": 33277,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-29T21:28:36.576071+00:00",
+  "status": "running",
+  "title": "WAVE04 Database: Tighten migration failure posture and introduce a single-writer startup seam",
+  "touched_paths": [
+    "../socialpredict/backend/main.go",
+    "../socialpredict/backend/migration",
+    "../socialpredict/backend/seed",
+    "../socialpredict/backend/internal/app/runtime"
+  ],
+  "uid": "63c28c0d-db5e-4036-a78d-8f2953ead2be",
+  "verification": {
+    "focus": [
+      "migration runner failure posture",
+      "single-writer startup seam for migrations and startup-owned seeds",
+      "deterministic migration and startup safety checks"
+    ],
+    "owner": "software-action-db-migration-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

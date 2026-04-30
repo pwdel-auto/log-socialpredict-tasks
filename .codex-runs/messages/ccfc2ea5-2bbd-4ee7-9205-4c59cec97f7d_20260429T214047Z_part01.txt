@@ -1,0 +1,22 @@
+task_uid: `ccfc2ea5-2bbd-4ee7-9205-4c59cec97f7d`  
+task_id: `WAVE04-DB-003`  
+status: `done`
+
+Spawned the requested dispatcher coordinator. It used architecture, reliability, and verifier specialists and reported no remaining blockers.
+
+Changed:
+- [server.go](/workspace/socialpredict/backend/server/server.go): routes now use runtime-owned `ServingProbe`; `/health` is liveness and returns `live`; `/readyz` requires runtime readiness plus DB readiness.
+- [serving_probe.go](/workspace/socialpredict/backend/internal/app/runtime/serving_probe.go): added owned runtime liveness/readiness probe.
+- [serving_probe_test.go](/workspace/socialpredict/backend/internal/app/runtime/serving_probe_test.go): added deterministic runtime probe tests.
+- [server_test.go](/workspace/socialpredict/backend/server/server_test.go) and [server_contract_test.go](/workspace/socialpredict/backend/server/server_contract_test.go): updated probe contract assertions.
+
+Checks run:
+- `go test -count=1 ./internal/app/runtime ./server` passed twice with workspace Go caches.
+- `go vet ./...` passed.
+- `run_boundary_checks.sh /workspace/socialpredict` passed.
+- `gofmt -l ...` had no output.
+- `run_reliability_suite.sh /workspace/socialpredict ./server` passed.
+- `run_reliability_suite.sh /workspace/socialpredict ./internal/app/runtime` passed.
+
+Assumption: existing dirty startup/migration/runtime DB files were pre-existing and left intact.  
+follow_ups: `None`

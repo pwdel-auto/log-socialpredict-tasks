@@ -1,0 +1,34 @@
+task_uid: `63c28c0d-db5e-4036-a78d-8f2953ead2be`  
+task_id: `WAVE04-DB-002`  
+status: `completed`
+
+Spawned `software-action-dispatcher-agent` first as requested; it coordinated specialists and the final report was updated.
+
+files_changed:
+- `backend/main.go`
+- `backend/startup_mutation.go`
+- `backend/startup_mutation_test.go`
+- `backend/migration/migrate.go`
+- `backend/migration/migrate_test.go`
+- `backend/internal/app/runtime/startup_mutation.go`
+- `backend/internal/app/runtime/startup_mutation_test.go`
+
+What changed:
+- Added explicit `STARTUP_WRITER` startup mutation gate.
+- Writer processes run migrations plus startup-owned seeds.
+- Non-writer processes only verify applied migrations without mutating schema.
+- Removed warning-only migration continuation and `AutoMigrate` fallback.
+- Added focused tests for writer/non-writer branching, migration failure abort, env parsing, and read-only migration verification.
+
+checks_run:
+- `go test -count=1 . ./migration ./internal/app/runtime` passed twice with workspace-local Go caches.
+- `go test -count=1 ./...` passed.
+- `go vet ./...` passed.
+- `gofmt` wrapper passed.
+- architecture boundary check passed.
+
+Assumption:
+- Exactly one deployed startup writer will run with `STARTUP_WRITER=true`; request-serving replicas remain unset or false.
+
+follow_ups:
+- Deploy/configure the single startup writer role before relying on non-writer request-serving startup.

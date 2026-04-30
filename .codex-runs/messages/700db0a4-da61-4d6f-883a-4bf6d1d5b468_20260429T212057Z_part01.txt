@@ -1,0 +1,20 @@
+task_uid: `700db0a4-da61-4d6f-883a-4bf6d1d5b468`  
+task_id: `WAVE04-DB-001`  
+status: `complete`
+
+Changed `internal/app/runtime/db.go`, `internal/app/runtime/db_test.go`, and `main.go`.
+
+Runtime DB ownership is now explicit for pool sizing, connection lifetime, SSL/TLS posture, readiness pinging, and shutdown. `InitDB` now returns/configures the explicit handle without mutating `SetDB`/`GetDB`; those globals remain documented as legacy/test bridge only. `main.go` now closes the DB pool after server shutdown.
+
+Assumption: production runtime should fail closed on TLS posture when `APP_ENV=production` unless SSL mode is set to `require`, `verify-ca`, or `verify-full`, or TLS requirement is explicitly disabled.
+
+Checks run:
+- `go test ./internal/app/runtime -count=1`
+- runtime reliability suite, including two deterministic runtime test runs
+- `go vet ./...`
+- architecture boundary checks
+- quality guardrails
+- `gofmt`
+- `git diff --check`
+
+follow_ups: none.
