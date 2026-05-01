@@ -1,0 +1,74 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/dcf47cd2-ea9e-42dc-b8d9-5bc4f765b669`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/dcf47cd2-ea9e-42dc-b8d9-5bc4f765b669/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/dcf47cd2-ea9e-42dc-b8d9-5bc4f765b669/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/dcf47cd2-ea9e-42dc-b8d9-5bc4f765b669/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/dcf47cd2-ea9e-42dc-b8d9-5bc4f765b669/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "The remaining DB or runtime behaviors that still lack source-of-truth Postgres verification are explicitly inventoried after the wave's concrete test additions.",
+    "The active and future testing notes accurately distinguish completed hardening from still-deferred infrastructure ideas.",
+    "The wave ends with a precise next verification seam rather than a revived platform backlog."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "b309821d-deb6-4a6b-a78b-ef1637cc765f"
+  ],
+  "id": "WAVE07-TEST-005",
+  "max_attempts": 3,
+  "notes": [
+    "This is the WAVE07 stop-and-review point before any heavier verification or CI discussion.",
+    "Keep the next slice framed as one concrete uncovered behavior, not a testing-platform program."
+  ],
+  "out_of_scope": [
+    "testcontainers adoption or container-orchestration rollout",
+    "broad CI or workflow taxonomy redesign",
+    "centralized shared test framework or helper-repo extraction"
+  ],
+  "profile": "",
+  "prompt": "Finish WAVE07 with a verification-specific stop-and-review point. Reconcile what this wave actually proved against the remaining SQLite-only convenience coverage, make the next real-Postgres candidate explicit if one still remains, and keep `FUTURE/03-long-term-test-infrastructure.md` clearly deferred. Do not pull `testcontainers-go`, a top-level `testing/` tree, shared `TestSuite` architecture, broad fast/slow taxonomy work, performance suites, or CI-platform redesign into the active queue unless the touched evidence now reveals a specific uncovered behavior that cannot be handled with the current package-local posture.",
+  "runner_pid": 30795,
+  "sandbox": "workspace-write",
+  "started_at": "2026-05-01T03:37:43.548406+00:00",
+  "status": "running",
+  "title": "WAVE07 Testing: Stop and review remaining DB-truth gaps and deferred test-platform ideas",
+  "touched_paths": [
+    "../socialpredict/backend/internal/app/runtime",
+    "../socialpredict/backend/migration",
+    "../socialpredict/backend/internal/domain/bets",
+    "../socialpredict/backend/server",
+    "../socialpredict/README/PRODUCTION-NOTES/BACKEND/07-testing-strategy.md",
+    "../socialpredict/README/PRODUCTION-NOTES/BACKEND/FUTURE/03-long-term-test-infrastructure.md"
+  ],
+  "uid": "dcf47cd2-ea9e-42dc-b8d9-5bc4f765b669",
+  "verification": {
+    "focus": [
+      "explicit remaining DB-truth verification inventory",
+      "accuracy of active versus deferred testing notes",
+      "continued rejection of speculative testing-platform expansion"
+    ],
+    "owner": "software-action-verifier-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict"
+}

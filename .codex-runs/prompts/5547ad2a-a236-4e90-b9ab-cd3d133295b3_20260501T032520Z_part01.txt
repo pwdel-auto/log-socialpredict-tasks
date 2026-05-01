@@ -1,0 +1,71 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/5547ad2a-a236-4e90-b9ab-cd3d133295b3`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/5547ad2a-a236-4e90-b9ab-cd3d133295b3/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/5547ad2a-a236-4e90-b9ab-cd3d133295b3/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/5547ad2a-a236-4e90-b9ab-cd3d133295b3/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/5547ad2a-a236-4e90-b9ab-cd3d133295b3/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "The first migrated atomic workflow has real-Postgres verification for transaction success, rollback, and the touched concurrency-control behavior.",
+    "The verification stays in the owning domain or repository packages and does not depend on a new shared transaction-test platform.",
+    "The tests preserve accounting semantics and avoid speculative coverage of workflows that the active queue has not yet migrated."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "bc2d6801-7904-406d-b2f4-b23ccd6998bb"
+  ],
+  "id": "WAVE07-TEST-003",
+  "max_attempts": 3,
+  "notes": [
+    "Start with the workflow W04 actually migrated instead of inventing a new accounting surface.",
+    "Add only the smallest concurrency cases needed to prove the chosen locking or update semantics."
+  ],
+  "out_of_scope": [
+    "sell-position or market-resolution sweeps beyond the first migrated workflow",
+    "automatic retry or circuit-breaker experimentation",
+    "load, stress, or benchmark infrastructure"
+  ],
+  "profile": "",
+  "prompt": "Add the next small real-Postgres verification slice to the first accounting-sensitive workflow that W04 made atomic, expected to be bet placement unless the completed W04 slice leaves a smaller live unit of work. Prove transaction boundaries, rollback behavior, and the chosen primary-DB concurrency protection under overlapping requests or equivalent direct repository or service calls. Keep the tests in the owning domain or repository packages, preserve integer-first accounting assumptions, and do not grow a generalized transaction-test framework.",
+  "runner_pid": 22304,
+  "sandbox": "workspace-write",
+  "started_at": "2026-05-01T03:25:20.516219+00:00",
+  "status": "running",
+  "title": "WAVE07 Testing: Add Postgres-truthful verification for the first atomic accounting workflow",
+  "touched_paths": [
+    "../socialpredict/backend/internal/domain/bets",
+    "../socialpredict/backend/internal/repository/bets",
+    "../socialpredict/backend/internal/repository/users"
+  ],
+  "uid": "5547ad2a-a236-4e90-b9ab-cd3d133295b3",
+  "verification": {
+    "focus": [
+      "transaction and rollback truth under Postgres",
+      "concurrency protection for the first atomic workflow",
+      "preservation of integer-first accounting behavior"
+    ],
+    "owner": "software-action-test-reliability-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

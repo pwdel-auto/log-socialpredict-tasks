@@ -1,0 +1,16 @@
+task_uid: `661835f8-0764-4ce6-bb3e-6a4ec53925eb`  
+task_id: `WAVE07-TEST-001`  
+status: `completed`
+
+Changed 10 files: package-local runtime, migration, bets, and markets test files now explicitly label SQLite/fake coverage as convenience-only and identify the real-Postgres proof still needed. Updated `07-testing-strategy.md` to narrow first source-of-truth targets to concrete W04 and W06 risks while keeping long-term infrastructure deferred.
+
+checks_run:
+- `gofmt -w` on touched Go test files
+- `git diff --check`
+- reliability suite for `./internal/...`
+- reliability suite for `./migration/...`
+
+follow_ups:
+- Implement real-Postgres W04 proof for readiness/outage, migration/startup-writer serialization, and accounting transaction/concurrency behavior.
+- Use real Postgres for W06 persisted auth-state contract checks only where fakes are not truthful.
+- Keep testcontainers/shared `TestSuite`/top-level testing infrastructure deferred.

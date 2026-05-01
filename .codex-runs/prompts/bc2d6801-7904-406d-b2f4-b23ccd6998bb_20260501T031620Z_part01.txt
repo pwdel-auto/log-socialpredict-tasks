@@ -1,0 +1,71 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/bc2d6801-7904-406d-b2f4-b23ccd6998bb`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/bc2d6801-7904-406d-b2f4-b23ccd6998bb/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/bc2d6801-7904-406d-b2f4-b23ccd6998bb/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/bc2d6801-7904-406d-b2f4-b23ccd6998bb/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/bc2d6801-7904-406d-b2f4-b23ccd6998bb/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "Real-Postgres-backed checks exist for the touched readiness, startup-writer, or migration behaviors whose correctness depends on Postgres semantics.",
+    "The new DB-truthful checks live with the owning runtime or migration code, or in a narrowly justified backend-root contract test, without introducing a central test subsystem.",
+    "The touched verification makes failure posture explicit for DB loss, schema incompatibility, or startup-writer discipline without widening into general deployment orchestration."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "661835f8-0764-4ce6-bb3e-6a4ec53925eb"
+  ],
+  "id": "WAVE07-TEST-002",
+  "max_attempts": 3,
+  "notes": [
+    "Prefer the smallest real-Postgres cases that prove the runtime contract; do not duplicate every SQLite case against Postgres.",
+    "If startup-writer behavior cannot be proven entirely package-local, use backend-root or `server` only for the narrow cross-boundary seam."
+  ],
+  "out_of_scope": [
+    "generalized multi-node orchestration harnesses",
+    "backend-wide CI redesign",
+    "caching, Redis, or unrelated database architecture changes"
+  ],
+  "profile": "",
+  "prompt": "With the target seams narrowed, add the first real-Postgres verification where SQLite is not credible: runtime DB readiness after startup, migration failure posture, and the chosen startup-writer or migration-serialization behavior from W04. Keep the tests beside `internal/app/runtime` and `migration` or in the smallest justified backend-root contract location, reuse existing helpers where practical, and avoid broad container-orchestration or CI redesign. If minimal production seams must change to make the behavior testable, keep them owned by runtime or migration code rather than inventing a new test platform.",
+  "runner_pid": 8969,
+  "sandbox": "workspace-write",
+  "started_at": "2026-05-01T03:16:20.443937+00:00",
+  "status": "running",
+  "title": "WAVE07 Testing: Add Postgres-truthful runtime and migration verification for readiness and startup-writer behavior",
+  "touched_paths": [
+    "../socialpredict/backend/internal/app/runtime",
+    "../socialpredict/backend/migration",
+    "../socialpredict/backend/server"
+  ],
+  "uid": "bc2d6801-7904-406d-b2f4-b23ccd6998bb",
+  "verification": {
+    "focus": [
+      "real-Postgres verification for readiness and startup mutation behavior",
+      "migration failure posture under the owned startup seam",
+      "package-local or narrowly justified contract-test placement"
+    ],
+    "owner": "software-action-db-migration-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

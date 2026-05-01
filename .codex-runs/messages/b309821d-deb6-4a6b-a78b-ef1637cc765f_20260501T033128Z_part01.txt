@@ -1,0 +1,24 @@
+task_uid: `b309821d-deb6-4a6b-a78b-ef1637cc765f`  
+task_id: `WAVE07-TEST-004`  
+status: `completed`
+
+Changed:
+- Hardened existing boundary tests in:
+  - [openapi_test.go](/workspace/socialpredict/backend/openapi_test.go:255)
+  - [security/ratelimit_test.go](/workspace/socialpredict/backend/security/ratelimit_test.go:191)
+  - [security/requestboundary_test.go](/workspace/socialpredict/backend/security/requestboundary_test.go:85)
+  - [server/server_contract_test.go](/workspace/socialpredict/backend/server/server_contract_test.go:117)
+  - [server/server_test.go](/workspace/socialpredict/backend/server/server_test.go:355)
+- Added/strengthened coverage for must-change-password exceptions, shared `405`, `429`, sanitized `500`, proxy-trust client identity, and runtime/public `reason` vocabulary parity.
+- `docs/openapi.yaml` was not changed; the hardened checks did not expose drift.
+
+Checks run:
+- `go test -count=1 ./security` twice
+- `go test -count=1 ./server` twice
+- `go test -count=1 .` twice
+- `go test -count=1 ./internal/service/auth` twice
+- `git diff --check -- touched files`
+
+Assumption: test-only hardening satisfied the task because implementation and OpenAPI YAML already matched the intended contract.
+
+Follow-ups: none. Note: the worktree had unrelated pre-existing changes outside these five touched files; I left them untouched.
