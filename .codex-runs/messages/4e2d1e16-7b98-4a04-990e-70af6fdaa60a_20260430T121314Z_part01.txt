@@ -1,0 +1,24 @@
+task_uid: `4e2d1e16-7b98-4a04-990e-70af6fdaa60a`  
+task_id: `WAVE06-API-001`  
+status: `completed`
+
+Implemented the WAVE06 API contract alignment. Added the route-family migration matrix to OpenAPI and docs, documented public `reason` vocabulary as client contract vocabulary separate from telemetry/runtime terms, documented `PlainTextErrorResponse` as migration state, added the trailing-slash market projection alias to the contract, and constrained `/swagger` routes to `GET` to match the documented infra docs surface. OpenAPI specialist sign-off is approved.
+
+files_changed:
+- `backend/server/server.go`
+- `backend/docs/openapi.yaml`
+- `backend/docs/API-ISSUES.md`
+- `backend/openapi_test.go`
+- `backend/server/server_contract_test.go`
+- `README/PRODUCTION-NOTES/BACKEND/06-api-design.md`
+
+checks_run:
+- `gofmt -w openapi_test.go server/server.go server/server_contract_test.go`
+- `go test ./...`
+- `check_api_contract_sync.sh /workspace/socialpredict HEAD`
+- focused OpenAPI matrix/reason/plain-text tests
+- focused server contract tests
+- `git diff --check`
+
+follow_ups:
+- Staging/production proxy publishing for `/swagger/` and `/openapi.yaml` remains an operations follow-up, now documented.

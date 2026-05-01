@@ -1,0 +1,75 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/a8738d53-e5b3-494c-8ca1-6a9c30126f2f`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/a8738d53-e5b3-494c-8ca1-6a9c30126f2f/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/a8738d53-e5b3-494c-8ca1-6a9c30126f2f/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/a8738d53-e5b3-494c-8ca1-6a9c30126f2f/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/a8738d53-e5b3-494c-8ca1-6a9c30126f2f/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "The chosen auth path no longer requires `internal/service/auth.HTTPError` as the internal contract for the touched protected route family, and HTTP mapping stays at the boundary.",
+    "The touched protected routes preserve the existing login token contract plus the intentional login and change-password `mustChangePassword` exception behavior.",
+    "Focused route tests and OpenAPI or note updates cover the migrated auth failure reasons without leaking raw transport strings or overstating broader retirement."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "4e2d1e16-7b98-4a04-990e-70af6fdaa60a"
+  ],
+  "id": "WAVE06-API-002",
+  "max_attempts": 3,
+  "notes": [
+    "Choose one coherent protected family instead of scattering single-callsite changes across the tree.",
+    "Preserve the existing login and change-password exception behavior intentionally while retiring transport leakage in the touched slice."
+  ],
+  "out_of_scope": [
+    "token redesign, MFA, RBAC, or session-platform work",
+    "full authenticated-route sweep in one task",
+    "turning public `reason` values into telemetry fields"
+  ],
+  "profile": "",
+  "prompt": "With the migration matrix in place, start retiring auth transport leakage in code rather than just documenting it. Replace `internal/service/auth.HTTPError` usage on one coherent protected route family, such as the current-user/profile, admin, or create-market slice, with typed internal outcomes or an equivalent boundary-safe translation seam that keeps HTTP mapping at the handler or boundary helper. Preserve the existing `POST /v0/login` token response and the intentional `/v0/changepassword` exception when `mustChangePassword` is set, keep public `reason` values separate from telemetry classification, and update OpenAPI or notes only for the touched routes instead of claiming wave-wide completion.",
+  "runner_pid": 168842,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-30T12:26:03.297682+00:00",
+  "status": "running",
+  "title": "WAVE06 API: Introduce boundary-safe auth outcomes for the first protected route family",
+  "touched_paths": [
+    "../socialpredict/backend/internal/service/auth",
+    "../socialpredict/backend/handlers/users",
+    "../socialpredict/backend/handlers/admin",
+    "../socialpredict/backend/handlers/markets",
+    "../socialpredict/backend/server",
+    "../socialpredict/backend/docs/openapi.yaml",
+    "../socialpredict/backend/docs/API-ISSUES.md"
+  ],
+  "uid": "a8738d53-e5b3-494c-8ca1-6a9c30126f2f",
+  "verification": {
+    "focus": [
+      "boundary-safe auth outcomes for the chosen route family",
+      "removal of `HTTPError` transport leakage from the touched auth path",
+      "preserved login and change-password `mustChangePassword` exceptions"
+    ],
+    "owner": "software-action-architecture-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

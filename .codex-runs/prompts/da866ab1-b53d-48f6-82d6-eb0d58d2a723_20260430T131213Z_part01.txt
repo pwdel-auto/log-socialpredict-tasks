@@ -1,0 +1,75 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/da866ab1-b53d-48f6-82d6-eb0d58d2a723`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/da866ab1-b53d-48f6-82d6-eb0d58d2a723/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/da866ab1-b53d-48f6-82d6-eb0d58d2a723/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/da866ab1-b53d-48f6-82d6-eb0d58d2a723/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/da866ab1-b53d-48f6-82d6-eb0d58d2a723/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "The chosen staging or production publishing path for `/swagger/` and `/openapi.yaml` is explicit in the touched proxy or deployment config and operator docs rather than implicit prefix routing.",
+    "Backend tests and touched docs agree on the canonical backend docs endpoints and their intended external publishing behavior.",
+    "The task keeps backend-served docs as the single contract surface and does not introduce a frontend-owned Swagger copy or new platform layer."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "78131017-967a-43e2-9fd0-fc523891b1ce"
+  ],
+  "id": "WAVE06-API-004",
+  "max_attempts": 3,
+  "notes": [
+    "Choose one explicit external docs path or hostname and document any access-restriction decision.",
+    "Do not let `/api/` proxy rules accidentally own the docs contract."
+  ],
+  "out_of_scope": [
+    "generated clients or generator-first contract ownership",
+    "frontend-owned Swagger duplication",
+    "`/v1` or broader version-platform rollout"
+  ],
+  "profile": "",
+  "prompt": "Once the active contract inventory is explicit, make backend-served docs an owned publishing contract across local, staging, and production. Preserve `/swagger/` and `/openapi.yaml` as the canonical backend endpoints, update the repo's proxy or deployment templates and operator-facing notes so those paths are published deliberately instead of being hidden behind `/api/` prefix routing, and keep the backend as the single Swagger or OpenAPI source of truth. Do not solve this by cloning Swagger into the frontend, inventing a new docs platform, or starting generated-client rollout.",
+  "runner_pid": 196484,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-30T13:12:13.257378+00:00",
+  "status": "running",
+  "title": "WAVE06 API: Make Swagger and OpenAPI publishing explicit across proxy environments",
+  "touched_paths": [
+    "../socialpredict/backend/server/server_contract_test.go",
+    "../socialpredict/backend/docs/README.md",
+    "../socialpredict/backend/docs/API-ISSUES.md",
+    "../socialpredict/README/PRODUCTION-NOTES/BACKEND/06-api-design.md",
+    "../socialpredict/data/nginx/vhosts/dev/default.conf.template",
+    "../socialpredict/data/nginx/vhosts/prod/default.conf.template",
+    "../socialpredict/data/traefik/config/traefik.template"
+  ],
+  "uid": "da866ab1-b53d-48f6-82d6-eb0d58d2a723",
+  "verification": {
+    "focus": [
+      "explicit proxy publishing for `/swagger/` and `/openapi.yaml`",
+      "agreement between backend tests and operator-facing docs",
+      "continued backend ownership of the docs surface"
+    ],
+    "owner": "software-action-verifier-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict"
+}

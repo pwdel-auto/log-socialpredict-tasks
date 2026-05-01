@@ -1,0 +1,25 @@
+task_uid: `78131017-967a-43e2-9fd0-fc523891b1ce`  
+task_id: `WAVE06-API-003`  
+status: `completed`
+
+Spawned the requested dispatcher coordination path; specialists signed off. Migrated the market-search route family so `SearchMarketsHandler` now uses shared `ReasonResponse` failures while preserving raw `SearchResponse` success payloads. Updated focused tests, OpenAPI migration matrix/docs, and removed the stale production-note plain-text example for `searchmarkets.go`.
+
+files_changed:
+- `handlers/markets/searchmarkets.go`
+- `handlers/markets/searchmarkets_handler_test.go`
+- `docs/openapi.yaml`
+- `docs/API-ISSUES.md`
+- `README/PRODUCTION-NOTES/BACKEND/06-api-design.md`
+- `openapi_test.go`
+
+checks_run:
+- `gofmt -l ...`
+- `go test -count=1 ./handlers/markets` twice
+- `go test -count=1 ./handlers/markets -run 'TestSearchMarketsHandler|TestHandlerSearchMarkets'`
+- `go test -count=1 ./... -run 'TestOpenAPI|Test.*Contract|TestSearchMarkets'`
+- API contract sync script
+- architecture boundary checks
+- quality guardrails
+
+Assumption: market-search is the scoped client-visible family for this wave; broader markets/plain-text compatibility handlers remain explicit migration state.  
+follow_ups: none.

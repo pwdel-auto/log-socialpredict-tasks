@@ -1,0 +1,17 @@
+task_uid: `f8cf6368-bd2e-4dbc-9548-6431f21e7b25`  
+task_id: `WAVE06-API-005`  
+status: `completed`
+
+Spawned `software-action-dispatcher-agent` first as requested. WAVE06 stop-and-review is complete, report summary is updated, and verifier sign-off passed.
+
+files_changed:
+`README/PRODUCTION-NOTES/BACKEND/06-api-design.md`, `README/PRODUCTION-NOTES/BACKEND/08-deployment-infrastructure.md`, `README/PRODUCTION-NOTES/BACKEND/FUTURE/02-long-term-api-design.md`, `backend/docs/API-ISSUES.md`, `backend/docs/README.md`, `backend/docs/openapi.yaml`, auth/user/market/server handler/test files, nginx dev/prod templates, and Traefik template.
+
+checks_run:
+- `run_gofmt.sh /workspace/socialpredict check ./handlers/authhttp ./handlers/markets ./handlers/users ./server`
+- API contract sync script with workspace Go caches
+- `go test -count=1 ./server ./handlers/authhttp ./handlers/markets ./handlers/users ./internal/service/auth`
+- `git diff --check`
+
+follow_ups:
+Next concrete API slice is markets route-family cleanup: retire unused compatibility entry points and convert any still-routed market handler failures to `ReasonResponse`, without reviving platform backlog topics.
