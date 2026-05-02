@@ -1,0 +1,18 @@
+task_uid: `019de369-df09-7003-99f7-177b9be306d8`  
+task_id: `WAVE09-MON-004`  
+status: `completed`
+
+Updated:
+- [09-monitoring-alerting.md](/workspace/socialpredict/README/PRODUCTION-NOTES/BACKEND/09-monitoring-alerting.md)
+- [docs/README.md](/workspace/socialpredict/backend/docs/README.md)
+- [docs/openapi.yaml](/workspace/socialpredict/backend/docs/openapi.yaml)
+
+What changed: documented the app-owned monitoring signal contract, named the first supported alert set, narrowed remaining gaps to concrete runtime signal seams, and explicitly deferred Prometheus/Grafana/Alertmanager/paging/SLO/platform work. The canonical report summary is also marked `completed`.
+
+Checks run:
+- `git diff --check -- ../README/PRODUCTION-NOTES/BACKEND/09-monitoring-alerting.md docs/README.md docs/openapi.yaml`
+- `go test ./... -run 'TestOpenAPI|TestSwagger|Test.*OpenAPI'` with repo-local Go caches
+- `check_api_contract_sync.sh /workspace/socialpredict HEAD` with repo-local Go caches
+- `software-action-verifier-agent` sign-off: pass
+
+Assumption: broader monitoring-platform work remains intentionally deferred until a future task selects the next app-owned runtime signal seam.

@@ -1,0 +1,72 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7ddb-96b8-1ea971557d1b`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7ddb-96b8-1ea971557d1b/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7ddb-96b8-1ea971557d1b/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7ddb-96b8-1ea971557d1b/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7ddb-96b8-1ea971557d1b/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "The touched startup, readiness, or shared-failure paths emit stable operational log events with consistent field names and sanitized payloads.",
+    "Focused tests or deterministic log-facing checks cover the chosen events without leaking public failure vocabulary into internal telemetry fields.",
+    "The change stays within current logger, runtime, server, or middleware ownership instead of creating a new monitoring layer."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "019de369-df09-755b-9e26-a37bcec4ee8a"
+  ],
+  "id": "WAVE09-MON-002",
+  "max_attempts": 3,
+  "notes": [
+    "Prefer a small stable event set over verbose speculative telemetry.",
+    "Keep shared failure writers and runtime transitions aligned under the same logger vocabulary."
+  ],
+  "out_of_scope": [
+    "OTel collector deployment or external log platform rollout",
+    "duplicating public `reason` values as internal telemetry vocabulary",
+    "new logging packages outside `backend/logger`"
+  ],
+  "profile": "",
+  "prompt": "Once the signal inventory is explicit, use `backend/logger` and the existing runtime or middleware seams to emit stable, sanitized operational log events for startup incompatibility or migration failure, readiness-open and readiness-closed transitions, and shared severe request-failure paths. Keep public `reason` vocabulary separate from telemetry field names and do not reintroduce duplicate logging packages or a second monitoring architecture.",
+  "runner_pid": 105685,
+  "sandbox": "workspace-write",
+  "started_at": "2026-05-02T17:46:50.607292+00:00",
+  "status": "running",
+  "title": "WAVE09 Monitoring: Standardize runtime log events for startup, readiness, and severe boundary failures",
+  "touched_paths": [
+    "../socialpredict/backend/logger",
+    "../socialpredict/backend/internal/app/runtime",
+    "../socialpredict/backend/security",
+    "../socialpredict/backend/server"
+  ],
+  "uid": "019de369-df09-7ddb-96b8-1ea971557d1b",
+  "verification": {
+    "focus": [
+      "stable runtime log vocabulary for monitoring consumption",
+      "sanitized startup and failure event payloads",
+      "continued single-owner logging architecture"
+    ],
+    "owner": "software-action-logging-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

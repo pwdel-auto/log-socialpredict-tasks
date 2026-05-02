@@ -1,0 +1,22 @@
+task_uid: `019de369-df09-755b-9e26-a37bcec4ee8a`  
+task_id: `WAVE09-MON-001`  
+status: `completed`
+
+Changed the monitoring slice to publish the current backend operational signal inventory without adding a monitoring platform. The docs and contract test now distinguish `/health`, `/readyz`, startup fatal failures, and shared request-boundary failures from `/v0/system/metrics`, which is documented as economy/accounting output.
+
+files_changed:
+- `backend/server/server_contract_test.go`
+- `backend/docs/README.md`
+- `backend/docs/openapi.yaml`
+- `backend/README/BACKEND/API/API-DOCS.md`
+- `README/PRODUCTION-NOTES/BACKEND/09-monitoring-alerting.md`
+
+checks_run:
+- `git diff --check`
+- OpenAPI contract sync script
+- `GOMAXPROCS=1 GOFLAGS=-p=1 go test -count=1 ./server`
+- `GOMAXPROCS=1 GOFLAGS=-p=1 go test -count=1 ./server ./internal/app/runtime ./security ./handlers/metrics`
+- `software-action-verifier-agent` sign-off
+
+follow_ups:
+- Default unconstrained Go test parallelism was killed during sqlite compilation in this environment; constrained verification passed cleanly.

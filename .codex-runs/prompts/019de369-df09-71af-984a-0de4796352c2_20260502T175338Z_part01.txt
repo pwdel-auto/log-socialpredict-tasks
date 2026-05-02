@@ -1,0 +1,73 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-71af-984a-0de4796352c2`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-71af-984a-0de4796352c2/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-71af-984a-0de4796352c2/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-71af-984a-0de4796352c2/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-71af-984a-0de4796352c2/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "The touched backend now exposes a minimal operational metrics seam or status export that is clearly separate from business or economics metrics.",
+    "The first alert set supported by that seam is explicit in focused tests or docs for the touched paths.",
+    "The implementation remains narrow and app-owned instead of committing the repo to a broader monitoring platform."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "019de369-df09-7ddb-96b8-1ea971557d1b"
+  ],
+  "id": "WAVE09-MON-003",
+  "max_attempts": 3,
+  "notes": [
+    "If a route is added, keep it explicitly operator-facing and outside the business metrics namespace.",
+    "The goal is the smallest credible alert surface, not a full observability stack."
+  ],
+  "out_of_scope": [
+    "broad dashboard or alert-routing platform buildout",
+    "relabeling business endpoints as operational telemetry",
+    "full metrics taxonomy design for every backend behavior"
+  ],
+  "profile": "",
+  "prompt": "After log-based signal ownership is clearer, add the smallest backend-owned operational metrics seam that can support the first alert set from the note: backend down or unready, startup failure, and severe request-failure spikes. Keep the implementation inside the current runtime, server, or logger ownership, prefer a minimal export surface over a platform commitment, and do not conflate these metrics with `/v0/system/metrics` or roll out a full external monitoring stack.",
+  "runner_pid": 111168,
+  "sandbox": "workspace-write",
+  "started_at": "2026-05-02T17:53:38.255993+00:00",
+  "status": "running",
+  "title": "WAVE09 Monitoring: Add the smallest app-owned operational metrics seam for the first alert set",
+  "touched_paths": [
+    "../socialpredict/backend/server",
+    "../socialpredict/backend/internal/app/runtime",
+    "../socialpredict/backend/logger",
+    "../socialpredict/backend/docs/README.md",
+    "../socialpredict/backend/docs/openapi.yaml"
+  ],
+  "uid": "019de369-df09-71af-984a-0de4796352c2",
+  "verification": {
+    "focus": [
+      "minimal app-owned operational metrics scope",
+      "clear separation from business metrics and route vocabulary",
+      "use of existing runtime and server ownership rather than a new platform tree"
+    ],
+    "owner": "software-action-architecture-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

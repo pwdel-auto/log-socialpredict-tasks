@@ -1,0 +1,16 @@
+task_uid: `019de369-df09-7ddb-96b8-1ea971557d1b`  
+task_id: `WAVE09-MON-002`  
+status: `completed`
+
+Implemented stable runtime log vocabulary through `backend/logger` and existing seams: startup incompatibility/migration failure events, readiness open/closed transition events, and request-boundary failure/panic events with public `reason` kept out of telemetry fields.
+
+files_changed:
+`logger/simplelogging.go`, `logger/simplelogging_test.go`, `internal/app/runtime/readiness.go`, `internal/app/runtime/readiness_test.go`, `main.go`, `security/requestboundary.go`, `security/requestboundary_test.go`, `startup_mutation_test.go`
+
+checks_run:
+`go test ./logger ./internal/app/runtime ./security ./server .`  
+`go vet ./logger ./internal/app/runtime ./security ./server .`  
+`git diff --check`
+
+follow_ups:
+Quality/reliability wrapper scripts should be rerun after their stale `backend/logging/...` path and `/home/agent/go` cache assumptions are fixed. The canonical report summary is updated at `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7ddb-96b8-1ea971557d1b`.

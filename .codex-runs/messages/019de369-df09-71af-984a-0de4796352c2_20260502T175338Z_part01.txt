@@ -1,0 +1,14 @@
+task_uid: `019de369-df09-71af-984a-0de4796352c2`  
+task_id: `WAVE09-MON-003`  
+status: `completed`
+
+Implemented a minimal app-owned operational seam: `/ops/status` now exports `live`, `ready`, and process-local `requestFailuresTotal`, separate from `/v0/system/metrics`. Added runtime failure-counting support, focused tests, OpenAPI/docs coverage, and the OpenAPI route-family guard update. Dispatcher and specialists completed sign-off; architecture status is `PASS`.
+
+files_changed:
+`backend/internal/app/runtime/operational_status.go`, `backend/internal/app/runtime/operational_status_test.go`, `backend/server/server.go`, `backend/server/server_test.go`, `backend/docs/README.md`, `backend/docs/openapi.yaml`, `backend/openapi_test.go`, plus report-tracked docs/test updates listed in `summary.json`.
+
+checks_run:
+`go test ./internal/app/runtime ./server` passed twice with workspace Go caches; `go test . ./internal/app/runtime ./server` passed; boundary checks passed; API contract sync passed; full reliability suite `./...` passed; `git diff --check` passed.
+
+follow_ups:
+No blockers. No monitoring platform, Prometheus format, fleet aggregation, alert routing, or dashboard work was added.
