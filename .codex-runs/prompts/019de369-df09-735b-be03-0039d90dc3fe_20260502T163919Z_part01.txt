@@ -1,0 +1,73 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-735b-be03-0039d90dc3fe`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-735b-be03-0039d90dc3fe/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-735b-be03-0039d90dc3fe/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-735b-be03-0039d90dc3fe/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-735b-be03-0039d90dc3fe/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "The active deployment note accurately reflects the landed health, writer-role, docs-publishing, and graceful-shutdown contract for the touched paths.",
+    "Any remaining deployment or proxy gap is stated as a narrow next seam rather than a speculative platform program.",
+    "The wave closes with larger deployment-platform ambitions still explicitly deferred."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "019de369-df09-74c0-a71f-e257b6fc59f1"
+  ],
+  "id": "WAVE08-DEPLOY-004",
+  "max_attempts": 3,
+  "notes": [
+    "This is the WAVE08 stop-and-review point before any future deployment-platform discussion.",
+    "Keep the next seam concrete and tied to the existing runtime and proxy topology."
+  ],
+  "out_of_scope": [
+    "reactivating Kubernetes, Helm, Terraform, or autoscaling work",
+    "broad ingress or edge-platform redesign",
+    "new backlog buckets without a concrete next seam"
+  ],
+  "profile": "",
+  "prompt": "Finish WAVE08 with a deployment-specific stop-and-review point. Confirm the touched health, startup-writer, docs-publishing, and graceful-shutdown behavior matches the active note, inventory any remaining narrow proxy or rollout gaps, and leave a precise next seam without reviving Kubernetes, Helm, Terraform, autoscaling, or broad infra-as-code backlog.",
+  "runner_pid": 81913,
+  "sandbox": "workspace-write",
+  "started_at": "2026-05-02T16:39:19.421535+00:00",
+  "status": "running",
+  "title": "WAVE08 Deploy: Stop and review remaining proxy or rollout gaps and deferred platform topics",
+  "touched_paths": [
+    "../socialpredict/README/PRODUCTION-NOTES/BACKEND/08-deployment-infrastructure.md",
+    "../socialpredict/scripts/docker-compose-prod.yaml",
+    "../socialpredict/data/nginx/vhosts/prod/default.conf.template",
+    "../socialpredict/.github/workflows/deploy-to-staging.yml",
+    "../socialpredict/.github/workflows/deploy-to-production.yml"
+  ],
+  "uid": "019de369-df09-735b-be03-0039d90dc3fe",
+  "verification": {
+    "focus": [
+      "note accuracy versus touched deployment artifacts and runtime behavior",
+      "explicit remaining rollout or proxy gap inventory",
+      "continued deferral of large deployment-platform topics"
+    ],
+    "owner": "software-action-verifier-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict"
+}

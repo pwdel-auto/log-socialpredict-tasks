@@ -1,0 +1,33 @@
+task_uid: `019de369-df09-74c0-a71f-e257b6fc59f1`  
+task_id: `WAVE08-DEPLOY-003`  
+status: `completed`
+
+Implemented graceful shutdown for the current backend path:
+- Added runtime-owned shutdown config with `BACKEND_READINESS_DRAIN_SECONDS` defaulting to `5s` and `BACKEND_SHUTDOWN_TIMEOUT_SECONDS` defaulting to `10s`.
+- Wired `main.go` to load shutdown config and pass it into `server.Start`.
+- Updated server shutdown order to close readiness, wait the readiness drain window, then call bounded `http.Server.Shutdown`.
+- Added focused tests for config defaults/overrides/invalid values and shutdown sequencing.
+- Updated production compose/docs to use `5s` readiness drain, `10s` shutdown timeout, and `20s` Docker `stop_grace_period`.
+
+files_changed:
+- `backend/internal/app/runtime/shutdown.go`
+- `backend/internal/app/runtime/shutdown_test.go`
+- `backend/main.go`
+- `backend/server/server.go`
+- `backend/server/server_test.go`
+- `scripts/docker-compose-prod.yaml`
+- `README/PRODUCTION-NOTES/BACKEND/08-deployment-infrastructure.md`
+
+checks_run:
+- `go test -count=1 ./internal/app/runtime ./server` twice
+- `run_boundary_checks.sh /workspace/socialpredict`
+- `run_quality_guardrails.sh /workspace/socialpredict HEAD~1`
+- `go test ./... -run TestOpenAPISpecValidates -count=1`
+- `git diff --check`
+- `software-action-test-reliability-agent` sign-off
+- `verifier-agent` final PASS
+
+follow_ups:
+- No black-box signal-driven container shutdown test was run.
+- `docker compose config` could not run because Docker is unavailable; compose values were reviewed directly.
+- `BACKEND_PORT` remains parsed in `server`; architecture marked that as pre-existing cleanup, not a shutdown blocker.

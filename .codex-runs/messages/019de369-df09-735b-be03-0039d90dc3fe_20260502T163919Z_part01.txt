@@ -1,0 +1,22 @@
+task_uid: `019de369-df09-735b-be03-0039d90dc3fe`  
+task_id: `WAVE08-DEPLOY-004`  
+status: `completed`
+
+Spawned `software-action-dispatcher-agent` first, then completed verifier sign-off with `software-action-verifier-agent`.
+
+files_changed:
+- `README/PRODUCTION-NOTES/BACKEND/08-deployment-infrastructure.md`
+
+what_changed:
+- Closed WAVE08 with a deployment stop-and-review section.
+- Confirmed the note matches landed `/health`, `/readyz`, startup-writer, docs publishing, workflow payload, and graceful shutdown behavior.
+- Narrowed the remaining seam to downstream deploy/proxy rollout verification.
+- Kept Kubernetes, Helm, Terraform, autoscaling, service mesh, multi-cluster, and broad infra-as-code work explicitly deferred.
+
+checks_run:
+- `git diff --check`
+- YAML parse for `scripts/docker-compose-prod.yaml` and both deploy workflows
+- `go test ./internal/app/runtime ./server`
+
+follow_ups:
+- Verify downstream deploy playbooks apply the compose service split and nginx root-path probe/docs template together, then host-check `/health`, `/readyz`, `/openapi.yaml`, `/swagger`, and `/swagger/` against the non-writer backend service.

@@ -1,0 +1,19 @@
+task_uid: `019de369-df09-7b67-8f06-e98931e26caa`  
+task_id: `WAVE08-DEPLOY-001`  
+status: `completed`
+
+Changed:
+- `docker/backend/Dockerfile`: added image `HEALTHCHECK` against `/health`, requiring `live`.
+- `scripts/docker-compose-prod.yaml`: added production backend `/readyz` healthcheck, requiring `ready`; gated frontend and nginx on backend `service_healthy`.
+- `data/nginx/vhosts/prod/default.conf.template`: explicitly proxies `/health`, `/readyz`, `/swagger/`, and `/openapi.yaml` to backend.
+- `README/PRODUCTION-NOTES/BACKEND/08-deployment-infrastructure.md`: updated deployment guidance to match the new liveness/readiness policy.
+
+Checks run:
+- `git diff --check` on touched files.
+- Node YAML parse of `scripts/docker-compose-prod.yaml`.
+- `go test ./server` with workspace-local Go caches.
+- Verifier reliability suite: `go test ./server -count=1` twice, OpenAPI validation, and `go vet ./server`.
+- Route/topology scans for health/docs ownership and forbidden platform expansion.
+
+Follow-ups:
+- `docker compose config` and `nginx -t` could not run because Docker/nginx CLIs are not installed in this environment; run those before production rollout.
