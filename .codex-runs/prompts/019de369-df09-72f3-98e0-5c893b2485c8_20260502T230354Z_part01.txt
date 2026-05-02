@@ -1,0 +1,71 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-72f3-98e0-5c893b2485c8`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-72f3-98e0-5c893b2485c8/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-72f3-98e0-5c893b2485c8/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-72f3-98e0-5c893b2485c8/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-72f3-98e0-5c893b2485c8/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "One duplicated boundary-only validation concern in the touched slice is consolidated under the shared boundary seam.",
+    "The touched domain services still own business invariants and do not regress into handler or middleware policy leakage.",
+    "Focused tests make the boundary-versus-domain split explicit for the chosen rule."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "019de369-df09-78f2-96b1-16098f92ce27"
+  ],
+  "id": "WAVE10-VALID-003",
+  "max_attempts": 3,
+  "notes": [
+    "Extract only a true boundary concern; do not recast domain policy as generic validation.",
+    "Prefer the smallest helper that reduces real duplication in the chosen slice."
+  ],
+  "out_of_scope": [
+    "DB-backed rules engines or generic rule registries",
+    "moving business invariants into middleware",
+    "broad output-sanitization campaigns"
+  ],
+  "profile": "",
+  "prompt": "While the chosen route family is open, move one duplicated boundary-only validation or sanitization rule into `backend/security` or an adjacent shared boundary helper, such as repeated query or title sanitization, while leaving business invariants like market-eligibility, resolution-time, or probability policy in the domain service layer. Keep the extracted rule small, reversible, and covered by focused tests.",
+  "runner_pid": 162485,
+  "sandbox": "workspace-write",
+  "started_at": "2026-05-02T23:03:54.002758+00:00",
+  "status": "running",
+  "title": "WAVE10 Validation: Pull one duplicated boundary-only rule into backend or security and keep business invariants in domain services",
+  "touched_paths": [
+    "../socialpredict/backend/security",
+    "../socialpredict/backend/handlers/markets",
+    "../socialpredict/backend/internal/domain/markets"
+  ],
+  "uid": "019de369-df09-72f3-98e0-5c893b2485c8",
+  "verification": {
+    "focus": [
+      "small shared-helper extraction for a true boundary-only rule",
+      "preserved domain ownership of business invariants",
+      "reversible validation consolidation without framework growth"
+    ],
+    "owner": "software-action-architecture-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

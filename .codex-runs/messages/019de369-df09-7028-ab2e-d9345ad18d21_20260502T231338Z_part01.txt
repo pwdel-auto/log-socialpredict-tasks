@@ -1,0 +1,24 @@
+task_uid: `019de369-df09-7028-ab2e-d9345ad18d21`  
+task_id: `WAVE10-VALID-004`  
+status: `completed`
+
+Updated:
+- `README/PRODUCTION-NOTES/BACKEND/10-data-validation.md`
+- `backend/docs/API-ISSUES.md`
+- `backend/docs/openapi.yaml`
+
+What changed:
+- Recorded the WAVE10 validation stop-and-review outcome.
+- Documented the landed markets boundary-validation consolidation.
+- Inventoried remaining validation bypasses by concrete route/helper seams.
+- Set the next seam to markets path/action helper convergence.
+- Kept validation registries, generic request-body middleware, and platform-wide validation ideas explicitly deferred.
+
+Checks run:
+- `git diff --check -- ../README/PRODUCTION-NOTES/BACKEND/10-data-validation.md docs/API-ISSUES.md docs/openapi.yaml`: pass
+- `check_api_contract_sync.sh /workspace/socialpredict`: pass with repo-local Go caches
+- `go test ./handlers/markets ./security -count=1`: pass
+- Verifier agent sign-off: pass, no blockers
+
+follow_ups:
+- Next validation seam: consolidate markets path/action helpers for market ID, projection amount, resolution outcome, and related failure shaping in market detail, resolve, projection, and legacy markets handler methods.

@@ -1,0 +1,29 @@
+task_uid: `019de369-df09-759d-b8e5-8cca9f3b9aed`  
+task_id: `WAVE10-VALID-001`  
+status: `completed`
+
+Changed the markets route family so create/search validation and sanitization use injected `*security.SecurityService` from the container/server seam instead of constructing `security.NewSecurityService()` or `security.NewSanitizer()` inside handlers. Added focused rejection coverage for suspicious create-market titles and updated tests/wiring accordingly.
+
+files_changed:
+- `handlers/markets/createmarket.go`
+- `handlers/markets/handler.go`
+- `handlers/markets/searchmarkets.go`
+- `handlers/markets/handler_contract_test.go`
+- `handlers/markets/handler_status_leaderboard_test.go`
+- `handlers/markets/searchmarkets_handler_test.go`
+- `internal/app/container.go`
+- `server/markets_alias_routing_test.go`
+- `server/server.go`
+
+checks_run:
+- `gofmt -l` changed files: pass
+- `go test ./handlers/markets`: pass
+- `go test ./server ./internal/app`: pass
+- `go vet ./...`: pass
+- `go test ./...`: pass
+- boundary checks: pass
+- reliability suite for `./handlers/markets`: pass
+- quality guardrails: pass
+
+Assumption: market route tests may construct security services directly as test fixtures; production `handlers/markets` no longer has ad hoc security constructors.  
+follow_ups: none.
