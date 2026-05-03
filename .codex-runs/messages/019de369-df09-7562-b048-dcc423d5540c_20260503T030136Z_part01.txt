@@ -1,0 +1,23 @@
+task_uid: `019de369-df09-7562-b048-dcc423d5540c`  
+task_id: `WAVE12-CACHE-002`  
+status: `completed`
+
+Changed:
+- [service.go](/workspace/socialpredict/backend/internal/domain/users/service.go): `UserBalanceRepository` is now the authoritative read/write port for balance mutations, and `updateUserBalance` reads through it instead of the generic user reader.
+- [service_transactions_test.go](/workspace/socialpredict/backend/internal/domain/users/service_transactions_test.go): added a stale-reader regression test proving `ApplyTransaction` uses the authoritative balance repo value.
+
+Checks run:
+- `gofmt`
+- focused touched-package `go test -count=1` suite twice, passed
+- architecture boundary checks, passed
+- reliability suite for `./internal/domain/users`, passed
+- `git diff --check`, passed
+- `software-action-test-reliability-agent` sign-off: PASS
+
+Assumption: this task’s smallest defensible hardening is the shared user balance mutation path, since betting, selling, refunds, and payouts all flow through `ApplyTransaction`.
+
+Follow-ups:
+- Optional future hardening for sale credit and market resolution payout/refund paths if later cache work touches those collaborators.
+- Default Go cache under `/home/agent/go` is not writable here, so verification used workspace-local `GOCACHE`/`GOMODCACHE`.
+
+Unrelated pre-existing modified files under README/metrics/analytics were left untouched.
