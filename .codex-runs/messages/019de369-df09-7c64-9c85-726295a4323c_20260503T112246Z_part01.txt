@@ -1,0 +1,22 @@
+task_uid: `019de369-df09-7c64-9c85-726295a4323c`  
+task_id: `WAVE13-JOBS-001`  
+status: `completed`
+
+Changed `handlers/cms/homepage/service.go` to expose CMS homepage render/sanitize as `Service.RenderContent(RenderInput)`, an HTTP-free, derived, recomputable service seam. `UpdateHome` still calls it inline, so runtime behavior remains synchronous and no jobs, queues, schedulers, workers, Redis, or async infrastructure were added.
+
+files_changed:
+- `backend/handlers/cms/homepage/service.go`
+- `backend/handlers/cms/homepage/service_test.go`
+
+checks_run:
+- `go test -count=1 ./handlers/cms/homepage/...` passed twice with workspace-local Go caches
+- `go vet ./handlers/cms/homepage/...` passed
+- `go vet ./...` passed
+- `run_boundary_checks.sh /workspace/socialpredict` passed
+- `gofmt -l` on touched files passed
+- `git diff --check` passed
+- Architecture sign-off passed; dispatcher summary updated
+
+follow_ups:
+- Later CMS cleanup could move the legacy homepage repository out from under `handlers`.
+- Workspace-local Go caches were needed because `/home/agent/go` was not writable.

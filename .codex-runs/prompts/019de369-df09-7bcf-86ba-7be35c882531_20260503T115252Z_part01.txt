@@ -1,0 +1,72 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7bcf-86ba-7be35c882531`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7bcf-86ba-7be35c882531/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7bcf-86ba-7be35c882531/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7bcf-86ba-7be35c882531/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7bcf-86ba-7be35c882531/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "The background-jobs draft or touched docs accurately describe the chosen candidate seam and the prerequisites still missing for any real async rollout.",
+    "Any next async seam is named concretely and remains explicitly non-financial.",
+    "Queue, worker, scheduler, and Redis platform work remain clearly deferred at the end of the wave."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "019de369-df09-79f9-83d5-515bbd142837"
+  ],
+  "id": "WAVE13-JOBS-003",
+  "max_attempts": 3,
+  "notes": [
+    "This stop-and-review point is part of the deferral posture, not a signal to activate workers next.",
+    "Keep the next seam tied to one safe candidate and its missing prerequisites."
+  ],
+  "out_of_scope": [
+    "outbox, scheduler, or worker runtime implementation",
+    "queue tables or Redis infrastructure",
+    "new async backlog buckets without a concrete safe candidate"
+  ],
+  "profile": "",
+  "prompt": "Finish WAVE13 by updating the background-jobs draft or adjacent docs with the precise prerequisites still missing for any real worker or queue rollout: runtime roles, retry and dead-letter policy, lag and failure visibility, and one concrete next async seam if it remains justified. Keep queue tables, outbox rollout, scheduler frameworks, and Redis or worker platform work deferred.",
+  "runner_pid": 301584,
+  "sandbox": "workspace-write",
+  "started_at": "2026-05-03T11:52:52.576814+00:00",
+  "status": "running",
+  "title": "WAVE13 Jobs: Stop and review runtime-role prerequisites, failure visibility, and continued deferral",
+  "touched_paths": [
+    "../socialpredict/README/PRODUCTION-NOTES/BACKEND/13-background-jobs.md",
+    "../socialpredict/backend/handlers/metrics",
+    "../socialpredict/backend/internal/domain/analytics",
+    "../socialpredict/backend/handlers/cms/homepage"
+  ],
+  "uid": "019de369-df09-7bcf-86ba-7be35c882531",
+  "verification": {
+    "focus": [
+      "accuracy of the documented future-async prerequisites",
+      "explicit non-financial next seam selection if one remains justified",
+      "continued deferral of background-job platform work"
+    ],
+    "owner": "software-action-verifier-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

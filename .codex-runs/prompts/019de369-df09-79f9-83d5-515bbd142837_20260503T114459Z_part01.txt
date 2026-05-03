@@ -1,0 +1,72 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-79f9-83d5-515bbd142837`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-79f9-83d5-515bbd142837/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-79f9-83d5-515bbd142837/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-79f9-83d5-515bbd142837/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-79f9-83d5-515bbd142837/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "The chosen candidate has deterministic tests proving its repeatability or idempotent behavior in-process.",
+    "The touched accounting-sensitive flows remain explicitly synchronous and out of scope for background execution.",
+    "The task improves future async readiness without introducing worker semantics or retry infrastructure."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "019de369-df09-7c64-9c85-726295a4323c"
+  ],
+  "id": "WAVE13-JOBS-002",
+  "max_attempts": 3,
+  "notes": [
+    "Prefer repeatability tests close to the owning service over a generic async test harness.",
+    "Make the synchronous non-target boundary explicit for any touched financial path."
+  ],
+  "out_of_scope": [
+    "dead-letter queues, retries, or lag-tracking systems",
+    "async offloading of any money-moving workflow",
+    "new worker deployment roles"
+  ],
+  "profile": "",
+  "prompt": "After the candidate seam exists, add deterministic tests that prove the chosen operation can be retried or replayed safely in-process, and make the non-target boundary explicit for bet placement, sell settlement, market resolution, or other accounting-sensitive flows touched by the task. Do not add retry loops, dead-letter handling, background execution, or hidden async fallbacks.",
+  "runner_pid": 295181,
+  "sandbox": "workspace-write",
+  "started_at": "2026-05-03T11:44:59.651646+00:00",
+  "status": "running",
+  "title": "WAVE13 Jobs: Prove idempotency or replay safety for the chosen candidate and keep financial flows synchronous",
+  "touched_paths": [
+    "../socialpredict/backend/handlers/metrics",
+    "../socialpredict/backend/internal/domain/analytics",
+    "../socialpredict/backend/internal/domain/bets",
+    "../socialpredict/backend/internal/domain/markets"
+  ],
+  "uid": "019de369-df09-79f9-83d5-515bbd142837",
+  "verification": {
+    "focus": [
+      "deterministic idempotency or replay-safety proof for the chosen candidate",
+      "explicit non-target boundary for accounting-sensitive flows",
+      "continued absence of background execution infrastructure"
+    ],
+    "owner": "software-action-test-reliability-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}
