@@ -1,0 +1,25 @@
+task_uid: `019de369-df09-7241-835a-e8c54bbbcb78`  
+task_id: `WAVE11-PERF-001`  
+status: `complete`
+
+Changed:
+- `backend/internal/app/runtime/db.go`
+- `backend/internal/app/runtime/db_test.go`
+- `backend/logger/simplelogging.go`
+- `README/PRODUCTION-NOTES/BACKEND/11-runtime-performance-tuning.md`
+
+Summary:
+- Added explicit effective DB pool posture normalization for max open, max idle, connection lifetime, and idle time.
+- Startup now logs `db_pool.configured` with safe effective values only, without DSNs, host/user/db names, passwords, or secrets.
+- Added focused runtime tests for defaults, invalid env fallback, negative normalization, and idle cap behavior.
+- Updated the performance tuning note with current env knobs, defaults, safe observability, and deployment-shape guidance.
+
+Checks run:
+- `go test ./internal/app/runtime`: PASS
+- reliability suite for `./internal/app/runtime`: PASS
+- architecture boundary checks: PASS
+- dispatcher-reported API contract sync, `gofmt`, and `go vet`: PASS
+
+Follow-ups:
+- None for code.
+- Report summary is updated at `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7241-835a-e8c54bbbcb78/summary.json`.

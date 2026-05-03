@@ -1,0 +1,31 @@
+task_uid: `019de369-df09-707b-975c-866559bfda5c`  
+task_id: `WAVE11-PERF-002`  
+status: `completed`
+
+Added narrow DB pool measurement coverage:
+- Runtime-local benchmark/test seam in `internal/app/runtime/db_pool_measurement_test.go`
+- Dispatcher-coordinated runtime/server `/ops/status.dbPool` counters for pool saturation and wait-latency visibility
+- OpenAPI/docs updates for the `/ops/status` response shape
+
+files_changed:
+- `backend/internal/app/runtime/db.go`
+- `backend/internal/app/runtime/db_test.go`
+- `backend/internal/app/runtime/db_pool_measurement_test.go`
+- `backend/server/server.go`
+- `backend/server/server_test.go`
+- `backend/docs/openapi.yaml`
+- `backend/docs/README.md`
+
+checks_run:
+- `go test ./internal/app/runtime -run TestMeasureDBPoolWaitDifferentiatesSaturation -count=1`
+- `go test ./internal/app/runtime -run '^$' -bench BenchmarkDBPoolWaitUnderSaturation -benchtime=5x -count=1`
+- `go test ./internal/app/runtime -count=1` twice
+- `go vet ./...`
+- boundary checks
+- quality guardrails
+- runtime reliability suite
+- dispatcher/specialist verification including server tests, OpenAPI contract sync, server reliability suite, targeted vet, and `git diff --check`
+
+Benchmark evidence: saturated `max_open=1` recorded `1.000 pool_waits/op`; headroom `max_open=2` recorded `0 pool_waits/op`.
+
+follow_ups: `None`

@@ -1,0 +1,25 @@
+task_uid: `019de369-df09-7740-a702-8edaec847c28`  
+task_id: `WAVE11-PERF-003`  
+status: `completed`
+
+files_changed:
+- `backend/.env.dev`
+- `scripts/docker-compose-prod.yaml`
+- `README/PRODUCTION-NOTES/BACKEND/11-runtime-performance-tuning.md`
+
+what changed:
+- Encoded explicit initial DB pool/lifetime defaults: `DB_MAX_OPEN_CONNS=25`, `DB_MAX_IDLE_CONNS=5`, `DB_CONN_MAX_LIFETIME=30m`, `DB_CONN_MAX_IDLE_TIME=5m`.
+- Added production compose defaults for both `backend-startup-writer` and `backend`, with env overrides.
+- Documented why the defaults stay aligned with current runtime behavior: WAVE11-PERF-002 showed `max_open=1` saturates while `max_open=2` clears the controlled seam, but did not justify speculative changes beyond existing defaults.
+- Documented revisit signals using `/ops/status.dbPool` wait counters, request/readiness symptoms, DB connection capacity, and lifecycle closure counters.
+
+checks_run:
+- `git diff --check -- backend/.env.dev scripts/docker-compose-prod.yaml README/PRODUCTION-NOTES/BACKEND/11-runtime-performance-tuning.md`
+- `node/js-yaml` parse/assertion for `scripts/docker-compose-prod.yaml`
+- `go test ./internal/app/runtime -run TestMeasureDBPoolWaitDifferentiatesSaturation -count=1`
+- `go test ./internal/app/runtime -run '^$' -bench BenchmarkDBPoolWaitUnderSaturation -benchtime=5x -count=1`
+
+follow_ups:
+- `docker compose config` was not run because `docker` is unavailable in this environment; run it in a Docker-equipped deploy environment if compose render validation is required.
+
+Dispatcher and verifier sign-off were recorded in `.codex-reports/tasks/019de369-df09-7740-a702-8edaec847c28`.
