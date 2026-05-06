@@ -1,0 +1,71 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7003-99f7-177b9be306d8`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7003-99f7-177b9be306d8/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7003-99f7-177b9be306d8/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7003-99f7-177b9be306d8/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7003-99f7-177b9be306d8/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "The active monitoring note and touched operator docs accurately describe the app-owned signal contract and the first supported alert set.",
+    "Remaining monitoring gaps are stated as narrow next seams rather than a broad external-platform wish list.",
+    "Larger monitoring-platform topics remain explicitly deferred at the end of the wave."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "019de369-df09-71af-984a-0de4796352c2"
+  ],
+  "id": "WAVE09-MON-004",
+  "max_attempts": 3,
+  "notes": [
+    "This is the WAVE09 stop-and-review point before any future monitoring-platform discussion.",
+    "Keep the next seam tied to the owned runtime signal contract, not to tool choice."
+  ],
+  "out_of_scope": [
+    "reviving Prometheus, Grafana, Alertmanager, or centralized log-platform rollout",
+    "formal SLO or error-budget program creation",
+    "new backlog buckets without a concrete next signal seam"
+  ],
+  "profile": "",
+  "prompt": "Finish WAVE09 with a monitoring-specific stop-and-review point. Update the monitoring note and any adjacent operator docs to reflect the landed signal contract, name the first alert set the current backend can support, and inventory what still blocks broader dashboards or external-platform adoption. Do not reactivate Prometheus, Grafana, paging-platform, or long-term observability backlog work.",
+  "runner_pid": 126203,
+  "sandbox": "workspace-write",
+  "started_at": "2026-05-02T18:03:45.834146+00:00",
+  "status": "running",
+  "title": "WAVE09 Monitoring: Stop and review the first alert surface and deferred platform topics",
+  "touched_paths": [
+    "../socialpredict/README/PRODUCTION-NOTES/BACKEND/09-monitoring-alerting.md",
+    "../socialpredict/backend/docs/README.md",
+    "../socialpredict/backend/docs/openapi.yaml"
+  ],
+  "uid": "019de369-df09-7003-99f7-177b9be306d8",
+  "verification": {
+    "focus": [
+      "accuracy of the documented first alert surface",
+      "explicit remaining monitoring gap inventory",
+      "continued deferral of platform-heavy monitoring topics"
+    ],
+    "owner": "software-action-verifier-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

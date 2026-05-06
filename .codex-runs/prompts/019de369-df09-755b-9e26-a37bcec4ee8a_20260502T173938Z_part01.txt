@@ -1,0 +1,70 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-755b-9e26-a37bcec4ee8a`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-755b-9e26-a37bcec4ee8a/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-755b-9e26-a37bcec4ee8a/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-755b-9e26-a37bcec4ee8a/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-755b-9e26-a37bcec4ee8a/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "The touched docs or contract tests distinguish operator-facing health and failure signals from the existing business-metrics surface.",
+    "The touched signal inventory stays truthful to live server wiring and startup behavior instead of promising a broader monitoring stack.",
+    "The first monitoring slice improves operator clarity without inventing a new monitoring architecture."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [],
+  "id": "WAVE09-MON-001",
+  "max_attempts": 3,
+  "notes": [
+    "Keep `/v0/system/metrics` documented as economics output even if touched during the monitoring wave.",
+    "Prefer making the current signal contract explicit before adding any new export surface."
+  ],
+  "out_of_scope": [
+    "Prometheus, Grafana, Alertmanager, ELK, Loki, or collector rollout",
+    "business-metrics redesign",
+    "new top-level monitoring or observability package trees"
+  ],
+  "profile": "",
+  "prompt": "Use `lib/design/design-plan.json` and `../socialpredict/README/PRODUCTION-NOTES/BACKEND/09-monitoring-alerting.md` as the binding context for WAVE09 monitoring and alerting. Treat upstream `main` at commit `051aac6b2fefa5634b8c98cc38caf52acf0043a9` as the reviewed baseline. Start by making the current operator-facing signal contract explicit at the backend boundary: `/health`, `/readyz`, startup exit and failure behavior, and the existing shared request-failure surface. At the same time, make it explicit in touched docs or tests that `/v0/system/metrics` is a business or accounting output, not the operational monitoring surface. Keep changes close to `server`, backend docs, and existing contract tests; do not add Prometheus, Grafana, Alertmanager, or a new monitoring package.",
+  "runner_pid": 94104,
+  "sandbox": "workspace-write",
+  "started_at": "2026-05-02T17:39:38.572190+00:00",
+  "status": "running",
+  "title": "WAVE09 Monitoring: Publish the current operational signal inventory and separate it from business metrics",
+  "touched_paths": [
+    "../socialpredict/backend/server",
+    "../socialpredict/backend/server/server_contract_test.go",
+    "../socialpredict/backend/docs/README.md",
+    "../socialpredict/README/PRODUCTION-NOTES/BACKEND/09-monitoring-alerting.md"
+  ],
+  "uid": "019de369-df09-755b-9e26-a37bcec4ee8a",
+  "verification": {
+    "focus": [
+      "truthful operator-facing signal inventory",
+      "explicit separation of business metrics from runtime monitoring signals",
+      "avoidance of platform-heavy monitoring scope drift"
+    ],
+    "owner": "software-action-verifier-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}
