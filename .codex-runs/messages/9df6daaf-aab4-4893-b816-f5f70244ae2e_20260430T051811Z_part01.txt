@@ -1,0 +1,32 @@
+task_uid: `9df6daaf-aab4-4893-b816-f5f70244ae2e`  
+task_id: `WAVE05-SEC-003`  
+status: `completed`
+
+Changed:
+- `backend/internal/app/container.go`
+- `backend/internal/app/container_test.go`
+- `backend/internal/service/auth/auth.go`
+- `backend/internal/service/auth/auth_service.go`
+- `backend/internal/service/auth/loggin.go`
+- `backend/internal/service/auth/middleware_test.go`
+- `backend/handlers/admin/adduser.go`
+- `backend/handlers/admin/adduser_http_test.go`
+- `backend/server/server.go`
+
+Summary:
+- Spawned the requested dispatcher path and got architecture plus verifier signoff.
+- Moved login and admin add-user onto a container-owned request-boundary `security.SecurityService`.
+- Removed ad hoc per-handler `security.NewSecurityService()` construction from those migrated production slices.
+- Kept validation/sanitization at the HTTP boundary and did not move policy into domain services.
+- Fixed the verifier-found auth fallback regression so empty injected auth keys still use the configured process/env fallback, while malformed bearer tokens still return `INVALID_TOKEN`.
+
+Checks run:
+- Boundary checks: pass
+- Focused tests: `go test -count=1 ./internal/app ./internal/service/auth ./handlers/admin` pass, repeated
+- Regression/focused sweep: `go test -count=1 ./internal/app ./internal/service/auth ./handlers/admin ./handlers/users` pass
+- Full suite: `go test -count=1 ./...` pass
+- `go vet ./...` pass
+- `git diff --check` pass
+
+Follow-ups:
+- Non-blocking: `AuthService` snapshots the JWT signing key at construction, so runtime key rotation would require rebuilding or reinjecting the service. The canonical report summary was updated at `/workspace/socialpredict/.codex-reports/tasks/9df6daaf-aab4-4893-b816-f5f70244ae2e/summary.json`.

@@ -1,0 +1,73 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/97568861-fcab-4748-bd63-957981f94da3`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/97568861-fcab-4748-bd63-957981f94da3/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/97568861-fcab-4748-bd63-957981f94da3/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/97568861-fcab-4748-bd63-957981f94da3/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/97568861-fcab-4748-bd63-957981f94da3/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "The touched runtime/bootstrap path owns JWT signing-key presence, trusted-proxy rules, CORS defaults, and header or HSTS posture explicitly instead of leaving them split across ad hoc helpers.",
+    "Touched auth or server code no longer reads deployment-sensitive security settings ad hoc when an injected runtime seam is available.",
+    "Focused tests and operator-facing note updates cover the chosen runtime security posture and missing-key failure behavior for the touched slice."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "d439e58f-93be-42de-bd8c-1cb05cab0705"
+  ],
+  "id": "WAVE05-SEC-001",
+  "max_attempts": 3,
+  "notes": [
+    "Keep deployment-sensitive security posture separate from application-policy configuration.",
+    "Do not hide runtime security ownership back inside `setup`, auth helpers, or a new middleware platform tree."
+  ],
+  "out_of_scope": [
+    "token or session redesign",
+    "MFA, RBAC, or request-signing rollout",
+    "distributed rate limiting or compliance-program work"
+  ],
+  "profile": "",
+  "prompt": "Use `lib/design/design-plan.json`, `../socialpredict/README/PRODUCTION-NOTES/BACKEND/05-security-hardening.md`, and `../socialpredict/README/PRODUCTION-NOTES/BACKEND/FUTURE/01-long-term-security-hardening.md` as the binding design context for WAVE05 security hardening. Complete the first useful slice by moving deployment-sensitive security posture behind an explicit runtime/bootstrap seam. Make JWT signing-key presence, trusted-proxy rules for forwarded headers, CORS defaults, and header or HSTS ownership assumptions explicit in runtime code and operator-facing docs; remove ad hoc env reads from auth or server code where the touched path can now depend on injected runtime settings. Preserve current login and serving behavior where safe, fail closed on missing JWT signing material for the touched auth-serving path, and do not create a new `security/*` platform tree.",
+  "runner_pid": 92243,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-30T04:14:17.391953+00:00",
+  "status": "running",
+  "title": "WAVE05 Security: Make runtime/bootstrap own JWT, proxy-trust, CORS, and header posture",
+  "touched_paths": [
+    "../socialpredict/backend/internal/app/runtime",
+    "../socialpredict/backend/internal/service/auth",
+    "../socialpredict/backend/server",
+    "../socialpredict/backend/security",
+    "../socialpredict/README/PRODUCTION-NOTES/BACKEND/05-security-hardening.md"
+  ],
+  "uid": "97568861-fcab-4748-bd63-957981f94da3",
+  "verification": {
+    "focus": [
+      "runtime ownership of deployment-sensitive security posture",
+      "removal of ad hoc env reads from touched auth and server paths",
+      "explicit fail-closed JWT key behavior for the touched slice"
+    ],
+    "owner": "software-action-architecture-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

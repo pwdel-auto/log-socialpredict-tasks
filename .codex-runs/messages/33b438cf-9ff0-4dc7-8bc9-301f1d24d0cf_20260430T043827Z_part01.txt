@@ -1,0 +1,27 @@
+task_uid: `33b438cf-9ff0-4dc7-8bc9-301f1d24d0cf`  
+task_id: `WAVE05-SEC-002`  
+status: `completed`
+
+Implemented the rate-limit hardening behind an explicit `ClientIdentityExtractor`, wired it through rate limiting and request-boundary logging, preserved shared JSON `429` responses via `WriteRateLimited`, and documented/tested the limiter as in-memory and per-process only. Assumption: existing dirty runtime/auth/security posture changes were task lineage from the dependent slice and were preserved.
+
+files_changed:
+- `backend/security/ratelimit.go`
+- `backend/security/ratelimit_test.go`
+- `backend/security/requestboundary.go`
+- `backend/security/requestboundary_test.go`
+- `backend/docs/openapi.yaml`
+- `README/PRODUCTION-NOTES/BACKEND/05-security-hardening.md`
+
+checks_run:
+- `go test ./security -count=1` passed twice
+- `go test ./internal/app/runtime -count=1` passed after workspace cache retry
+- `go test ./server -count=1` passed
+- `go test ./internal/service/auth -count=1` passed
+- boundary checks passed
+- API contract sync/OpenAPI validation passed
+- reliability suite for `./security` passed
+- `go vet ./security ./internal/app/runtime ./server` passed
+- `go vet ./internal/service/auth` passed
+- `gofmt -l` on touched Go files passed
+
+follow_ups: none.

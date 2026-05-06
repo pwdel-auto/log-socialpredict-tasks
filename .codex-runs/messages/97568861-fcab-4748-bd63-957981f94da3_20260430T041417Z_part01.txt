@@ -1,0 +1,14 @@
+task_uid: `97568861-fcab-4748-bd63-957981f94da3`  
+task_id: `WAVE05-SEC-001`  
+status: `completed`
+
+Implemented the runtime/bootstrap security posture seam. Runtime now loads and validates JWT signing material, proxy-header trust, CORS defaults, and HSTS/header posture; server/auth consume injected settings; missing JWT signing key fails closed before serving. Operator notes were updated in `README/PRODUCTION-NOTES/BACKEND/05-security-hardening.md`.
+
+files_changed:
+`backend/internal/app/runtime/security.go`, `backend/internal/app/runtime/security_test.go`, `backend/main.go`, `backend/server/server.go`, `backend/server/server_test.go`, `backend/internal/app/container.go`, `backend/internal/service/auth/*`, `backend/security/*`, `README/PRODUCTION-NOTES/BACKEND/05-security-hardening.md`
+
+checks_run:
+`go test -count=1 ./internal/app/runtime ./security ./internal/service/auth ./server` passed twice; `go vet ./...` passed; boundary checks passed; quality guardrails passed; API contract sync passed.
+
+follow_ups:
+Remaining direct JWT parsing in `handlers/markets/resolvemarket.go` is still a later auth/API cleanup slice, as documented. Architecture dispatcher and specialist sign-off completed with no blockers.

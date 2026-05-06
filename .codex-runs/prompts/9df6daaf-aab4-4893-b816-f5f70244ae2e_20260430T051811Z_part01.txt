@@ -1,0 +1,74 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/9df6daaf-aab4-4893-b816-f5f70244ae2e`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/9df6daaf-aab4-4893-b816-f5f70244ae2e/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/9df6daaf-aab4-4893-b816-f5f70244ae2e/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/9df6daaf-aab4-4893-b816-f5f70244ae2e/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/9df6daaf-aab4-4893-b816-f5f70244ae2e/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "The touched auth and write-path slices no longer create fresh security services ad hoc when a shared boundary seam is sufficient.",
+    "Reusable validation and sanitization ownership is explicit in the touched server, container, or handler wiring without leaking transport checks into domain policy.",
+    "Focused tests preserve current validation and sanitization behavior for the migrated slices."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "33b438cf-9ff0-4dc7-8bc9-301f1d24d0cf"
+  ],
+  "id": "WAVE05-SEC-003",
+  "max_attempts": 3,
+  "notes": [
+    "Prefer the smallest reusable seam that removes a real ad hoc security-service construction.",
+    "Do not turn `backend/security` into domain policy or a second platform architecture."
+  ],
+  "out_of_scope": [
+    "schema-wide validation redesign",
+    "domain-policy validation rewrites",
+    "new top-level security or validation subsystems"
+  ],
+  "profile": "",
+  "prompt": "Keep `backend/security` as shared request-boundary support instead of a hidden constructor call in every handler. Migrate the first high-value touched slices that still instantiate `security.NewSecurityService()` ad hoc, starting with login plus one write-heavy boundary path such as admin add-user or create-market, onto injected or otherwise owned reusable validation and sanitization dependencies through the existing server or container seams. Preserve current validation and sanitization behavior, keep handlers thin, and do not invent a new validation platform or move boundary checks into domain policy.",
+  "runner_pid": 127791,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-30T05:18:11.085594+00:00",
+  "status": "running",
+  "title": "WAVE05 Security: Inject shared validation and sanitization into the first auth and write-path slices",
+  "touched_paths": [
+    "../socialpredict/backend/internal/service/auth",
+    "../socialpredict/backend/handlers/admin",
+    "../socialpredict/backend/handlers/markets",
+    "../socialpredict/backend/server",
+    "../socialpredict/backend/internal/app/container.go",
+    "../socialpredict/backend/security"
+  ],
+  "uid": "9df6daaf-aab4-4893-b816-f5f70244ae2e",
+  "verification": {
+    "focus": [
+      "owned validation and sanitization seam reuse",
+      "removal of ad hoc `security.NewSecurityService()` creation from touched paths",
+      "preservation of boundary-only validation responsibilities"
+    ],
+    "owner": "software-action-architecture-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

@@ -1,0 +1,14 @@
+task_uid: `0ba7f17a-9086-4ebc-8a2b-75da87826d2b`  
+task_id: `WAVE05-SEC-005`  
+status: `completed`
+
+Changed the active security note to close WAVE05 with a stop-and-review inventory, document remaining boundary-security exceptions, and name `backend/handlers/markets/resolvemarket.go` as the next precise auth-boundary seam. Updated `backend/docs/API-ISSUES.md` so security-boundary cleanup is not framed as a broad API backlog. The canonical summary report is updated at `/workspace/socialpredict/.codex-reports/tasks/0ba7f17a-9086-4ebc-8a2b-75da87826d2b/summary.json`.
+
+files_changed:
+`README/PRODUCTION-NOTES/BACKEND/05-security-hardening.md`, `backend/docs/API-ISSUES.md`, plus the existing WAVE05 backend security/auth/runtime/server diff files recorded in `summary.json`.
+
+checks_run:
+`git diff --check`; `RUNS=2 run_reliability_suite.sh /workspace/socialpredict ./security`; `go test ./internal/app/runtime ./internal/service/auth ./server ./handlers/admin -count=1` twice; `go vet ./internal/app/runtime ./internal/service/auth ./server ./handlers/admin`; verifier ran scoped `gofmt -l`.
+
+follow_ups:
+Next slice should migrate `backend/handlers/markets/resolvemarket.go` to injected `AuthService` plus `authhttp`/shared failure envelopes, removing direct JWT parsing and handler-local `JWT_SIGNING_KEY` reads. Keep `FUTURE/01-long-term-security-hardening.md` deferred; no MFA, RBAC, distributed rate limiting, request signing, session redesign, or compliance work was activated.

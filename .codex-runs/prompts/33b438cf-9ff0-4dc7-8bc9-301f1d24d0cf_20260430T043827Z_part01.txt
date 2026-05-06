@@ -1,0 +1,73 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/33b438cf-9ff0-4dc7-8bc9-301f1d24d0cf`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/33b438cf-9ff0-4dc7-8bc9-301f1d24d0cf/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/33b438cf-9ff0-4dc7-8bc9-301f1d24d0cf/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/33b438cf-9ff0-4dc7-8bc9-301f1d24d0cf/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/33b438cf-9ff0-4dc7-8bc9-301f1d24d0cf/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "The touched rate-limiting path no longer blindly trusts forwarded headers and instead uses an explicit proxy-trust or client-identity contract.",
+    "Touched `429` behavior stays on the shared boundary-failure path rather than raw transport strings.",
+    "Focused tests and note updates make the in-process limiter baseline and its replica-level limitations explicit for the touched slice."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "97568861-fcab-4748-bd63-957981f94da3"
+  ],
+  "id": "WAVE05-SEC-002",
+  "max_attempts": 3,
+  "notes": [
+    "Keep the active-slice limiter local and honest about its limits.",
+    "Do not reintroduce plain-text `429` behavior while tightening proxy trust."
+  ],
+  "out_of_scope": [
+    "Redis or distributed rate limiting",
+    "IP reputation or abuse-platform work",
+    "public route taxonomy changes"
+  ],
+  "profile": "",
+  "prompt": "After the runtime-owned proxy rules exist, harden `backend/security` rate limiting around an explicit client-identity extractor that respects the new proxy-trust contract instead of blindly trusting `X-Forwarded-For` or `X-Real-IP`. Keep the current in-process limiter as the active-slice baseline, reuse the boundary failure path for `429` behavior rather than reintroducing transport-rough strings, and make the limitation to per-process enforcement explicit in code, tests, and the active security note without pulling in Redis or shared rate limiting.",
+  "runner_pid": 113912,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-30T04:38:27.388901+00:00",
+  "status": "running",
+  "title": "WAVE05 Security: Harden client-IP extraction and keep the in-process limiter honest",
+  "touched_paths": [
+    "../socialpredict/backend/security",
+    "../socialpredict/backend/server",
+    "../socialpredict/backend/internal/app/runtime",
+    "../socialpredict/backend/docs/openapi.yaml",
+    "../socialpredict/README/PRODUCTION-NOTES/BACKEND/05-security-hardening.md"
+  ],
+  "uid": "33b438cf-9ff0-4dc7-8bc9-301f1d24d0cf",
+  "verification": {
+    "focus": [
+      "deterministic proxy-trust and client-identity behavior",
+      "stable shared `429` behavior for touched middleware paths",
+      "explicit in-process limiter baseline without distributed-scope drift"
+    ],
+    "owner": "software-action-test-reliability-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}
