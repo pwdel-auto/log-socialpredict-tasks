@@ -1,0 +1,25 @@
+task_uid: `019de369-df09-7fc2-9052-77a493096b90`  
+task_id: `WAVE12-CACHE-003`  
+status: `completed`
+
+files_changed:
+- [12-database-caching.md](/workspace/socialpredict/README/PRODUCTION-NOTES/BACKEND/12-database-caching.md:116)
+- canonical report files under `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7fc2-9052-77a493096b90`
+
+what changed:
+- Documented the global leaderboard snapshot as the single deferred future cache target.
+- Made invalidation owner explicit: analytics domain service, not the metrics handler.
+- Set tolerated staleness: max 60 seconds for public leaderboard reads only.
+- Listed narrow blockers and kept Redis, generalized cache layers, queues, distributed locks, and broader coordination-platform work deferred.
+
+checks_run:
+- `git diff --check -- ../README/PRODUCTION-NOTES/BACKEND/12-database-caching.md`
+- `jq -e . meta.json summary.json`
+- `jq -c . conversation.ndjson` and `jq -c . decisions.ndjson`
+- `summary.last_event_seq` equals max conversation seq
+- `architecture-agent` review: PASS
+- `software-action-verifier-agent` final rerun: PASS
+
+follow_ups:
+- Runtime caching remains deferred pending hotspot evidence, analytics invalidation wiring, freshness metrics, and a specific cache runtime decision.
+- Existing unrelated backend dirty files were left untouched.

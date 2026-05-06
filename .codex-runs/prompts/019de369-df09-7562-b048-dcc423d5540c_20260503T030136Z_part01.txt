@@ -1,0 +1,74 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7562-b048-dcc423d5540c`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7562-b048-dcc423d5540c/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7562-b048-dcc423d5540c/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7562-b048-dcc423d5540c/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7562-b048-dcc423d5540c/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "The touched accounting-sensitive paths make their source-of-truth boundary explicit through focused tests or narrowly scoped code guards.",
+    "The task reduces the risk of accidental cache shortcuts in money-moving code without introducing new runtime dependencies.",
+    "Postgres remains clearly authoritative for the touched accounting behavior."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "019de369-df09-7e68-8ee2-fef5c961b0c6"
+  ],
+  "id": "WAVE12-CACHE-002",
+  "max_attempts": 3,
+  "notes": [
+    "Prefer explicit tests and narrow guards over large comments-only sweeps.",
+    "The purpose is to make future caching safer by protecting the places that must never use it."
+  ],
+  "out_of_scope": [
+    "cache invalidation implementation",
+    "read-through or write-through caching behavior",
+    "changes that weaken accounting correctness for performance"
+  ],
+  "profile": "",
+  "prompt": "While the first future cache candidate is isolated, harden the do-not-cache boundary in the money-moving paths. Add the smallest useful tests or code-level guards in touched betting, selling, balance, or resolution services to make it explicit that authoritative accounting state still comes directly from Postgres and must not be satisfied through cache shortcuts. Do not add read-through, write-through, invalidation machinery, or speculative coordination state.",
+  "runner_pid": 267978,
+  "sandbox": "workspace-write",
+  "started_at": "2026-05-03T03:01:36.872480+00:00",
+  "status": "running",
+  "title": "WAVE12 Cache: Guard do-not-cache accounting paths and source-of-truth boundaries",
+  "touched_paths": [
+    "../socialpredict/backend/internal/domain/bets",
+    "../socialpredict/backend/internal/domain/markets",
+    "../socialpredict/backend/internal/domain/users",
+    "../socialpredict/backend/internal/repository/bets",
+    "../socialpredict/backend/internal/repository/markets",
+    "../socialpredict/backend/internal/repository/users"
+  ],
+  "uid": "019de369-df09-7562-b048-dcc423d5540c",
+  "verification": {
+    "focus": [
+      "source-of-truth protection for accounting-sensitive paths",
+      "narrow regression coverage preventing accidental cache shortcuts",
+      "continued absence of live cache infrastructure"
+    ],
+    "owner": "software-action-test-reliability-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

@@ -1,0 +1,73 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7fc2-9052-77a493096b90`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7fc2-9052-77a493096b90/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7fc2-9052-77a493096b90/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7fc2-9052-77a493096b90/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7fc2-9052-77a493096b90/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "The caching draft or touched docs name one concrete future cache target and make its invalidation owner and tolerated staleness explicit.",
+    "The remaining blockers to real cache runtime work are stated clearly and narrowly.",
+    "Redis and broader cache-platform work remain explicitly deferred at the end of the wave."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "019de369-df09-7562-b048-dcc423d5540c"
+  ],
+  "id": "WAVE12-CACHE-003",
+  "max_attempts": 3,
+  "notes": [
+    "This stop-and-review point is part of the deferral posture, not a signal to build Redis next.",
+    "Keep the next seam tied to one chosen read surface and its invalidation owner."
+  ],
+  "out_of_scope": [
+    "actual cache runtime activation",
+    "generalized cache-layer abstraction design",
+    "coordination-platform ideas such as queues or distributed locks"
+  ],
+  "profile": "",
+  "prompt": "Finish WAVE12 by updating the caching draft or adjacent docs with the chosen future cache candidate, its invalidation owner, tolerated staleness, and the concrete blockers that still keep caching deferred. Keep Redis, generalized cache layers, and coordination use cases explicitly out of the active slice and do not claim caching is now active backend reality.",
+  "runner_pid": 276781,
+  "sandbox": "workspace-write",
+  "started_at": "2026-05-03T03:08:10.003450+00:00",
+  "status": "running",
+  "title": "WAVE12 Cache: Stop and review invalidation ownership, tolerated staleness, and continued deferral",
+  "touched_paths": [
+    "../socialpredict/README/PRODUCTION-NOTES/BACKEND/12-database-caching.md",
+    "../socialpredict/backend/handlers/metrics",
+    "../socialpredict/backend/internal/domain/analytics",
+    "../socialpredict/backend/handlers/markets",
+    "../socialpredict/backend/internal/domain/markets"
+  ],
+  "uid": "019de369-df09-7fc2-9052-77a493096b90",
+  "verification": {
+    "focus": [
+      "accuracy of the documented future cache target and invalidation owner",
+      "explicit remaining blockers to any real cache rollout",
+      "continued deferral of Redis and generalized cache-platform work"
+    ],
+    "owner": "software-action-verifier-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

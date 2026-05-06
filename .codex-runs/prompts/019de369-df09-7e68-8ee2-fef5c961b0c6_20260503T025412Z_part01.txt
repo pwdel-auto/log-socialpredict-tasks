@@ -1,0 +1,71 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7e68-8ee2-fef5c961b0c6`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7e68-8ee2-fef5c961b0c6/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7e68-8ee2-fef5c961b0c6/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7e68-8ee2-fef5c961b0c6/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7e68-8ee2-fef5c961b0c6/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "One non-authoritative read surface is chosen explicitly as the first future cache candidate and exposed through a stable owned seam.",
+    "The touched handler or service behavior stays stable while becoming easier to cache later without contract churn.",
+    "No cache runtime, cache helper abstraction, or hidden memoization is introduced in this slice."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [],
+  "id": "WAVE12-CACHE-001",
+  "max_attempts": 3,
+  "notes": [
+    "Choose one candidate surface only; the point is to preserve optionality, not to prebuild caching everywhere.",
+    "Stay on public or derived reads, not authoritative accounting state."
+  ],
+  "out_of_scope": [
+    "Redis rollout or cache runtime introduction",
+    "blanket caching across route families",
+    "any cache target touching balances, bets, or resolution correctness"
+  ],
+  "profile": "",
+  "prompt": "Use `lib/design/design-plan.json` and `../socialpredict/README/PRODUCTION-NOTES/BACKEND/12-database-caching.md` as the binding context for this deferred WAVE12 caching queue. Treat upstream `main` at commit `051aac6b2fefa5634b8c98cc38caf52acf0043a9` as the reviewed baseline. Start by choosing one plausible future cache target from the note's non-authoritative read surfaces, using the current runtime or performance evidence and the live codebase rather than guesswork. Name the candidate explicitly and tighten the owning service or repository seam enough that the handler can consume a stable snapshot or query result without introducing Redis, cache-aside helpers, or hidden memoization.",
+  "runner_pid": 253874,
+  "sandbox": "workspace-write",
+  "started_at": "2026-05-03T02:54:12.061348+00:00",
+  "status": "running",
+  "title": "WAVE12 Cache: Choose one future cache candidate without adding cache runtime",
+  "touched_paths": [
+    "../socialpredict/backend/handlers/metrics",
+    "../socialpredict/backend/internal/domain/analytics",
+    "../socialpredict/backend/handlers/markets",
+    "../socialpredict/backend/internal/domain/markets",
+    "../socialpredict/README/PRODUCTION-NOTES/BACKEND/12-database-caching.md"
+  ],
+  "uid": "019de369-df09-7e68-8ee2-fef5c961b0c6",
+  "verification": {
+    "focus": [
+      "stable future-cache seam for one non-authoritative read surface",
+      "preservation of current handler and service boundaries",
+      "continued deferral of real cache runtime work"
+    ],
+    "owner": "software-action-architecture-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

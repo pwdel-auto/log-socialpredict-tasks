@@ -1,0 +1,27 @@
+task_uid: `019de369-df09-7e68-8ee2-fef5c961b0c6`  
+task_id: `WAVE12-CACHE-001`  
+status: `completed`
+
+Changed:
+- Chose global leaderboard snapshots as the single future cache candidate.
+- Added an analytics-owned `GlobalLeaderboardSnapshot` seam in `internal/domain/analytics`.
+- Updated the metrics handler to consume the snapshot seam while preserving the existing JSON response array.
+- Documented the explicit deferred candidate in `12-database-caching.md`.
+
+files_changed:
+- `/workspace/socialpredict/README/PRODUCTION-NOTES/BACKEND/12-database-caching.md`
+- `/workspace/socialpredict/backend/handlers/metrics/getgloballeaderboard.go`
+- `/workspace/socialpredict/backend/handlers/metrics/service.go`
+- `/workspace/socialpredict/backend/internal/domain/analytics/leaderboard.go`
+
+checks_run:
+- `gofmt`
+- `go test -count=1 ./internal/domain/analytics ./handlers/metrics` twice
+- reliability suite for `./internal/domain/analytics`
+- reliability suite for `./handlers/metrics`
+- `go vet ./...`
+- boundary checks
+- `git diff --check`
+
+follow_ups:
+- `run_quality_guardrails.sh` is blocked against baseline `051aac6...` by stale deleted `backend/logging/*` paths in the baseline diff; direct replacement checks passed.
