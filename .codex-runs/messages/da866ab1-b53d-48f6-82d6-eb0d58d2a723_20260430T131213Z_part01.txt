@@ -1,0 +1,30 @@
+task_uid: `da866ab1-b53d-48f6-82d6-eb0d58d2a723`  
+task_id: `WAVE06-API-004`  
+status: `completed`
+
+files_changed:
+- `backend/openapi_test.go`
+- `backend/docs/README.md`
+- `backend/docs/API-ISSUES.md`
+- `README/PRODUCTION-NOTES/BACKEND/06-api-design.md`
+- `README/PRODUCTION-NOTES/BACKEND/08-deployment-infrastructure.md`
+- `data/nginx/vhosts/dev/default.conf.template`
+- `data/nginx/vhosts/prod/default.conf.template`
+- `data/traefik/config/traefik.template`
+
+what changed:
+- Explicitly published backend-owned docs at `/openapi.yaml`, `/swagger`, and `/swagger/` in dev/prod nginx before `/api/` and frontend catch-all routing.
+- Documented primary-domain root publishing as the chosen path, with Traefik owning host/TLS and nginx owning docs path routing.
+- Kept backend-served Swagger/OpenAPI as the single contract surface; no frontend Swagger copy or new docs platform added.
+- Added contract tests for Swagger initializer and proxy template docs publishing.
+
+checks_run:
+- `go test ./server`: passed
+- API contract sync script with workspace Go caches: passed
+- Verifier ran `go test . ./server`: passed
+- Verifier ran gofmt check for touched Go files: passed
+- Nginx location/order brace check: passed
+- Full nginx syntax validation not run because `nginx` is not installed
+
+follow_ups:
+- If operations later restricts docs access, apply it at proxy/host layer without adding a frontend-owned Swagger copy.

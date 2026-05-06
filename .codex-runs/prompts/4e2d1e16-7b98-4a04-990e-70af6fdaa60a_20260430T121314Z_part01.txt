@@ -1,0 +1,73 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/4e2d1e16-7b98-4a04-990e-70af6fdaa60a`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/4e2d1e16-7b98-4a04-990e-70af6fdaa60a/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/4e2d1e16-7b98-4a04-990e-70af6fdaa60a/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/4e2d1e16-7b98-4a04-990e-70af6fdaa60a/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/4e2d1e16-7b98-4a04-990e-70af6fdaa60a/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "The touched docs and OpenAPI contract include a route-family migration matrix that matches live route behavior for the chosen families and infra docs routes.",
+    "Touched public `reason` values are explicit and kept separate from runtime or telemetry vocabulary, and touched `PlainTextErrorResponse` usage is documented as migration state rather than target contract.",
+    "Focused contract validation keeps the matrix slice aligned with `server.go`, touched handlers or DTOs, and `openapi.yaml`."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "0ba7f17a-9086-4ebc-8a2b-75da87826d2b"
+  ],
+  "id": "WAVE06-API-001",
+  "max_attempts": 3,
+  "notes": [
+    "Track middleware and handler response families together in the matrix.",
+    "Keep the source-of-truth order explicit: `server.go` -> touched handlers or DTOs -> `openapi.yaml` -> `API-ISSUES.md`."
+  ],
+  "out_of_scope": [
+    "HATEOAS or broader hypermedia rollout",
+    "XML or broader content negotiation",
+    "universal `APIResponse` wrappers, `/v1`, or header-based versioning"
+  ],
+  "profile": "",
+  "prompt": "Use `lib/design/design-plan.json`, `../socialpredict/README/PRODUCTION-NOTES/BACKEND/06-api-design.md`, `../socialpredict/README/PRODUCTION-NOTES/BACKEND/FUTURE/02-long-term-api-design.md`, and `../socialpredict/backend/docs/API-ISSUES.md` as the binding design context for WAVE06 API alignment. Start the wave by making the mixed contract explicit instead of improvising it during code cleanup. Add an initial route-family migration matrix for the touched `/v0` families plus infra docs routes, classify which paths are envelope-based, mixed raw-success plus `ReasonResponse`, or legacy plain-text, capture the touched public `reason` vocabulary, and make every touched `PlainTextErrorResponse` usage explicit migration state. Keep `backend/server/server.go` as the source of truth and align `backend/docs/openapi.yaml`, route/spec checks, and API follow-up notes to that matrix without introducing a universal wrapper, `/v1`, header-based versioning, or generated-client workflow.",
+  "runner_pid": 154057,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-30T12:13:14.266803+00:00",
+  "status": "running",
+  "title": "WAVE06 API: Publish the route-family migration matrix and touched public reason vocabulary",
+  "touched_paths": [
+    "../socialpredict/backend/docs/API-ISSUES.md",
+    "../socialpredict/backend/docs/openapi.yaml",
+    "../socialpredict/backend/openapi_test.go",
+    "../socialpredict/backend/server/server_contract_test.go",
+    "../socialpredict/README/PRODUCTION-NOTES/BACKEND/06-api-design.md"
+  ],
+  "uid": "4e2d1e16-7b98-4a04-990e-70af6fdaa60a",
+  "verification": {
+    "focus": [
+      "route-family migration matrix accuracy",
+      "OpenAPI parity for the touched families and infra docs routes",
+      "explicit `PlainTextErrorResponse` migration-state documentation"
+    ],
+    "owner": "software-action-openapi-contract-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

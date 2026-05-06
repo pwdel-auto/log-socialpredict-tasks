@@ -1,0 +1,74 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/78131017-967a-43e2-9fd0-fc523891b1ce`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/78131017-967a-43e2-9fd0-fc523891b1ce/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/78131017-967a-43e2-9fd0-fc523891b1ce/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/78131017-967a-43e2-9fd0-fc523891b1ce/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/78131017-967a-43e2-9fd0-fc523891b1ce/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "The chosen legacy route family no longer emits touched ad hoc plain-text failures where the shared boundary-failure path now applies.",
+    "Success payloads for the chosen family remain stable and truthful to the current route contract instead of being force-wrapped.",
+    "Focused tests, the migration matrix, and OpenAPI updates reflect the migrated family and make remaining `PlainTextErrorResponse` families explicit elsewhere."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "a8738d53-e5b3-494c-8ca1-6a9c30126f2f"
+  ],
+  "id": "WAVE06-API-003",
+  "max_attempts": 3,
+  "notes": [
+    "Prefer a route family with existing contract tests or clear client visibility.",
+    "Migrate middleware and handler behavior together for the chosen family."
+  ],
+  "out_of_scope": [
+    "broad public route taxonomy rewrite",
+    "universal success-wrapper middleware",
+    "repo-wide parameter normalization"
+  ],
+  "profile": "",
+  "prompt": "After the first auth-translation seam lands, migrate one client-visible legacy route family that still returns raw JSON success with plain-text or ad hoc `http.Error` failures, such as search markets or a public-user reporting slice, onto the shared failure-writer direction. Keep success payloads truthful to the current family unless the route already advertises an envelope, update the route-family migration matrix and OpenAPI route-by-route, and only retire `PlainTextErrorResponse` for the paths whose handler and middleware behavior have actually converged. Do not attempt a flag-day public route redesign or a universal response wrapper.",
+  "runner_pid": 182148,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-30T13:01:04.253217+00:00",
+  "status": "running",
+  "title": "WAVE06 API: Converge the first client-visible legacy route family on shared failure writers",
+  "touched_paths": [
+    "../socialpredict/backend/handlers/markets",
+    "../socialpredict/backend/handlers/users",
+    "../socialpredict/backend/server",
+    "../socialpredict/backend/docs/openapi.yaml",
+    "../socialpredict/backend/docs/API-ISSUES.md",
+    "../socialpredict/README/PRODUCTION-NOTES/BACKEND/06-api-design.md"
+  ],
+  "uid": "78131017-967a-43e2-9fd0-fc523891b1ce",
+  "verification": {
+    "focus": [
+      "shared failure-writer behavior for the migrated family",
+      "stable success-shape preservation without wrapper drift",
+      "accurate remaining `PlainTextErrorResponse` inventory"
+    ],
+    "owner": "software-action-openapi-contract-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

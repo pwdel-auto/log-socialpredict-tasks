@@ -1,0 +1,19 @@
+task_uid: `a8738d53-e5b3-494c-8ca1-6a9c30126f2f`  
+task_id: `WAVE06-API-002`  
+status: `completed`
+
+Changed the private-users protected route family to use `handlers/authhttp` boundary helpers:
+- `CurrentUser` enforces `mustChangePassword` for private profile/profile-change routes.
+- `TokenUser` preserves the intentional `/v0/changepassword` exception.
+- Added focused tests to confirm public `reason` envelopes do not leak raw auth messages.
+- Updated OpenAPI/API notes for the touched private-users routes only.
+- Updated canonical report summary at `/workspace/socialpredict/.codex-reports/tasks/a8738d53-e5b3-494c-8ca1-6a9c30126f2f/summary.json`.
+
+files_changed:
+`handlers/authhttp/authhttp.go`, `handlers/users/privateuser/privateuser.go`, `handlers/users/changepassword.go`, `handlers/users/changedescription.go`, `handlers/users/changedisplayname.go`, `handlers/users/changeemoji.go`, `handlers/users/changepersonallinks.go`, related focused tests, `docs/API-ISSUES.md`, `docs/openapi.yaml`.
+
+checks_run:
+focused Go tests twice, focused server/OpenAPI tests twice, architecture boundary checks, API contract sync, quality guardrails/go vet, architecture sign-off, verifier review.
+
+follow_ups:
+Full `go test ./...` should run in CI or a clean environment with sufficient cache space. Remaining auth leakage outside private-users, such as `userposition`, is intentionally deferred.
