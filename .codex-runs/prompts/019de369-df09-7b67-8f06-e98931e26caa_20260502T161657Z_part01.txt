@@ -1,0 +1,70 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7b67-8f06-e98931e26caa`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7b67-8f06-e98931e26caa/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7b67-8f06-e98931e26caa/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7b67-8f06-e98931e26caa/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7b67-8f06-e98931e26caa/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "The touched backend image and production compose path consume the current `/health` and `/readyz` contract intentionally instead of relying on placeholder checks or root-path assumptions.",
+    "The touched deployment artifacts stay aligned with the live backend docs and infra route ownership for `/swagger/` and `/openapi.yaml` where that surface is affected.",
+    "Focused verification proves the current deployment health policy matches the backend serving contract without widening into orchestration-platform work."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [],
+  "id": "WAVE08-DEPLOY-001",
+  "max_attempts": 3,
+  "notes": [
+    "Keep the backend binary as the source of truth for liveness, readiness, and docs-serving paths.",
+    "Prefer the smallest deployment-artifact change that makes health consumption explicit."
+  ],
+  "out_of_scope": [
+    "Kubernetes, Helm, Terraform, or autoscaling rollout",
+    "frontend or proxy redesign outside touched health and docs publishing paths",
+    "new worker or sidecar deployment topology"
+  ],
+  "profile": "",
+  "prompt": "Use `lib/design/design-plan.json` and `../socialpredict/README/PRODUCTION-NOTES/BACKEND/08-deployment-infrastructure.md` as the binding context for WAVE08 deployment infrastructure. Treat upstream `main` at commit `051aac6b2fefa5634b8c98cc38caf52acf0043a9` as the reviewed baseline. Start by wiring the current backend Docker image and production compose topology to the backend-owned `/health` and `/readyz` contract instead of placeholder or implicit path checks. Keep backend-served docs publishing explicit where touched, preserve the current single backend binary shape, and do not introduce Kubernetes, Helm, Terraform, or a second deployment platform.",
+  "runner_pid": 49540,
+  "sandbox": "workspace-write",
+  "started_at": "2026-05-02T16:16:57.784242+00:00",
+  "status": "running",
+  "title": "WAVE08 Deploy: Wire image and compose health policy to backend-owned liveness and readiness",
+  "touched_paths": [
+    "../socialpredict/docker/backend/Dockerfile",
+    "../socialpredict/scripts/docker-compose-prod.yaml",
+    "../socialpredict/data/nginx/vhosts/prod/default.conf.template",
+    "../socialpredict/README/PRODUCTION-NOTES/BACKEND/08-deployment-infrastructure.md"
+  ],
+  "uid": "019de369-df09-7b67-8f06-e98931e26caa",
+  "verification": {
+    "focus": [
+      "image and compose consumption of backend health semantics",
+      "continued explicit docs publishing through the current proxy topology",
+      "avoidance of speculative deployment-platform expansion"
+    ],
+    "owner": "software-action-verifier-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict"
+}

@@ -1,0 +1,72 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-776f-8d91-c25d95bd455a`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-776f-8d91-c25d95bd455a/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-776f-8d91-c25d95bd455a/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-776f-8d91-c25d95bd455a/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-776f-8d91-c25d95bd455a/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "The touched deployment artifacts encode an explicit writer versus non-writer distinction instead of relying on implicit startup defaults.",
+    "The current operational contract for migrations and startup-owned seeds is documented where operators will actually use it.",
+    "The chosen change keeps the existing backend startup seam intact and does not reopen the design question as a cluster-platform feature buildout."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "019de369-df09-7b67-8f06-e98931e26caa"
+  ],
+  "id": "WAVE08-DEPLOY-002",
+  "max_attempts": 3,
+  "notes": [
+    "Operational enforcement is the point of this slice; do not replace it with another code-path abstraction.",
+    "Keep the exact-one-writer assumption explicit in touched deployment docs."
+  ],
+  "out_of_scope": [
+    "DB-backed advisory locking or new startup leader-election logic",
+    "generalized multi-cluster orchestration redesign",
+    "schema or seed behavior changes outside the deployment contract"
+  ],
+  "profile": "",
+  "prompt": "After health policy is explicit, update the current compose or deployment artifacts so exactly one runtime path is responsible for `STARTUP_WRITER=true` and request-serving replicas are explicit non-writers. Keep the current one-binary deployment shape, preserve fail-closed startup behavior, and do not add DB advisory-lock infrastructure, leader-election code, or a broader platform control plane.",
+  "runner_pid": 63364,
+  "sandbox": "workspace-write",
+  "started_at": "2026-05-02T16:23:16.014975+00:00",
+  "status": "running",
+  "title": "WAVE08 Deploy: Make the startup-writer role explicit in the deployable topology",
+  "touched_paths": [
+    "../socialpredict/scripts/docker-compose-prod.yaml",
+    "../socialpredict/.github/workflows/deploy-to-staging.yml",
+    "../socialpredict/.github/workflows/deploy-to-production.yml",
+    "../socialpredict/README/PRODUCTION-NOTES/BACKEND/08-deployment-infrastructure.md"
+  ],
+  "uid": "019de369-df09-776f-8d91-c25d95bd455a",
+  "verification": {
+    "focus": [
+      "deployment enforcement of the startup-writer contract",
+      "non-writer serving posture around migrations and startup-owned seeds",
+      "preservation of fail-closed startup mutation behavior"
+    ],
+    "owner": "software-action-db-migration-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict"
+}

@@ -1,0 +1,19 @@
+task_uid: `019de369-df09-776f-8d91-c25d95bd455a`  
+task_id: `WAVE08-DEPLOY-002`  
+status: `completed`
+
+Changed:
+- `scripts/docker-compose-prod.yaml`: added explicit `backend-startup-writer` with `STARTUP_WRITER=true`; serving `backend` now sets `STARTUP_WRITER=false` and waits on writer readiness.
+- `.github/workflows/deploy-to-staging.yml`
+- `.github/workflows/deploy-to-production.yml`: dispatch payloads now name the writer/non-writer deployment contract.
+- `.env.example`: documents the production writer/non-writer posture.
+- `README/PRODUCTION-NOTES/BACKEND/08-deployment-infrastructure.md`: documents the migration/startup-owned seed contract and “scale only non-writer backend” rule.
+
+Checks run:
+- `git diff --check`
+- Python assertions for compose writer/non-writer topology and workflow `client-payload` JSON parsing
+- `db-migration-agent` static sign-off: no blocking issues
+
+Follow-ups:
+- `docker compose config` could not be run because `docker` is not installed in this runner; run it in a Docker-enabled environment before deploy.
+- The requested custom `software-action-dispatcher-agent` type was unavailable, so I attempted it first, then used the repo’s available `dispatcher-agent` fallback.
