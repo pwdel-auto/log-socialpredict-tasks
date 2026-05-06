@@ -1,0 +1,14 @@
+task_uid: `019de369-df09-74cf-beab-ff77f9576bce`  
+task_id: `WAVE11-PERF-004`  
+status: `complete`
+
+Updated the WAVE11 performance stop-and-review in [11-runtime-performance-tuning.md](/workspace/socialpredict/README/PRODUCTION-NOTES/BACKEND/11-runtime-performance-tuning.md): the active note now says the first measured hotspot was the DB pool wait seam, the one-connection bottleneck is no longer represented by the explicit active defaults, and no query/index follow-up is justified without concrete dbPool wait plus request-path evidence. Caching, workers, compression middleware, profiling/load-testing, autoscaling, and broader platform work remain deferred.
+
+files_changed:
+`README/PRODUCTION-NOTES/BACKEND/11-runtime-performance-tuning.md`, plus the already-coordinated WAVE11 runtime/contract files recorded in the canonical summary.
+
+checks_run:
+`git diff --check -- README/PRODUCTION-NOTES/BACKEND/11-runtime-performance-tuning.md`; dispatcher/verifier also recorded passing Go formatting, boundary, API contract, quality, reliability, repeated `go test -count=1 ./server ./internal/app/runtime`, and the DB pool benchmark.
+
+follow_ups:
+Only create a migration-owned query or index follow-up after `/ops/status.dbPool` wait counters and request-path evidence identify a concrete slow query or missing index.

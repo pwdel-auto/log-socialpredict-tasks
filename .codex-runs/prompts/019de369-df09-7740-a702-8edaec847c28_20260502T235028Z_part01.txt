@@ -1,0 +1,71 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7740-a702-8edaec847c28`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7740-a702-8edaec847c28/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7740-a702-8edaec847c28/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7740-a702-8edaec847c28/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7740-a702-8edaec847c28/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "The touched env or deployment templates encode explicit initial pool defaults or documented overrides for the current backend runtime.",
+    "The chosen values are tied to the measured behavior from the preceding slice instead of guesswork.",
+    "Touched docs make it clear when those values should be revisited and what signal would justify doing so."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "019de369-df09-707b-975c-866559bfda5c"
+  ],
+  "id": "WAVE11-PERF-003",
+  "max_attempts": 3,
+  "notes": [
+    "Keep deployment defaults explicit where the repo already owns them.",
+    "Do not let a lack of perfect data justify speculative performance settings."
+  ],
+  "out_of_scope": [
+    "cache rollout or Redis introduction",
+    "query or index changes without measured justification",
+    "deployment-platform redesign beyond touched runtime defaults"
+  ],
+  "profile": "",
+  "prompt": "Use evidence from the measurement seam to choose initial `DB_MAX_*` and connection-lifetime defaults for the current deployment shapes, update the current env or compose templates, and explain the tradeoff in operator-facing docs. Keep the change reversible, tie it directly to the measured evidence, and do not speculate about caching, background workers, or query rewrites.",
+  "runner_pid": 233052,
+  "sandbox": "workspace-write",
+  "started_at": "2026-05-02T23:50:28.152928+00:00",
+  "status": "running",
+  "title": "WAVE11 Performance: Set initial deployment defaults for DB pool knobs from measured behavior",
+  "touched_paths": [
+    "../socialpredict/backend/.env.dev",
+    "../socialpredict/scripts/docker-compose-prod.yaml",
+    "../socialpredict/README/PRODUCTION-NOTES/BACKEND/11-runtime-performance-tuning.md"
+  ],
+  "uid": "019de369-df09-7740-a702-8edaec847c28",
+  "verification": {
+    "focus": [
+      "evidence-backed pool-default selection",
+      "alignment between runtime knobs and deployment templates",
+      "reversible performance tuning without speculative scope growth"
+    ],
+    "owner": "software-action-verifier-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict"
+}

@@ -1,0 +1,69 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7241-835a-e8c54bbbcb78`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7241-835a-e8c54bbbcb78/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7241-835a-e8c54bbbcb78/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7241-835a-e8c54bbbcb78/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7241-835a-e8c54bbbcb78/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "The touched runtime path makes effective pool and connection-lifecycle values explicit without leaking secrets or changing unrelated DB behavior.",
+    "Focused tests cover normalization or default-selection behavior for the touched pool settings.",
+    "Operator-facing docs or touched runtime notes reflect the current performance knobs honestly instead of promising a broader optimization platform."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [],
+  "id": "WAVE11-PERF-001",
+  "max_attempts": 3,
+  "notes": [
+    "Expose effective DB-pool posture safely; never log secrets or full DSNs.",
+    "Keep the first slice focused on the owned runtime knobs that already exist."
+  ],
+  "out_of_scope": [
+    "caching, Redis, or worker rollout",
+    "query rewrites or index changes before evidence exists",
+    "new top-level performance packages"
+  ],
+  "profile": "",
+  "prompt": "Use `lib/design/design-plan.json` and `../socialpredict/README/PRODUCTION-NOTES/BACKEND/11-runtime-performance-tuning.md` as the binding context for WAVE11 runtime performance tuning. Treat upstream `main` at commit `051aac6b2fefa5634b8c98cc38caf52acf0043a9` as the reviewed baseline. Start by making the runtime-owned `sql.DB` pool and lifetime settings explicit and observable: normalize effective values, log them safely at startup, and document the current env knobs per deployment shape without changing query architecture. Preserve current ownership in `backend/internal/app/runtime/db.go` and do not introduce a new performance subsystem.",
+  "runner_pid": 215092,
+  "sandbox": "workspace-write",
+  "started_at": "2026-05-02T23:37:49.220393+00:00",
+  "status": "running",
+  "title": "WAVE11 Performance: Make effective DB pool and connection-lifecycle posture explicit",
+  "touched_paths": [
+    "../socialpredict/backend/internal/app/runtime",
+    "../socialpredict/backend/logger",
+    "../socialpredict/README/PRODUCTION-NOTES/BACKEND/11-runtime-performance-tuning.md"
+  ],
+  "uid": "019de369-df09-7241-835a-e8c54bbbcb78",
+  "verification": {
+    "focus": [
+      "runtime ownership of DB pool and lifecycle settings",
+      "safe observability of effective performance knobs",
+      "avoidance of speculative performance-platform growth"
+    ],
+    "owner": "software-action-architecture-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}
