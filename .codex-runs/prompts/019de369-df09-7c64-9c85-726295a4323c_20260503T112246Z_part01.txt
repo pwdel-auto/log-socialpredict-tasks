@@ -1,0 +1,70 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7c64-9c85-726295a4323c`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7c64-9c85-726295a4323c/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7c64-9c85-726295a4323c/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7c64-9c85-726295a4323c/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7c64-9c85-726295a4323c/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "One clearly non-financial candidate operation is exposed through an owned service seam that can be invoked without HTTP coupling.",
+    "The chosen operation still runs synchronously in the current backend runtime after the refactor.",
+    "No queue, scheduler, worker, or async runtime infrastructure is introduced in this slice."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [],
+  "id": "WAVE13-JOBS-001",
+  "max_attempts": 3,
+  "notes": [
+    "Choose a derived or recomputable candidate only; money-moving flows are explicitly non-targets.",
+    "The point is to preserve a future async seam without changing current runtime shape."
+  ],
+  "out_of_scope": [
+    "Redis, queue tables, or outbox rollout",
+    "moving bet, sell, or market-resolution flows off the request path",
+    "new jobs or workers package trees"
+  ],
+  "profile": "",
+  "prompt": "Use `lib/design/design-plan.json` and `../socialpredict/README/PRODUCTION-NOTES/BACKEND/13-background-jobs.md` as the binding context for this deferred WAVE13 background-jobs queue. Treat upstream `main` at commit `051aac6b2fefa5634b8c98cc38caf52acf0043a9` as the reviewed baseline. Start by choosing one clearly non-financial candidate already adjacent to the live codebase, expected to be a derived snapshot, export-like helper, or other recomputable side effect, and extract or tighten its service seam so it can be invoked without HTTP coupling while remaining synchronous in the current runtime. Do not add a jobs package, Redis queue, cron framework, or worker deployment role.",
+  "runner_pid": 282100,
+  "sandbox": "workspace-write",
+  "started_at": "2026-05-03T11:22:46.009930+00:00",
+  "status": "running",
+  "title": "WAVE13 Jobs: Extract one future async-safe candidate behind an idempotent service seam while keeping it synchronous",
+  "touched_paths": [
+    "../socialpredict/backend/handlers/metrics",
+    "../socialpredict/backend/internal/domain/analytics",
+    "../socialpredict/backend/handlers/cms/homepage",
+    "../socialpredict/README/PRODUCTION-NOTES/BACKEND/13-background-jobs.md"
+  ],
+  "uid": "019de369-df09-7c64-9c85-726295a4323c",
+  "verification": {
+    "focus": [
+      "small future-async seam for a non-financial candidate",
+      "continued synchronous ownership in the current runtime",
+      "avoidance of premature worker-platform buildout"
+    ],
+    "owner": "software-action-architecture-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

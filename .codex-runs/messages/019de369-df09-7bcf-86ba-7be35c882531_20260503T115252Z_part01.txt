@@ -1,0 +1,16 @@
+task_uid: `019de369-df09-7bcf-86ba-7be35c882531`  
+task_id: `WAVE13-JOBS-003`  
+status: `completed`
+
+Updated [13-background-jobs.md](/workspace/socialpredict/README/PRODUCTION-NOTES/BACKEND/13-background-jobs.md) with the WAVE13 stop-and-review conclusion. The chosen next async seam is `homepage_render_warmup` for homepage CMS render/sanitize warm-up after `PUT /v0/admin/content/home`, explicitly non-financial and deferred until runtime roles, retry/dead-letter policy, lag/failure visibility, logging, DB ownership, and release-safety prerequisites exist.
+
+files_changed:
+- `/workspace/socialpredict/README/PRODUCTION-NOTES/BACKEND/13-background-jobs.md`
+- canonical report files under `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7bcf-86ba-7be35c882531`
+
+checks_run:
+- `git diff --check -- ../README/PRODUCTION-NOTES/BACKEND/13-background-jobs.md`
+- targeted `rg` acceptance-term check
+- `python3 -m json.tool` on `summary.json`
+
+follow_ups: none. Verifier sign-off was recorded. Existing unrelated modified Go files were left untouched.
