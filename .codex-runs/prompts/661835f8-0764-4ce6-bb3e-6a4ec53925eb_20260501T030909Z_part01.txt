@@ -1,0 +1,73 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/661835f8-0764-4ce6-bb3e-6a4ec53925eb`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/661835f8-0764-4ce6-bb3e-6a4ec53925eb/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/661835f8-0764-4ce6-bb3e-6a4ec53925eb/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/661835f8-0764-4ce6-bb3e-6a4ec53925eb/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/661835f8-0764-4ce6-bb3e-6a4ec53925eb/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "The touched runtime, migration, or accounting-sensitive test files make it clear which checks are convenience-only and which behaviors are still awaiting real-Postgres verification.",
+    "The first real-Postgres targets for this wave are narrowed to concrete W04 and W06 risks rather than a broad integration backlog.",
+    "Any touched testing note changes stay consistent with package-local test ownership and keep long-term infrastructure ideas explicitly deferred."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "f8cf6368-bd2e-4dbc-9548-6431f21e7b25"
+  ],
+  "id": "WAVE07-TEST-001",
+  "max_attempts": 3,
+  "notes": [
+    "Prefer comments, naming, and helper extraction inside the owning packages over a central test taxonomy.",
+    "Use the smallest documentation edit that makes the chosen truth boundary explicit."
+  ],
+  "out_of_scope": [
+    "introducing a top-level `testing/` subsystem or shared `TestSuite` base",
+    "broad CI orchestration or coverage-gating redesign",
+    "testcontainers-first rollout or generalized integration harness work"
+  ],
+  "profile": "",
+  "prompt": "Use `lib/design/design-plan.json`, `../socialpredict/README/PRODUCTION-NOTES/BACKEND/07-testing-strategy.md`, and `../socialpredict/README/PRODUCTION-NOTES/BACKEND/FUTURE/03-long-term-test-infrastructure.md` as the binding context for WAVE07 verification hardening. Start by tightening the existing package-local runtime, migration, and accounting-sensitive test files so they explicitly distinguish SQLite convenience coverage from behaviors that still require real-Postgres proof. Keep the changes close to the owning packages, refresh the active testing note only as needed to reflect the concrete source-of-truth targets chosen for this wave, and do not create a new shared test framework, top-level `testing/` tree, or CI program.",
+  "runner_pid": 1639,
+  "sandbox": "workspace-write",
+  "started_at": "2026-05-01T03:09:09.148599+00:00",
+  "status": "running",
+  "title": "WAVE07 Testing: Clarify convenience versus source-of-truth verification at the owning packages",
+  "touched_paths": [
+    "../socialpredict/backend/internal/app/runtime",
+    "../socialpredict/backend/migration",
+    "../socialpredict/backend/internal/domain/bets",
+    "../socialpredict/backend/internal/domain/markets",
+    "../socialpredict/README/PRODUCTION-NOTES/BACKEND/07-testing-strategy.md"
+  ],
+  "uid": "661835f8-0764-4ce6-bb3e-6a4ec53925eb",
+  "verification": {
+    "focus": [
+      "package-local verification ownership",
+      "explicit SQLite-versus-Postgres truth boundary",
+      "continued deferral of new testing-platform structure"
+    ],
+    "owner": "software-action-test-reliability-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict"
+}

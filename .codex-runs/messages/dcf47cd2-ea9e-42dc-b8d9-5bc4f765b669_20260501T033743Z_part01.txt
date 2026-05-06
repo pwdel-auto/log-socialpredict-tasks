@@ -1,0 +1,23 @@
+task_uid: `dcf47cd2-ea9e-42dc-b8d9-5bc4f765b669`  
+task_id: `WAVE07-TEST-005`  
+status: `completed`
+
+Changed the WAVE07 testing notes to close the stop-and-review point: completed DSN-gated Postgres startup/readiness/migration and place-bet transaction evidence is now separated from remaining DB-truth gaps, `FUTURE/03-long-term-test-infrastructure.md` stays clearly deferred, and the next seam is one package-local Postgres sell-position transaction atomicity/concurrency check.
+
+files_changed:
+- `README/PRODUCTION-NOTES/BACKEND/07-testing-strategy.md`
+- `README/PRODUCTION-NOTES/BACKEND/FUTURE/03-long-term-test-infrastructure.md`
+- Existing WAVE07 Go test/comment changes remain in the worktree, plus new DSN-gated Postgres tests:
+  - `backend/postgres_startup_integration_test.go`
+  - `backend/internal/repository/bets/place_transaction_postgres_test.go`
+
+checks_run:
+- `gofmt -l` on touched Go test files: clean
+- `git diff --check`: clean
+- `go test ./internal/repository/bets ./... -count=1` from `backend/`: pass
+- reliability suite: two uncached `go test ./...` runs, OpenAPI validation, and `go vet ./...`: pass
+
+follow_ups:
+- Next verification seam: one package-local, DSN-gated real-Postgres sell-position transaction atomicity/concurrency check once repository transaction scope is finalized.
+
+Assumption: no live Postgres DSN was provided, so DSN-gated Postgres tests were compile-checked and skipped rather than run against an actual database. The canonical report summary was updated at `.codex-reports/tasks/dcf47cd2-ea9e-42dc-b8d9-5bc4f765b669/summary.json`.

@@ -1,0 +1,73 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/b309821d-deb6-4a6b-a78b-ef1637cc765f`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/b309821d-deb6-4a6b-a78b-ef1637cc765f/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/b309821d-deb6-4a6b-a78b-ef1637cc765f/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/b309821d-deb6-4a6b-a78b-ef1637cc765f/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/b309821d-deb6-4a6b-a78b-ef1637cc765f/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "Existing auth, security, server, or OpenAPI contract tests cover the touched shared-failure behaviors and documented auth exceptions more explicitly than before.",
+    "Any touched public `reason` vocabulary or route-spec expectations stay aligned between implementation and `openapi.yaml`.",
+    "The verification remains attached to the owning packages and backend-root contract tests rather than moving into a new shared test layer."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "5547ad2a-a236-4e90-b9ab-cd3d133295b3"
+  ],
+  "id": "WAVE07-TEST-004",
+  "max_attempts": 3,
+  "notes": [
+    "Prefer extending existing contract tests over adding duplicate suites.",
+    "Keep proxy-trust and shared-failure expectations explicit in test names and fixtures."
+  ],
+  "out_of_scope": [
+    "distributed rate-limiting rollout",
+    "broader API versioning or generated-client changes",
+    "reopening unrelated handler migrations just to chase test coverage"
+  ],
+  "profile": "",
+  "prompt": "Strengthen the request-boundary verification that earlier waves introduced by extending existing auth, security, server, and OpenAPI contract tests around must-change-password exceptions, shared `405`, `429`, or sanitized `500` behavior, proxy-sensitive client-IP assumptions, and any touched public `reason` vocabulary. Keep the tests package-local or backend-root where they already live, and update `openapi.yaml` only if the hardened contract checks expose real drift. Do not reopen route redesign, distributed rate limiting, or generated-client work.",
+  "runner_pid": 23950,
+  "sandbox": "workspace-write",
+  "started_at": "2026-05-01T03:31:28.106018+00:00",
+  "status": "running",
+  "title": "WAVE07 Testing: Harden boundary contract tests for auth, rate limiting, and shared failure vocabulary",
+  "touched_paths": [
+    "../socialpredict/backend/internal/service/auth",
+    "../socialpredict/backend/security",
+    "../socialpredict/backend/server",
+    "../socialpredict/backend/docs/openapi.yaml",
+    "../socialpredict/backend/openapi_test.go"
+  ],
+  "uid": "b309821d-deb6-4a6b-a78b-ef1637cc765f",
+  "verification": {
+    "focus": [
+      "shared failure vocabulary and auth-exception contract coverage",
+      "proxy-sensitive rate-limit and boundary-failure behavior",
+      "route-spec parity for any touched public failure shapes"
+    ],
+    "owner": "software-action-openapi-contract-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

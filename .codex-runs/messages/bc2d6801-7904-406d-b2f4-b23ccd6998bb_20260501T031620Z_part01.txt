@@ -1,0 +1,19 @@
+task_uid: `bc2d6801-7904-406d-b2f4-b23ccd6998bb`  
+task_id: `WAVE07-TEST-002`  
+status: `completed`
+
+Added `postgres_startup_integration_test.go`, an opt-in real-Postgres backend-root contract test for the startup/readiness/migration seam. It verifies writer migration failure posture, readiness staying closed until successful startup, failed migrations not being recorded, successful writer migration enabling readiness, and non-writer `VerifyApplied` discipline without running migration bodies or creating missing artifacts.
+
+files_changed: `["postgres_startup_integration_test.go"]`
+
+checks_run:
+- `gofmt -l postgres_startup_integration_test.go`
+- `go test -count=1 . ./internal/app/runtime ./migration`
+- `go test -count=1 ./...`
+- `go test -count=1 -run TestPostgresStartupReadinessAndMigrationPosture -v .` skipped as expected because no Postgres DSN is configured
+- `go vet ./...`
+- architecture boundary checks
+- quality guardrails
+- reliability suite for `.`
+
+follow_ups: Run the opt-in Postgres test with `SOCIALPREDICT_POSTGRES_TEST_DSN` or `POSTGRES_TEST_DSN` where a real Postgres instance is available.

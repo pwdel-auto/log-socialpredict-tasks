@@ -1,0 +1,18 @@
+task_uid: `5547ad2a-a236-4e90-b9ab-cd3d133295b3`  
+task_id: `WAVE07-TEST-003`  
+status: `completed`
+
+Added package-local opt-in real-Postgres verification for W04 bet placement atomicity in [place_transaction_postgres_test.go](/workspace/socialpredict/backend/internal/repository/bets/place_transaction_postgres_test.go). The tests cover successful debit+bet commit, rollback when bet creation fails, and overlapping placement serialization through the existing Postgres `FOR UPDATE` user-row lock.
+
+files_changed:
+- `internal/repository/bets/place_transaction_postgres_test.go`
+
+checks_run:
+- `go test -count=1 ./internal/repository/bets` with workspace-local Go caches, passed twice
+- `go test -count=1 -run TestGormRepositoryPlaceBetTransactionPostgres -v ./internal/repository/bets`, passed with skip because no Postgres DSN is configured
+- `run_reliability_suite.sh /workspace/socialpredict ./internal/repository/bets`, passed
+
+follow_ups:
+- Run with `SOCIALPREDICT_POSTGRES_TEST_DSN` or `POSTGRES_TEST_DSN` in a real Postgres environment to exercise the opt-in Postgres subtests instead of the local skip.
+
+Note: existing unrelated worktree changes were left untouched.
