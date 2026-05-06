@@ -1,0 +1,73 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/1448e15d-34a0-49af-bf2d-504b9530f7f1`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/1448e15d-34a0-49af-bf2d-504b9530f7f1/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/1448e15d-34a0-49af-bf2d-504b9530f7f1/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/1448e15d-34a0-49af-bf2d-504b9530f7f1/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/1448e15d-34a0-49af-bf2d-504b9530f7f1/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "Touched runtime-owned `405`, `429`, and unexpected `500` responses flow through shared boundary writers instead of scattered `http.Error` or ad hoc server strings.",
+    "The touched runtime failure path makes request correlation, stable `error.type`, and one-time exception recording explicit without coupling public `reason` values to telemetry fields.",
+    "No touched path introduces a universal error hierarchy or retry or circuit-breaker behavior for accounting-sensitive writes."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "8bc7cbfd-0cfb-4029-9f3b-0073931389a3"
+  ],
+  "id": "WAVE03-ERR-002",
+  "max_attempts": 3,
+  "notes": [
+    "Treat `405`, `429`, and unexpected `500` responses as runtime-owned boundary behavior.",
+    "Keep public `reason` values separate from internal telemetry fields such as `error.type`.",
+    "Do not add generic retry or circuit-breaker behavior to accounting-sensitive writes."
+  ],
+  "out_of_scope": [
+    "handler-by-handler response migration",
+    "business rejection taxonomy redesign",
+    "OpenAPI sweeps outside touched runtime-owned failures"
+  ],
+  "profile": "",
+  "prompt": "With boundary recovery in place, add shared failure writers for runtime-owned `405`, `429`, and sanitized `500` behavior in server and middleware paths. Make the minimal OpenTelemetry-aligned runtime failure telemetry rules explicit for request correlation, stable `error.type`, and one-time exception recording, while keeping public `reason` values separate from telemetry fields and avoiding any universal error hierarchy or speculative retry behavior.",
+  "runner_pid": 13639,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-29T05:44:17.343347+00:00",
+  "status": "running",
+  "title": "WAVE03 Error Handling: Converge runtime-owned 405, 429, and sanitized 500 failures on shared writers",
+  "touched_paths": [
+    "../socialpredict/backend/server",
+    "../socialpredict/backend/security",
+    "../socialpredict/backend/logger",
+    "../socialpredict/backend/errors"
+  ],
+  "uid": "1448e15d-34a0-49af-bf2d-504b9530f7f1",
+  "verification": {
+    "focus": [
+      "shared boundary failure translation",
+      "separation of public reason from telemetry",
+      "absence of a universal error hierarchy or retry logic"
+    ],
+    "owner": "software-action-architecture-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

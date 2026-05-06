@@ -1,0 +1,11 @@
+task_uid: `0647e6ec-c354-4232-a440-3c9d25f9ffa3`  
+task_id: `WAVE03-ERR-005`  
+status: `completed`
+
+files_changed: `security/failures.go`, `security/ratelimit.go`, `security/requestboundary.go`, `server/server.go`, `server/server_test.go`, `handlers/authhttp/`, protected user/auth handlers, `docs/openapi.yaml`, `README/PRODUCTION-NOTES/BACKEND/03-error-handling.md`.
+
+what changed: Moved WAVE03 runtime 405/429/panic failure helpers out of `backend/errors` into `security`, kept migrated protected profile/password and runtime boundaries on JSON envelopes, and documented the remaining live plain-text/raw `http.Error` surface. OpenAPI now keeps `PlainTextErrorResponse` explicit only for public user read/credit/portfolio/financial routes.
+
+checks_run: targeted `go test` twice, `go test ./... -count=1`, `go vet ./...`, `git diff --check`, changed-file `gofmt -l`, architecture boundary checks, API contract sync, and verifier-agent sign-off all passed. The quality wrapper itself hit stale base-ref deleted `backend/logging/*` paths, but its underlying gates passed.
+
+follow_ups: Next wave should migrate `/v0/userinfo/{username}`, `/v0/usercredit/{username}`, `/v0/portfolio/{username}`, and `/v0/users/{username}/financial`; then handle markets raw `http.Error` reads before write-sensitive paths. `backend/errors` should only be deleted later as compatibility cleanup, not expanded.

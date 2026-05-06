@@ -1,0 +1,28 @@
+task_uid: `8bc7cbfd-0cfb-4029-9f3b-0073931389a3`  
+task_id: `WAVE03-ERR-001`  
+status: `completed`
+
+Implemented boundary-owned request correlation and panic recovery. The server stack now uses `security.RequestBoundaryMiddleware` as the single request boundary wrapper, while preserving logger-compatible request context for existing handler diagnostics. Unexpected panics now recover at the boundary with sanitized JSON `500` responses using `INTERNAL_ERROR`, and logs include correlated runtime fields plus `error_type="panic"`.
+
+Files changed:
+- `backend/server/server.go`
+- `backend/security/requestboundary.go`
+- `backend/security/requestboundary_test.go`
+- `backend/logger/middleware.go`
+- `backend/logger/simplelogging.go`
+- `backend/main.go` removed an unused `os` import that blocked repo-wide vet/build validation
+
+Checks run:
+- `gofmt -l ...`: pass
+- `git diff --check`: pass
+- `go test -count=1 ./security ./logger ./server`: pass
+- `go vet ./...`: pass
+- `run_boundary_checks.sh /workspace/socialpredict`: pass
+- `run_quality_guardrails.sh /workspace/socialpredict HEAD`: pass
+- `run_reliability_suite.sh /workspace/socialpredict ./security`: pass
+- `run_reliability_suite.sh /workspace/socialpredict ./logger`: pass
+- `run_reliability_suite.sh /workspace/socialpredict ./server`: pass
+
+Follow-ups:
+- Full `run_reliability_suite.sh /workspace/socialpredict ./...` is still blocked by pre-existing failures in `socialpredict/errors TestHandleHTTPError` and `socialpredict/handlers/users TestEmojiValidation`; touched package reliability checks pass.
+- Requested `software-action-dispatcher-agent` was not available as an agent type, so I used the installed `dispatcher-agent`, which completed coordination with specialists.

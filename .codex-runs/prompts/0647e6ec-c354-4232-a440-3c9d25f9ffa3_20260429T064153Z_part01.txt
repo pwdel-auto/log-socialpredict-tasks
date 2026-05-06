@@ -1,0 +1,73 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/0647e6ec-c354-4232-a440-3c9d25f9ffa3`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/0647e6ec-c354-4232-a440-3c9d25f9ffa3/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/0647e6ec-c354-4232-a440-3c9d25f9ffa3/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/0647e6ec-c354-4232-a440-3c9d25f9ffa3/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/0647e6ec-c354-4232-a440-3c9d25f9ffa3/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "Remaining live request paths that still rely on `PlainTextErrorResponse`, raw `http.Error`, status-only failures, or `backend/errors` are made explicit after the first migration slice.",
+    "Any request boundary migrated in WAVE03 no longer depends on `backend/errors`; if other live boundaries still do, that dependency is left explicit rather than half-removed.",
+    "The wave ends with a precise next-wave seam for additional route-family migrations and eventual package retirement, with touched docs kept accurate."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "f741f499-c696-40cb-abe4-56a2b2c65711"
+  ],
+  "id": "WAVE03-ERR-005",
+  "max_attempts": 3,
+  "notes": [
+    "This is the WAVE03 stop-and-review point before broader route-family convergence.",
+    "Do not claim universal envelope coverage or package retirement ahead of the actual migrated boundaries."
+  ],
+  "out_of_scope": [
+    "broad follow-on route-family migrations",
+    "universal plain-text contract retirement",
+    "generic retries or circuit breakers"
+  ],
+  "profile": "",
+  "prompt": "Finish WAVE03 by reconciling the first migrated slice with the remaining migration surface. Remove `backend/errors` from any request boundary successfully migrated in this wave, make the still-live `PlainTextErrorResponse`, raw `http.Error`, status-only, and `backend/errors` request paths explicit where they remain, and leave the next wave as a precise route-family or exception-case seam instead of a vague backlog. This is the WAVE03 stop-and-review point before broader route-family convergence or full package retirement.",
+  "runner_pid": 79886,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-29T06:41:53.175125+00:00",
+  "status": "running",
+  "title": "WAVE03 Error Handling: Stop and review remaining plain-text, raw HTTP, and backend/errors request paths",
+  "touched_paths": [
+    "../socialpredict/backend/errors",
+    "../socialpredict/backend/handlers",
+    "../socialpredict/backend/server",
+    "../socialpredict/backend/docs/openapi.yaml",
+    "../socialpredict/README/PRODUCTION-NOTES/BACKEND/03-error-handling.md"
+  ],
+  "uid": "0647e6ec-c354-4232-a440-3c9d25f9ffa3",
+  "verification": {
+    "focus": [
+      "precise remaining migration inventory",
+      "no half-retired backend/errors usage on migrated boundaries",
+      "clear stop-and-review seam for the next wave"
+    ],
+    "owner": "software-action-verifier-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

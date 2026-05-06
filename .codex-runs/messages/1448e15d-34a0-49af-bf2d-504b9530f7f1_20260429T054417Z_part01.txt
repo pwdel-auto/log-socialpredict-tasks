@@ -1,0 +1,13 @@
+task_uid: `1448e15d-34a0-49af-bf2d-504b9530f7f1`  
+task_id: `WAVE03-ERR-002`  
+status: `complete`
+
+Changed runtime-owned failure handling so `405`, middleware `429`, and sanitized panic `500` responses use shared JSON boundary writers. Public `reason` values now stay separate from telemetry-only `error_type`, request correlation is explicit, and panic exception recording is logged once. OpenAPI/tests were updated for the touched runtime paths.
+
+files_changed:
+`docs/openapi.yaml`, `errors/runtimefailure.go`, `errors/httperror_test.go`, `handlers/envelope.go`, `logger/middleware.go`, `logger/simplelogging.go`, `main.go`, `security/ratelimit.go`, `security/ratelimit_test.go`, `security/requestboundary.go`, `security/requestboundary_test.go`, `server/server.go`, `server/server_test.go`
+
+checks_run:
+`gofmt`, `run_boundary_checks.sh /workspace/socialpredict`, `go test -count=1 ./errors ./security ./server .`, dispatcher-reported reliability suites for `./security` and `./server`, API contract sync, and `git diff --check`.
+
+follow_ups: none. Assumption recorded: `RATE_LIMITED` and `LOGIN_RATE_LIMITED` are acceptable public reasons for middleware-owned `429`s.
