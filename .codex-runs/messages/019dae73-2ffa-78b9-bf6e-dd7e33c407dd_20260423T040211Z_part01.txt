@@ -1,0 +1,12 @@
+Updated [openapi.yaml](/workspace/socialpredict/backend/docs/openapi.yaml:47) to include the live `/openapi.yaml` endpoint and the legacy `/v0/markets/active|closed|resolved` aliases, then updated [API-ISSUES.md](/workspace/socialpredict/backend/docs/API-ISSUES.md:35) with the first grouped drift baseline from live code: auth drift, request-shape drift, response/error-shape drift, status-code drift, and content-type drift by endpoint area. I treated routed code and `SecurityMiddleware()` behavior as the source of truth, and kept the spec edits narrow instead of rewriting every stale security/error block in one pass. The canonical report was updated in [summary.json](/workspace/socialpredict/.codex-reports/tasks/019dae73-2ffa-78b9-bf6e-dd7e33c407dd/summary.json:1).
+
+- `task_uid:` `019dae73-2ffa-78b9-bf6e-dd7e33c407dd`
+- `task_id:` `API-001`
+- `status:` `completed`
+- `files_changed:` [openapi.yaml](/workspace/socialpredict/backend/docs/openapi.yaml:47), [API-ISSUES.md](/workspace/socialpredict/backend/docs/API-ISSUES.md:35)
+- `checks_run:` `GOCACHE=/tmp/socialpredict-gocache GOMODCACHE=/tmp/socialpredict-gomodcache bash /workspace/spec-socialpredict-tasks/.codex/skills/socialpredict-api-contract-drift-control/scripts/check_api_contract_sync.sh /workspace/socialpredict` passed
+- `checks_run:` `GOCACHE=/tmp/socialpredict-gocache GOMODCACHE=/tmp/socialpredict-gomodcache bash /workspace/spec-socialpredict-tasks/.codex/skills/socialpredict-openapi-kin-conformance/scripts/run_kin_openapi_conformance.sh /workspace/socialpredict` loaded and validated the spec, then failed on 41 pre-existing missing `operationId` fields
+- `follow_ups:` decide whether `/swagger`, `/swagger/`, and `/v0/marketprojection/{marketId}/{amount}/{outcome}/` belong in canonical OpenAPI
+- `follow_ups:` reconcile `bearerAuth` annotations with the current public-read implementation for Config, Metrics, Markets read endpoints, and public Users read endpoints
+- `follow_ups:` fix the `/v0/markets/{id}/projection` route/handler mismatch or narrow the contract to the legacy projection route
+- `follow_ups:` normalize remaining plain-text error/status behavior, or document it explicitly, especially middleware `429`s, metrics `500`s, market parse/auth failures, and portfolio missing-user handling

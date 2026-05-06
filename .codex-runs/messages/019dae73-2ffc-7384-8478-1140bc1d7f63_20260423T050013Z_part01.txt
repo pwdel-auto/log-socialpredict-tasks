@@ -1,0 +1,8 @@
+Kept the existing login token contract per DP-006, standardized login/admin failure reasons onto the shared API-002 vocabulary, preserved server-side must-change-password gating, and aligned OpenAPI plus tests for setup and docs exposure. The dispatcher agent was spawned as requested, but it did not converge before timeout; I finalized the implementation and canonical summary directly.
+
+- `task_uid`: `019dae73-2ffc-7384-8478-1140bc1d7f63`
+- `task_id`: `API-003`
+- `status`: `completed`
+- `files_changed`: `backend/internal/service/auth/loggin.go`, `backend/internal/service/auth/middleware_test.go`, `backend/handlers/admin/adduser.go`, `backend/handlers/admin/adduser_test.go`, `backend/server/server_test.go`, `backend/docs/openapi.yaml`, `backend/docs/API-ISSUES.md`, `/workspace/socialpredict/.codex-reports/tasks/019dae73-2ffc-7384-8478-1140bc1d7f63/summary.json`
+- `checks_run`: `gofmt -w` on modified Go files; `go test -count=1 ./internal/service/auth`; `go test -count=1 ./handlers/admin`; `go test -count=1 ./handlers/setup`; `go test -count=1 ./server`; `go test -count=1 ./handlers/cms/homepage/http`; `go test -count=1 ./handlers/users -run 'TestChangePasswordHandler|TestPassword'`; second deterministic pass of those focused suites; `go test ./... -run TestOpenAPISpecValidates -count=1`; `go vet ./internal/service/auth ./handlers/admin ./handlers/setup ./server`; `run_boundary_checks.sh /workspace/socialpredict`; `check_api_contract_sync.sh /workspace/socialpredict HEAD`
+- `follow_ups`: Broad `go test -count=1 ./handlers/users` still has unrelated pre-existing failures outside this task scope (`TestEmojiValidation` and a separate missing-`bets`-table path in other user tests).

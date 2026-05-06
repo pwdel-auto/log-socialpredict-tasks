@@ -1,0 +1,10 @@
+Completed the final API sweep. The target repo now has the contract/docs reconciliation in [openapi.yaml](/workspace/socialpredict/backend/docs/openapi.yaml) and [API-ISSUES.md](/workspace/socialpredict/backend/docs/API-ISSUES.md), plus the remaining runtime fix in [server.go](/workspace/socialpredict/backend/server/server.go) with regression coverage in [server_test.go](/workspace/socialpredict/backend/server/server_test.go). Verifier sign-off is approved.
+
+- `task_uid`: `019dae73-3002-782c-bdeb-569256ff5db8`
+- `task_id`: `API-009`
+- `status`: `completed`
+- `files_changed`: [openapi.yaml](/workspace/socialpredict/backend/docs/openapi.yaml), [API-ISSUES.md](/workspace/socialpredict/backend/docs/API-ISSUES.md), [server.go](/workspace/socialpredict/backend/server/server.go), [server_test.go](/workspace/socialpredict/backend/server/server_test.go)
+- `checks_run`: `gofmt -w backend/server/server.go backend/server/server_test.go`; focused `go test` for OpenAPI/embed checks in `backend/.`; focused `go test ./server`; kin-openapi conformance; local non-Docker backend runtime start; served `/openapi.yaml` byte-match check; scoped Schemathesis v4.15.2 runtime conformance against 16 public/docs operation IDs (`16 passed`); `git diff --check`; `go vet ./server`; architecture boundary checks
+- `follow_ups`: control-repo Schemathesis wrapper still uses obsolete `--base-url` instead of `--url`; Schemathesis still emits non-fatal schema-validation-mismatch warnings on 8 read-only endpoints even though all generated cases passed
+
+Assumptions: `/swagger` redirect evidence was verified with direct runtime `GET` probes rather than Schemathesis, because the installed CLI treats disabled redirect following as a transport error rather than a passing documented `301`.

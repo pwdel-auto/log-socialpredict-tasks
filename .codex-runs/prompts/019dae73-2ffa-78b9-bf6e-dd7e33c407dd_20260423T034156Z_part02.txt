@@ -1,0 +1,77 @@
+You are resuming queued automation task API-001 (019dae73-2ffa-78b9-bf6e-dd7e33c407dd) after codex-runner checkpointed the session because the active context window was getting full.
+
+Continue from the existing session state and current repository contents.
+- Reuse the canonical report directory `/workspace/socialpredict/.codex-reports/tasks/019dae73-2ffa-78b9-bf6e-dd7e33c407dd`.
+- Continue appending to `/workspace/socialpredict/.codex-reports/tasks/019dae73-2ffa-78b9-bf6e-dd7e33c407dd/conversation.ndjson` and `/workspace/socialpredict/.codex-reports/tasks/019dae73-2ffa-78b9-bf6e-dd7e33c407dd/decisions.ndjson` rather than creating new report files.
+- Keep `/workspace/socialpredict/.codex-reports/tasks/019dae73-2ffa-78b9-bf6e-dd7e33c407dd/summary.json` current as the dispatcher-owned rollup.
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for incremental reads and summary updates when practical.
+- Check `summary.json.context` first. If `handoff_requested` is true, consolidate state before branching into more work.
+- Do not restart the task from scratch.
+- Avoid repeating work that is already complete.
+- Re-read files or rerun checks only when needed to safely continue.
+- Finish with the same concise summary contract as before, including task_uid and task_id.
+
+Latest checkpoint:
+{}
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "Implemented routes are inventoried against `backend/docs/openapi.yaml` with mismatches grouped by endpoint area.",
+    "The baseline identifies auth, request, response, status-code, content-type, and error/reason drift without inventing future API behavior.",
+    "Any narrow OpenAPI edits made in this task reflect implemented behavior and keep Swagger rendering valid."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [],
+  "id": "API-001",
+  "last_resumed_at": "2026-04-23T03:41:56.070850+00:00",
+  "max_attempts": 3,
+  "notes": [
+    "Use `software-planner-agent` posture: this is the first useful feedback slice, not a broad rewrite.",
+    "Use `software-action-openapi-contract-agent` and API conformance skills for route/spec comparison.",
+    "Source-of-truth order: `server.go`, handlers/DTOs/tests, `docs/openapi.yaml`, then `API-ISSUES.md`."
+  ],
+  "out_of_scope": [
+    "public route reorganization",
+    "universal response-envelope migration",
+    "limited-scope token redesign",
+    "bets-to-trades rename",
+    "frontend client changes"
+  ],
+  "profile": "",
+  "prompt": "Create the first feedback slice for the API sweep by inventorying implemented backend routes against the current OpenAPI contract. Treat `backend/server/server.go`, touched handlers, DTOs, and handler tests as the source of truth, then compare them with `backend/docs/openapi.yaml` and `backend/docs/API-ISSUES.md`. Record mismatches by route, method, request shape, response shape, status code, auth requirement, and error/reason behavior. Fix only narrow obvious documentation drift needed to make the baseline truthful; do not redesign routes or response envelopes in this task.",
+  "runner_pid": 1186,
+  "runner_state": {
+    "context_file": "/workspace/log-socialpredict-tasks/.codex-runs/context/019dae73-2ffa-78b9-bf6e-dd7e33c407dd_20260423T033101Z_part01.ndjson",
+    "event_file": "/workspace/log-socialpredict-tasks/.codex-runs/events/019dae73-2ffa-78b9-bf6e-dd7e33c407dd_20260423T033101Z_part01.ndjson",
+    "message_file": "/workspace/log-socialpredict-tasks/.codex-runs/messages/019dae73-2ffa-78b9-bf6e-dd7e33c407dd_20260423T033101Z_part01.txt",
+    "prompt_file": "/workspace/log-socialpredict-tasks/.codex-runs/prompts/019dae73-2ffa-78b9-bf6e-dd7e33c407dd_20260423T033101Z_part01.txt",
+    "resume_pending": true,
+    "segment": 1,
+    "session_id": "019db864-1c81-77b1-831b-005d9f6c247f",
+    "stderr_file": "/workspace/log-socialpredict-tasks/.codex-runs/stderr/019dae73-2ffa-78b9-bf6e-dd7e33c407dd_20260423T033101Z_part01.stderr.log"
+  },
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-23T03:31:01.634599+00:00",
+  "status": "running",
+  "title": "W04 API: Establish route, handler, and OpenAPI drift baseline",
+  "touched_paths": [
+    "../socialpredict/backend/server",
+    "../socialpredict/backend/handlers",
+    "../socialpredict/backend/docs/openapi.yaml",
+    "../socialpredict/backend/docs/API-ISSUES.md",
+    "../socialpredict/backend/openapi_test.go"
+  ],
+  "uid": "019dae73-2ffa-78b9-bf6e-dd7e33c407dd",
+  "verification": {
+    "focus": [
+      "route-to-OpenAPI inventory evidence",
+      "kin-openapi structural validation",
+      "source-of-truth ordering from server.go to handlers/DTOs to OpenAPI"
+    ],
+    "owner": "software-action-api-conformance-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

@@ -1,0 +1,3 @@
+{"type":"thread.started","thread_id":"019db864-1c81-77b1-831b-005d9f6c247f"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Starting with the required delegation step. I’m spawning `software-action-dispatcher-agent` with the task metadata and report paths so it can choose specialists, coordinate analysis, and wait for them before handing back a concrete outcome."}}

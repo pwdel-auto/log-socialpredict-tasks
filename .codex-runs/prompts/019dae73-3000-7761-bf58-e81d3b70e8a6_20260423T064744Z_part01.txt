@@ -1,0 +1,76 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/019dae73-3000-7761-bf58-e81d3b70e8a6`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/019dae73-3000-7761-bf58-e81d3b70e8a6/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/019dae73-3000-7761-bf58-e81d3b70e8a6/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/019dae73-3000-7761-bf58-e81d3b70e8a6/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/019dae73-3000-7761-bf58-e81d3b70e8a6/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "Stats, metrics, leaderboard, CMS, and home route OpenAPI entries match implemented behavior.",
+    "Config-derived reporting routes continue to use the configuration service boundary.",
+    "Focused tests or conformance checks cover representative success and failure responses."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "019dae73-2ffb-7463-bd2c-a85943d8e3ed"
+  ],
+  "id": "API-007",
+  "max_attempts": 3,
+  "notes": [
+    "This is the stop-and-review point for route coverage before global conformance work.",
+    "Reuse the API-002 public reason vocabulary for reporting/content failures where those routes expose reason-bearing responses.",
+    "Do not revive stale historical API docs as source of truth when current code differs."
+  ],
+  "out_of_scope": [
+    "CMS product redesign",
+    "analytics algorithm redesign",
+    "universal response-envelope migration outside touched routes"
+  ],
+  "profile": "",
+  "prompt": "Sweep the remaining reporting and content-facing backend routes after API-002 has established the initial public `reason` vocabulary: stats, system metrics, global and market leaderboards, analytics-backed positions where not covered by user routes, CMS/homepage content, and root/home handlers. Verify that these routes use current response helpers, service-backed configuration where applicable, shared public reasons for route-visible failures, and OpenAPI schemas that match implemented payloads. Add or update focused tests around response shape and error behavior.",
+  "runner_pid": 109680,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-23T06:47:44.870389+00:00",
+  "status": "running",
+  "title": "W04 API: Align analytics, stats, metrics, leaderboard, and CMS/home routes",
+  "touched_paths": [
+    "../socialpredict/backend/handlers/stats",
+    "../socialpredict/backend/handlers/metrics",
+    "../socialpredict/backend/handlers/cms",
+    "../socialpredict/backend/handlers/home.go",
+    "../socialpredict/backend/internal/domain/analytics",
+    "../socialpredict/backend/internal/service/config",
+    "../socialpredict/backend/docs/openapi.yaml"
+  ],
+  "uid": "019dae73-3000-7761-bf58-e81d3b70e8a6",
+  "verification": {
+    "focus": [
+      "remaining route/spec parity",
+      "configuration-service boundary preservation",
+      "reporting/content response-shape coverage"
+    ],
+    "owner": "software-action-api-conformance-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

@@ -1,0 +1,75 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/019dae73-2ffb-7463-bd2c-a85943d8e3ed`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/019dae73-2ffb-7463-bd2c-a85943d8e3ed/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/019dae73-2ffb-7463-bd2c-a85943d8e3ed/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/019dae73-2ffb-7463-bd2c-a85943d8e3ed/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/019dae73-2ffb-7463-bd2c-a85943d8e3ed/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "A small stable initial public `reason` vocabulary exists for the API sweep's common failure classes and is expressed through constants or equivalent boundary-owned helpers.",
+    "The vocabulary includes usage guidance or a mapping table for validation, authentication, authorization, password-change gating, not-found, representative market/bet business-rule failures, and internal fallback failures.",
+    "Touched handlers can map policy outcomes to sanitized route-visible reasons without leaking internal error strings or inventing endpoint-local synonyms.",
+    "Focused tests cover the helper behavior and representative handler-level mappings that later markets, bets, users, and auth/setup tasks can reuse."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "019dae73-2ffa-78b9-bf6e-dd7e33c407dd"
+  ],
+  "id": "API-002",
+  "max_attempts": 3,
+  "notes": [
+    "This task answers the design-plan W04 open question about stable `reason` vocabulary.",
+    "Do not proceed to endpoint-area sweeps by improvising route-specific reason strings; establish the initial shared list first. Example candidates include `validation_failed`, `authentication_required`, `authorization_denied`, `password_change_required`, `not_found`, `market_closed`, `insufficient_balance`, `invalid_outcome`, `no_position`, and `internal_error`, but final names should follow repo style and implemented behavior.",
+    "Apply envelope direction only where the current route behavior can be safely tightened without a flag-day API migration.",
+    "Preserve public/private model boundaries in API responses."
+  ],
+  "out_of_scope": [
+    "forcing every endpoint into a universal envelope in this task",
+    "changing domain error semantics unrelated to API mapping",
+    "client-visible rename of bets terminology"
+  ],
+  "profile": "",
+  "prompt": "Prepare the API/auth contract cleanup by establishing a small initial public `reason` vocabulary before endpoint-area sweeps proceed. Define client-visible reason strings for the common failure classes the W04 queue depends on, including validation, authentication-required, authorization-denied, password-change-required, not-found, market/business-rule failures, and internal fallback failures. Publish where each reason should be used, preferably as constants or equivalent boundary-owned helpers, and document the vocabulary in OpenAPI schemas or route-visible docs touched by this task. Reuse existing response helpers where practical and add narrow boundary helpers only where they remove ad hoc raw error strings from HTTP handlers. Keep business logic in domain services and keep handlers as transport mappers. Update focused tests for the chosen helper behavior and representative handler-level mappings.",
+  "runner_pid": 17876,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-23T04:16:18.556299+00:00",
+  "status": "running",
+  "title": "W04 API: Define stable reason vocabulary and response-boundary helpers",
+  "touched_paths": [
+    "../socialpredict/backend/errors",
+    "../socialpredict/backend/handlers",
+    "../socialpredict/backend/internal/domain",
+    "../socialpredict/backend/docs/openapi.yaml"
+  ],
+  "uid": "019dae73-2ffb-7463-bd2c-a85943d8e3ed",
+  "verification": {
+    "focus": [
+      "reason vocabulary stability",
+      "handler boundary mapping tests",
+      "no domain policy moved into HTTP response helpers"
+    ],
+    "owner": "software-action-openapi-contract-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

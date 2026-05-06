@@ -1,0 +1,24 @@
+task_uid `019dae73-2ffe-7cae-a31d-e314caba370f`  
+task_id `API-005`  
+status `blocked`
+
+Aligned the touched bets surface locally and updated the canonical report at [summary.json](/workspace/socialpredict/.codex-reports/tasks/019dae73-2ffe-7cae-a31d-e314caba370f/summary.json). I added focused buy/sell auth-failure mapping coverage in [buypositionhandler_test.go](/workspace/socialpredict/backend/handlers/bets/buying/buypositionhandler_test.go) and [sellpositionhandler_test.go](/workspace/socialpredict/backend/handlers/bets/selling/sellpositionhandler_test.go), and tightened the touched bets OpenAPI entries in [openapi.yaml](/workspace/socialpredict/backend/docs/openapi.yaml) by adding `operationId` to `GET /v0/markets/bets/{marketId}`, `POST /v0/bet`, and `POST /v0/sell`, plus clarifying the `401` and `404` descriptions for buy/sell to match live handler behavior. Assumption: the remaining `operationId` sweep is a repo-wide follow-up outside the intended API-005 bets-only scope.
+
+files_changed:
+- `backend/handlers/bets/buying/buypositionhandler_test.go`
+- `backend/handlers/bets/selling/sellpositionhandler_test.go`
+- `backend/docs/openapi.yaml`
+
+checks_run:
+- `PASS: gofmt -w /workspace/socialpredict/backend/handlers/bets/buying/buypositionhandler_test.go /workspace/socialpredict/backend/handlers/bets/selling/sellpositionhandler_test.go`
+- `PASS x2: GOCACHE=/workspace/.cache/go-build GOMODCACHE=/workspace/.cache/go-mod go test ./handlers/bets/... ./internal/domain/bets -count=1 -vet=off`
+- `PASS: GOCACHE=/workspace/.cache/go-build GOMODCACHE=/workspace/.cache/go-mod go test ./... -run TestOpenAPISpecValidates -count=1`
+- `PASS: GOCACHE=/workspace/.cache/go-build GOMODCACHE=/workspace/.cache/go-mod go vet ./handlers/bets/... ./internal/domain/bets`
+- `PASS: ./.codex/skills/socialpredict-go-architecture-governance/scripts/run_boundary_checks.sh /workspace/socialpredict`
+- `BLOCKED: ./.codex/skills/socialpredict-openapi-kin-conformance/scripts/run_kin_openapi_conformance.sh /workspace/socialpredict`
+  Remaining blocker: `backend/docs/openapi.yaml` still has `41` operations without `operationId`, so the required kin-openapi sign-off cannot complete yet.
+
+follow_ups:
+- Add `operationId` values to the remaining `41` OpenAPI operations in `backend/docs/openapi.yaml`.
+- Rerun `./.codex/skills/socialpredict-openapi-kin-conformance/scripts/run_kin_openapi_conformance.sh /workspace/socialpredict`.
+- After that passes, rerun the API-005 conformance sign-off flow.

@@ -1,0 +1,80 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/019dae73-3001-7b7c-a2e0-74529cf102a4`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/019dae73-3001-7b7c-a2e0-74529cf102a4/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/019dae73-3001-7b7c-a2e0-74529cf102a4/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/019dae73-3001-7b7c-a2e0-74529cf102a4/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/019dae73-3001-7b7c-a2e0-74529cf102a4/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "OpenAPI structural validation passes for `backend/docs/openapi.yaml` and embedded Swagger assets remain valid.",
+    "Deterministic checks catch missing or stale OpenAPI operations for the swept route areas.",
+    "Focused tests for touched handlers and API helpers run reliably without requiring external secrets or non-local services."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "019dae73-2ffc-7384-8478-1140bc1d7f63",
+    "019dae73-2ffd-7b6e-975d-30e068c747f5",
+    "019dae73-2ffe-7cae-a31d-e314caba370f",
+    "019dae73-2fff-7116-be2b-996b3468c19f",
+    "019dae73-3000-7761-bf58-e81d3b70e8a6"
+  ],
+  "id": "API-008",
+  "max_attempts": 3,
+  "notes": [
+    "Run the OpenAPI navigation and kin-openapi skills before any runtime probing.",
+    "Include the API-002 public reason vocabulary in conformance thinking: drift includes undocumented new reason strings or stale documented reasons.",
+    "If broader Go tests fail for unrelated existing issues, classify them with exact package/test names.",
+    "Prefer small regression checks that future API tasks can run cheaply."
+  ],
+  "out_of_scope": [
+    "Docker-only runtime testing",
+    "large generated client rollout",
+    "broad unrelated test suite cleanup"
+  ],
+  "profile": "",
+  "prompt": "After endpoint-area sweeps are complete, add or tighten deterministic API conformance checks that prevent route/spec drift and public `reason` vocabulary drift from returning. Use kin-openapi validation, the existing OpenAPI test, targeted route/spec sync checks, focused handler/API tests, and any lightweight checks that ensure documented reason-bearing responses stay synchronized with the shared API-002 vocabulary. Where practical, add helper scripts or tests that compare route inventory and OpenAPI operations without requiring a full live environment. Keep checks scoped and deterministic.",
+  "runner_pid": 125285,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-23T07:04:13.541649+00:00",
+  "status": "running",
+  "title": "W04 API: Add deterministic OpenAPI and API conformance regression checks",
+  "touched_paths": [
+    "../socialpredict/backend/openapi_test.go",
+    "../socialpredict/backend/openapi_embed.go",
+    "../socialpredict/backend/docs/openapi.yaml",
+    "../socialpredict/backend/server",
+    "../socialpredict/backend/handlers",
+    "../socialpredict/backend/docs"
+  ],
+  "uid": "019dae73-3001-7b7c-a2e0-74529cf102a4",
+  "verification": {
+    "focus": [
+      "kin-openapi conformance",
+      "OpenAPI embed/test validity",
+      "deterministic route/spec regression checks"
+    ],
+    "owner": "software-action-test-reliability-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}
