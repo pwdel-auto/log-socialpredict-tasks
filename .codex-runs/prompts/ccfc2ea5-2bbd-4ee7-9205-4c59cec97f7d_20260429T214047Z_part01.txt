@@ -1,0 +1,71 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/ccfc2ea5-2bbd-4ee7-9205-4c59cec97f7d`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/ccfc2ea5-2bbd-4ee7-9205-4c59cec97f7d/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/ccfc2ea5-2bbd-4ee7-9205-4c59cec97f7d/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/ccfc2ea5-2bbd-4ee7-9205-4c59cec97f7d/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/ccfc2ea5-2bbd-4ee7-9205-4c59cec97f7d/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "Touched runtime or server code distinguishes process liveness from DB-backed readiness instead of reporting unconditional success.",
+    "The readiness decision for the touched path is tied to owned runtime DB condition rather than ad hoc handler behavior or application metrics routes.",
+    "Focused route and runtime tests cover the touched readiness and liveness behavior deterministically."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "63c28c0d-db5e-4036-a78d-8f2953ead2be"
+  ],
+  "id": "WAVE04-DB-003",
+  "max_attempts": 3,
+  "notes": [
+    "Keep health and readiness operator-facing and separate from application metrics.",
+    "Do not reintroduce a hard-coded `ok` contract once DB condition is available."
+  ],
+  "out_of_scope": [
+    "tracing rollout",
+    "business-metrics redesign",
+    "caching or Redis rollout"
+  ],
+  "profile": "",
+  "prompt": "With startup mutation policy tightened, make the serving contract reflect real database condition. Replace hard-coded health success with explicit DB-backed readiness and liveness behavior, or equivalent owned runtime signals, that distinguish process aliveness from safe request-serving readiness after startup. Reuse the runtime seam, keep `/v0/system/metrics` separate from health probes, and avoid a broad observability redesign.",
+  "runner_pid": 42887,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-29T21:40:47.492831+00:00",
+  "status": "running",
+  "title": "WAVE04 Database: Define DB-backed readiness and liveness for serving traffic",
+  "touched_paths": [
+    "../socialpredict/backend/server",
+    "../socialpredict/backend/internal/app/runtime",
+    "../socialpredict/backend/main.go"
+  ],
+  "uid": "ccfc2ea5-2bbd-4ee7-9205-4c59cec97f7d",
+  "verification": {
+    "focus": [
+      "owned readiness and liveness semantics",
+      "DB-backed serving contract",
+      "separation of health probes from application metrics"
+    ],
+    "owner": "software-action-architecture-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

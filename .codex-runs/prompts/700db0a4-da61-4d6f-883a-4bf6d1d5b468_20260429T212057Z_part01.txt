@@ -1,0 +1,69 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/700db0a4-da61-4d6f-883a-4bf6d1d5b468`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/700db0a4-da61-4d6f-883a-4bf6d1d5b468/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/700db0a4-da61-4d6f-883a-4bf6d1d5b468/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/700db0a4-da61-4d6f-883a-4bf6d1d5b468/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/700db0a4-da61-4d6f-883a-4bf6d1d5b468/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "The touched runtime DB path makes its minimum production ownership explicit for pool sizing, connection lifetime, SSL/TLS posture, and shutdown or health integration.",
+    "The production startup path no longer depends on `SetDB`/`GetDB` as a hidden runtime fallback; if compatibility remains, it is isolated to tests or a narrow migration bridge.",
+    "Focused tests cover the hardened runtime DB seam deterministically for the touched behavior."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [],
+  "id": "WAVE04-DB-001",
+  "max_attempts": 3,
+  "notes": [
+    "Keep Postgres as the authoritative system of record.",
+    "Do not treat caching, Redis, or a generic database service as part of this slice."
+  ],
+  "out_of_scope": [
+    "introducing a new `database/`, `repository/`, or `dal/` tree",
+    "every-replica startup-writer policy changes",
+    "caching or Redis rollout"
+  ],
+  "profile": "",
+  "prompt": "Use `lib/design/design-plan.json`, `../socialpredict/README/PRODUCTION-NOTES/BACKEND/04-database-layer.md`, and `../socialpredict/README/PRODUCTION-NOTES/BACKEND/12-database-caching.md` as the binding design context for WAVE04 database runtime ownership. Complete the first useful slice by hardening `backend/internal/app/runtime/db.go` as the owned runtime DB seam: make the minimum production contract for pool sizing, connection lifetime, SSL/TLS posture, and shutdown or health hooks explicit, and reduce `SetDB`/`GetDB` so the production startup path no longer relies on process-global fallback state. Preserve current runtime behavior where safe, keep the change reversible, and do not start caching or Redis work.",
+  "runner_pid": 9957,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-29T21:20:57.498062+00:00",
+  "status": "running",
+  "title": "WAVE04 Database: Harden the runtime DB ownership seam and reduce process-global fallback",
+  "touched_paths": [
+    "../socialpredict/backend/internal/app/runtime",
+    "../socialpredict/backend/main.go",
+    "../socialpredict/backend/util/postgres.go"
+  ],
+  "uid": "700db0a4-da61-4d6f-883a-4bf6d1d5b468",
+  "verification": {
+    "focus": [
+      "runtime DB seam ownership",
+      "reduction of process-global DB fallback",
+      "explicit pool, SSL/TLS, and lifecycle contract for the touched path"
+    ],
+    "owner": "software-action-architecture-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

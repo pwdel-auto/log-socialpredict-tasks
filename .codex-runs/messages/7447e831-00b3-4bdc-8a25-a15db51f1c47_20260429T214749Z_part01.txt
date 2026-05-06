@@ -1,0 +1,26 @@
+task_uid: `7447e831-00b3-4bdc-8a25-a15db51f1c47`  
+task_id: `WAVE04-DB-004`  
+status: `completed`
+
+Moved the targeted stats and admin create-user request-boundary paths off raw `*gorm.DB`:
+- `StatsHandler` now depends on an analytics stats service seam.
+- `AddUserHandler` now depends on a users service seam.
+- Server route wiring passes `analyticsService` and `usersService`.
+- Added focused handler/domain coverage and updated metrics fakes for the expanded analytics repository contract.
+- Architecture and verifier sign-off passed.
+
+files_changed:
+`handlers/stats/*`, `handlers/admin/adduser*`, `handlers/metrics/*test.go`, `server/server.go`, `internal/domain/analytics/*`, `internal/domain/users/*`, `internal/repository/users/repository.go`
+
+checks_run:
+- `run_boundary_checks.sh /workspace/socialpredict`: PASS
+- Focused `go test -count=1 ...`: PASS twice
+- Expanded focused test including metrics/server: PASS
+- `go test ./... -run TestOpenAPISpecValidates -count=1`: PASS
+- `go vet` on touched packages: PASS
+
+follow_ups:
+- Later cleanup: relocate analytics GORM adapter out of `internal/domain/analytics`.
+- Later cleanup: retire legacy users uniqueness helpers.
+
+Report summary updated at `/workspace/socialpredict/.codex-reports/tasks/7447e831-00b3-4bdc-8a25-a15db51f1c47/summary.json`. Unrelated pre-existing dirty files remain in the worktree outside this task.

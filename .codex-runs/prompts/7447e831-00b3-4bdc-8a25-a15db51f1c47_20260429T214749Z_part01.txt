@@ -1,0 +1,74 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/7447e831-00b3-4bdc-8a25-a15db51f1c47`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/7447e831-00b3-4bdc-8a25-a15db51f1c47/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/7447e831-00b3-4bdc-8a25-a15db51f1c47/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/7447e831-00b3-4bdc-8a25-a15db51f1c47/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/7447e831-00b3-4bdc-8a25-a15db51f1c47/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "The touched request-boundary handlers no longer take raw `*gorm.DB` when an owned service or repository seam is sufficient.",
+    "Touched server or container wiring passes explicit owned dependencies instead of raw DB handles for the migrated paths.",
+    "Focused tests cover the migrated handler behavior or service seams deterministically for the touched slice."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "ccfc2ea5-2bbd-4ee7-9205-4c59cec97f7d"
+  ],
+  "id": "WAVE04-DB-004",
+  "max_attempts": 3,
+  "notes": [
+    "Prefer the smallest vertical slice that removes a real raw DB leak.",
+    "Do not move persistence shaping back into handlers."
+  ],
+  "out_of_scope": [
+    "full handler migration sweep",
+    "legacy-model decoupling beyond the touched slice",
+    "caching or Redis rollout"
+  ],
+  "profile": "",
+  "prompt": "After the runtime and readiness story is explicit, migrate the next raw request-boundary `*gorm.DB` call sites onto owned service or repository seams. Start with the concrete remaining leaks called out by the design context, especially stats, admin add-user, and any adjacent route wiring that still passes raw DB handles into handlers. Preserve endpoint behavior, keep handlers thin, and do not solve this by inventing a new central DAL or generic CRUD facade.",
+  "runner_pid": 56285,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-29T21:47:49.693091+00:00",
+  "status": "running",
+  "title": "WAVE04 Database: Remove the next raw request-boundary DB leaks behind owned seams",
+  "touched_paths": [
+    "../socialpredict/backend/handlers/stats",
+    "../socialpredict/backend/handlers/admin/adduser.go",
+    "../socialpredict/backend/server",
+    "../socialpredict/backend/internal/app/container.go",
+    "../socialpredict/backend/internal/domain/analytics",
+    "../socialpredict/backend/internal/domain/users"
+  ],
+  "uid": "7447e831-00b3-4bdc-8a25-a15db51f1c47",
+  "verification": {
+    "focus": [
+      "request-boundary DB leak removal",
+      "reuse of existing service and repository seams",
+      "avoidance of DAL or generic CRUD regression"
+    ],
+    "owner": "software-action-architecture-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

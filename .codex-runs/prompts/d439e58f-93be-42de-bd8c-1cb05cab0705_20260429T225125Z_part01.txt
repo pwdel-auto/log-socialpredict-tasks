@@ -1,0 +1,73 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/d439e58f-93be-42de-bd8c-1cb05cab0705`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/d439e58f-93be-42de-bd8c-1cb05cab0705/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/d439e58f-93be-42de-bd8c-1cb05cab0705/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/d439e58f-93be-42de-bd8c-1cb05cab0705/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/d439e58f-93be-42de-bd8c-1cb05cab0705/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "One high-risk accounting-sensitive workflow in the touched code is converted from compensation-style behavior to an explicit transaction-scoped unit of work with clear commit boundaries.",
+    "The touched workflow makes its primary-DB concurrency protection explicit and preserves existing accounting behavior without adding generic automatic retry or circuit-breaker behavior.",
+    "Focused tests prove atomicity-sensitive behavior for the migrated workflow, and the wave ends with an explicit remaining inventory for other accounting-sensitive flows while keeping caching or Redis deferred."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "7447e831-00b3-4bdc-8a25-a15db51f1c47"
+  ],
+  "id": "WAVE04-DB-005",
+  "max_attempts": 3,
+  "notes": [
+    "Start with the smallest high-risk workflow, expected to be bet placement.",
+    "Keep Redis and caching explicitly deferred until runtime ownership and accounting correctness are stronger."
+  ],
+  "out_of_scope": [
+    "a generic transaction framework for every workflow",
+    "automatic retry or circuit-breaker rollout around money-moving writes",
+    "caching or Redis rollout"
+  ],
+  "profile": "",
+  "prompt": "Finish WAVE04 by turning one high-risk accounting-sensitive workflow into an explicit transaction-scoped unit of work, starting with bet placement unless the touched code reveals an even smaller live compensation path. Define which writes must commit together, where transaction scope begins and ends across repositories, and what primary-DB concurrency protection the touched workflow needs. Preserve integer-first accounting behavior, keep automatic retry or circuit-breaker behavior out of scope, and end the wave with a precise inventory of the remaining sell-position or market-resolution transaction surface while keeping caching or Redis explicitly deferred.",
+  "runner_pid": 70137,
+  "sandbox": "workspace-write",
+  "started_at": "2026-04-29T22:51:25.588305+00:00",
+  "status": "running",
+  "title": "WAVE04 Database: Make bet placement atomic and stop-and-review the remaining accounting surface",
+  "touched_paths": [
+    "../socialpredict/backend/internal/domain/bets",
+    "../socialpredict/backend/internal/repository/bets",
+    "../socialpredict/backend/handlers/bets",
+    "../socialpredict/backend/internal/app/container.go",
+    "../socialpredict/README/PRODUCTION-NOTES/BACKEND/04-database-layer.md"
+  ],
+  "uid": "d439e58f-93be-42de-bd8c-1cb05cab0705",
+  "verification": {
+    "focus": [
+      "explicit atomic unit of work for the first accounting-sensitive workflow",
+      "deterministic evidence for touched transaction and concurrency behavior",
+      "precise remaining accounting-surface inventory with caching still deferred"
+    ],
+    "owner": "software-action-verifier-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}
