@@ -1,0 +1,14 @@
+task_uid: `019de369-df09-78f2-96b1-16098f92ce27`  
+task_id: `WAVE10-VALID-002`  
+status: `completed`
+
+Changed the markets create/search validation slice to use shared `{ok:false,reason}` failure writers with stable public reasons. Create/search success payloads remain raw DTOs. Also converted create-market compatibility helper failures and updated OpenAPI/API issue docs so `INVALID_REQUEST` vs `VALIDATION_FAILED` is explicit.
+
+files_changed:
+`docs/API-ISSUES.md`, `docs/openapi.yaml`, `handlers/markets/createmarket.go`, `handlers/markets/createmarket_test.go`, `handlers/markets/handler.go`, `handlers/markets/handler_contract_test.go`, `handlers/markets/handler_status_leaderboard_test.go`, `handlers/markets/searchmarkets.go`, `handlers/markets/searchmarkets_handler_test.go`, `internal/app/container.go`, `server/markets_alias_routing_test.go`, `server/server.go`
+
+checks_run:
+`gofmt`, `git diff --check`, `go test ./handlers/markets ./server -count=1`, OpenAPI validation test, focused `go vet`, boundary checks, contract sync, reliability suite, and quality guardrails all passed.
+
+follow_ups:
+None blocking. Report updated at `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-78f2-96b1-16098f92ce27/summary.json`.

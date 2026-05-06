@@ -1,0 +1,70 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-759d-b8e5-8cca9f3b9aed`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-759d-b8e5-8cca9f3b9aed/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-759d-b8e5-8cca9f3b9aed/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-759d-b8e5-8cca9f3b9aed/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-759d-b8e5-8cca9f3b9aed/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "The chosen route family no longer constructs its own validation or sanitization helpers where a shared boundary seam is sufficient.",
+    "Validation and sanitization remain boundary-owned for the touched slice and do not leak into domain policy or persistence code.",
+    "Focused tests preserve the current rejection behavior for the migrated route family."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [],
+  "id": "WAVE10-VALID-001",
+  "max_attempts": 3,
+  "notes": [
+    "Prefer one coherent route family over scattered one-call-site edits.",
+    "Keep `backend/security` as the reusable boundary seam instead of a hidden per-handler constructor."
+  ],
+  "out_of_scope": [
+    "new top-level validation or sanitization subsystems",
+    "rewriting domain business invariants as middleware rules",
+    "broad route-family migration outside the chosen slice"
+  ],
+  "profile": "",
+  "prompt": "Use `lib/design/design-plan.json` and `../socialpredict/README/PRODUCTION-NOTES/BACKEND/10-data-validation.md` as the binding context for WAVE10 data validation. Treat upstream `main` at commit `051aac6b2fefa5634b8c98cc38caf52acf0043a9` as the reviewed baseline. Start by migrating one coherent route family that still constructs validation or sanitization helpers ad hoc, expected to be `handlers/markets` because the reviewed baseline still uses `security.NewSecurityService()` and `security.NewSanitizer()` there, onto shared or injected `backend/security` ownership through the existing server or container seams. Preserve current rejection behavior, keep handlers thin, and do not build a new validation platform.",
+  "runner_pid": 135327,
+  "sandbox": "workspace-write",
+  "started_at": "2026-05-02T22:50:23.543972+00:00",
+  "status": "running",
+  "title": "WAVE10 Validation: Remove ad hoc validator and sanitizer construction from the next route family",
+  "touched_paths": [
+    "../socialpredict/backend/handlers/markets",
+    "../socialpredict/backend/server",
+    "../socialpredict/backend/internal/app/container.go",
+    "../socialpredict/backend/security"
+  ],
+  "uid": "019de369-df09-759d-b8e5-8cca9f3b9aed",
+  "verification": {
+    "focus": [
+      "shared request-boundary validation ownership",
+      "removal of ad hoc helper construction from the chosen route family",
+      "preservation of thin-handler boundaries"
+    ],
+    "owner": "software-action-architecture-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

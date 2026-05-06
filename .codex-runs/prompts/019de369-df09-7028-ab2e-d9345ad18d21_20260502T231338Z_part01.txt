@@ -1,0 +1,71 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7028-ab2e-d9345ad18d21`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7028-ab2e-d9345ad18d21/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7028-ab2e-d9345ad18d21/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7028-ab2e-d9345ad18d21/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-7028-ab2e-d9345ad18d21/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "The active validation note and touched docs accurately reflect the landed boundary-validation consolidation and remaining hotspots.",
+    "The next validation seam is stated as a concrete route family or shared helper gap rather than a framework program.",
+    "Large validation-platform ideas remain explicitly deferred at the end of the wave."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "019de369-df09-72f3-98e0-5c893b2485c8"
+  ],
+  "id": "WAVE10-VALID-004",
+  "max_attempts": 3,
+  "notes": [
+    "This is the WAVE10 stop-and-review point before any broader validation-platform discussion.",
+    "Keep the next seam tied to the existing boundary and domain owners."
+  ],
+  "out_of_scope": [
+    "new top-level validation frameworks or rule registries",
+    "generic request-body rewriting middleware",
+    "new backlog buckets without a precise next validation seam"
+  ],
+  "profile": "",
+  "prompt": "Finish WAVE10 with a validation-specific stop-and-review point. Update the validation note and any adjacent contract docs with what this wave actually consolidated, inventory the remaining route families that still bypass the shared boundary seam, and keep framework-heavy registry, middleware, and platform ideas out of scope.",
+  "runner_pid": 189543,
+  "sandbox": "workspace-write",
+  "started_at": "2026-05-02T23:13:38.391904+00:00",
+  "status": "running",
+  "title": "WAVE10 Validation: Stop and review remaining validation bypasses and deferred framework ideas",
+  "touched_paths": [
+    "../socialpredict/README/PRODUCTION-NOTES/BACKEND/10-data-validation.md",
+    "../socialpredict/backend/docs/API-ISSUES.md",
+    "../socialpredict/backend/docs/openapi.yaml"
+  ],
+  "uid": "019de369-df09-7028-ab2e-d9345ad18d21",
+  "verification": {
+    "focus": [
+      "accuracy of the post-wave validation inventory",
+      "explicit remaining route-family or helper seams",
+      "continued deferral of validation-platform work"
+    ],
+    "owner": "software-action-verifier-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}

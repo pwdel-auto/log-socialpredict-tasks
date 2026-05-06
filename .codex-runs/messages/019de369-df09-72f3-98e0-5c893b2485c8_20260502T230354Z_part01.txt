@@ -1,0 +1,27 @@
+task_uid: `019de369-df09-72f3-98e0-5c893b2485c8`  
+task_id: `WAVE10-VALID-003`  
+status: `completed`
+
+Consolidated duplicated market pagination query parsing into `security.ParseBoundedIntParam`, then wired list/search market handlers to use it. Domain market services were left unchanged, so business invariants stay in `internal/domain/markets`.
+
+files_changed:
+- `security/queryparams.go`
+- `security/queryparams_test.go`
+- `handlers/markets/http_helpers.go`
+- `handlers/markets/listmarkets.go`
+- `handlers/markets/searchmarkets.go`
+- `handlers/markets/searchmarkets_handler_test.go`
+
+checks_run:
+- `gofmt` on touched Go files
+- `go test -count=1 ./security ./handlers/markets` twice
+- architecture boundary checks: passed
+- quality guardrails: passed with explicit Go caches
+- `go test -count=1 ./security ./handlers/markets ./server ./internal/app`
+- `go vet -p=1 ./security ./handlers/markets ./server ./internal/app`
+- `go test ./... -run TestOpenAPISpecValidates -count=1`
+
+Architecture, test-reliability, and verifier agents signed off. The canonical `summary.json` was updated to `completed`.
+
+follow_ups:
+- Keep `security.ParseBoundedIntParam` limited to HTTP/query-boundary parsing; do not reuse it for domain economics or market policy defaults.

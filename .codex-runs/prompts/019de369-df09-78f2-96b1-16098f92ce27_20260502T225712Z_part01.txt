@@ -1,0 +1,72 @@
+You are executing a queued automation task for the SocialPredict repository at /workspace/spec-socialpredict-tasks.
+
+Start by explicitly spawning the custom agent named `software-action-dispatcher-agent` to coordinate the task. The dispatcher should decide whether to spawn any specialist agents and should wait for them before concluding.
+
+Reporting convention:
+- The canonical curated report location is `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-78f2-96b1-16098f92ce27`.
+- Report files are already bootstrapped:
+  - meta: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-78f2-96b1-16098f92ce27/meta.json`
+  - summary: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-78f2-96b1-16098f92ce27/summary.json`
+  - conversation log: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-78f2-96b1-16098f92ce27/conversation.ndjson`
+  - decisions log: `/workspace/socialpredict/.codex-reports/tasks/019de369-df09-78f2-96b1-16098f92ce27/decisions.ndjson`
+- Use helper script `/workspace/spec-socialpredict-tasks/scripts/codex-report.py` for deterministic report I/O when practical.
+- Specialists should append facts and decisions; the dispatcher owns `summary.json`.
+- Prefer incremental reads, for example `read-events --after-seq <last_event_seq>` instead of rereading the full conversation log.
+- `summary.json.context` is runner-maintained. If `handoff_requested` becomes true, stop branching out, update the summary, record a handoff event, and converge toward a clean checkpoint.
+
+Execution contract:
+- Do the task end-to-end.
+- Do not stop for clarifying questions unless blocked by a missing file, contradictory task instructions, or a safety issue.
+- Prefer the smallest defensible change.
+- Follow repository AGENTS.md guidance and nearby repo docs.
+- Use machine-readable task metadata below as the source of truth.
+- Finish with a concise summary that includes: task_uid, task_id, status, files_changed, checks_run, and follow_ups.
+
+Task metadata:
+{
+  "acceptance_criteria": [
+    "The chosen route family's validation and sanitization failures use shared sanitized boundary failure writers and stable public reasons.",
+    "Success payloads and domain behavior remain stable for the migrated routes.",
+    "Focused tests and any touched contract docs stay aligned on the public validation-failure vocabulary for the migrated slice."
+  ],
+  "approval": "never",
+  "attempts": 1,
+  "depends_on": [
+    "019de369-df09-759d-b8e5-8cca9f3b9aed"
+  ],
+  "id": "WAVE10-VALID-002",
+  "max_attempts": 3,
+  "notes": [
+    "Keep public validation reasons stable and separate from internal parser or telemetry strings.",
+    "Migrate failure shaping with the same route family whose helper ownership was cleaned up."
+  ],
+  "out_of_scope": [
+    "flag-day response-wrapper redesign",
+    "repo-wide validation-failure normalization in one task",
+    "mixing internal parser errors into public contract fields"
+  ],
+  "profile": "",
+  "prompt": "After shared helper ownership is explicit, migrate the same route family's validation and sanitization failures off ad hoc text or raw parser responses onto shared sanitized boundary failure writers and stable public `reason` vocabulary. Keep success payloads stable, preserve the touched request shape, and do not leak domain-policy details or internal parser strings into the client contract.",
+  "runner_pid": 148475,
+  "sandbox": "workspace-write",
+  "started_at": "2026-05-02T22:57:12.575868+00:00",
+  "status": "running",
+  "title": "WAVE10 Validation: Converge the chosen route family on shared sanitized validation failures",
+  "touched_paths": [
+    "../socialpredict/backend/handlers/markets",
+    "../socialpredict/backend/server",
+    "../socialpredict/backend/docs/openapi.yaml",
+    "../socialpredict/backend/docs/API-ISSUES.md"
+  ],
+  "uid": "019de369-df09-78f2-96b1-16098f92ce27",
+  "verification": {
+    "focus": [
+      "shared sanitized validation-failure behavior",
+      "stable success-shape preservation for the migrated slice",
+      "contract alignment for the touched public reason vocabulary"
+    ],
+    "owner": "software-action-openapi-contract-agent",
+    "sign_off": "required"
+  },
+  "working_dir": "../socialpredict/backend"
+}
